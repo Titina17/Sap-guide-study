@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S4C03 &middot; Implementing SAP S/4HANA Cloud PE | Valentina RF</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg:#ffffff; --bg2:#eff6ff; --blue:#1573B6; --blue-light:#eff6ff; --blue-mid:#bfdbfe; --blue-dark:#003D6B;
+  --border:#e2e8f0; --border2:#cbd5e1;
+  --green:#15803d; --green-light:#f0fdf4; --green-mid:#bbf7d0;
+  --amber:#b45309; --amber-light:#fffbeb; --amber-mid:#fde68a;
+  --red:#b91c1c; --red-light:#fef2f2;
+  --purple:#7c3aed; --purple-light:#f5f3ff;
+  --teal:#0f766e; --teal-light:#f0fdfa; --teal-mid:#99f6e4;
+  --gold:#F0AB00; --gold-light:#FEF9E7;
+  --text:#0f172a; --text2:#334155; --muted:#64748b; --muted2:#94a3b8;
+  --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.05);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'Inter',sans-serif; background:var(--bg2); color:var(--text); font-size:14px; line-height:1.65; }
+
+body.lang-en .es { display:none !important; }
+body.lang-es .en { display:none !important; }
+
+/* TOP BAR */
+.topbar { background:#fff; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:200; box-shadow:var(--shadow); }
+.topbar-inner { max-width:1100px; margin:0 auto; padding:12px 20px 0; }
+.topbar-row1 { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.topbar-badge { background:var(--blue); color:#fff; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:3px 10px; border-radius:999px; letter-spacing:.05em; white-space:nowrap; }
+.topbar-row1 h1 { font-size:15px; font-weight:700; color:var(--text); letter-spacing:-.01em; flex:1; }
+.topbar-row1 p { font-size:11px; color:var(--muted); }
+.lang-btn { display:flex; align-items:center; gap:6px; background:var(--blue); color:#fff; border:none; border-radius:8px; padding:6px 14px; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:.04em; transition:all .15s; box-shadow:var(--shadow); white-space:nowrap; }
+.lang-btn:hover { background:#0e5fa3; transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.signature-tag { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); border:1px solid var(--border); border-radius:6px; padding:2px 8px; white-space:nowrap; letter-spacing:.04em; }
+.search-row { display:flex; align-items:center; gap:8px; padding:8px 0 6px; border-top:1px solid var(--border); }
+.search-wrap { flex:1; position:relative; max-width:480px; }
+.search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--muted2); pointer-events:none; width:15px; height:15px; }
+#globalSearch { width:100%; padding:7px 12px 7px 34px; border:1px solid var(--border2); border-radius:8px; font-family:'Inter',sans-serif; font-size:12.5px; color:var(--text); background:#fff; outline:none; transition:border-color .15s, box-shadow .15s; }
+#globalSearch:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(21,115,182,.12); }
+#searchClear { background:none; border:none; cursor:pointer; color:var(--muted2); font-size:16px; padding:0 4px; display:none; line-height:1; }
+#searchClear:hover { color:var(--red); }
+#searchCount { font-size:11px; color:var(--muted); white-space:nowrap; font-family:'JetBrains Mono',monospace; }
+#searchResults { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid var(--border2); border-radius:10px; box-shadow:var(--shadow-md); max-height:360px; overflow-y:auto; z-index:500; }
+.sr-item { padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border); transition:background .1s; }
+.sr-item:last-child { border-bottom:none; }
+.sr-item:hover { background:var(--blue-light); }
+.sr-mod { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; color:#fff; padding:2px 6px; border-radius:4px; margin-right:7px; text-transform:uppercase; }
+.sr-title { font-size:13px; font-weight:600; color:var(--text); }
+.sr-snippet { font-size:11.5px; color:var(--muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sr-snippet mark { background:#fef08a; color:var(--text); border-radius:2px; font-style:normal; font-weight:700; padding:0 2px; }
+.sr-empty { padding:16px 14px; text-align:center; font-size:12.5px; color:var(--muted); }
+mark.hl { background:#fef08a; color:var(--text); border-radius:2px; padding:0 2px; }
+
+/* TABS */
+.tabs-wrap { border-top:1px solid var(--border); }
+.tab-row { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; position:relative; }
+.tab-row::-webkit-scrollbar { display:none; }
+.tab-row-1 { border-bottom:1px solid var(--border); }
+.tab-btn { background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:8px 11px; font-family:'Inter',sans-serif; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:5px; }
+.tab-btn:hover { color:var(--blue); border-bottom-color:var(--blue-mid); }
+.tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); font-weight:700; }
+.tab-num { background:var(--blue-light); color:var(--blue); font-family:'JetBrains Mono',monospace; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700; }
+.tab-btn.active .tab-num { background:var(--blue); color:#fff; }
+.tab-row-fade { position:relative; }
+.tab-row-fade::after { content:'›'; position:absolute; right:0; top:0; bottom:0; width:28px; background:linear-gradient(to right, transparent, #fff 70%); display:flex; align-items:center; justify-content:flex-end; padding-right:4px; color:var(--muted2); font-size:16px; pointer-events:none; transition:opacity .2s; }
+.tab-row-fade.at-end::after { opacity:0; }
+
+/* MAIN */
+main { max-width:1100px; margin:0 auto; padding:24px 20px 80px; }
+.view { display:none; }
+.view.active { display:block; }
+
+/* MODULE HEADER */
+.mod-header { background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin-bottom:18px; display:flex; gap:14px; align-items:flex-start; box-shadow:var(--shadow); }
+.mod-num { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; color:#fff; background:var(--blue); padding:3px 9px; border-radius:5px; white-space:nowrap; margin-top:3px; letter-spacing:.04em; }
+.mod-header h2 { font-size:17px; font-weight:700; color:var(--text); letter-spacing:-.01em; }
+.mod-header p { font-size:12px; color:var(--muted); margin-top:3px; }
+
+/* EXAM TIP */
+.exam-tip { background:linear-gradient(135deg,var(--blue-light),var(--green-light)); border:1px solid var(--blue-mid); border-radius:10px; padding:13px 17px; margin-bottom:16px; font-size:13px; }
+.exam-tip .label { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); margin-bottom:4px; }
+.exam-tip p { color:var(--text2); margin:0; }
+
+/* SCENARIO */
+.scenario-sb { background:linear-gradient(135deg,var(--purple-light),#faf5ff); border:1px solid #ddd6fe; border-radius:10px; padding:15px 17px; margin:12px 0; }
+.scenario-sb .s-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--purple); margin-bottom:8px; }
+.scenario-sb .s-q { font-weight:600; font-size:13px; color:var(--text); margin-bottom:7px; }
+.scenario-sb .s-a { font-size:12.5px; color:var(--text2); line-height:1.65; }
+.scenario-sb .s-a strong { color:var(--purple); }
+
+/* CARD */
+.card { background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:8px; box-shadow:var(--shadow); transition:box-shadow .15s; }
+.card:hover { box-shadow:var(--shadow-md); }
+.card-header { padding:12px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none; gap:10px; }
+.card-header:hover { background:var(--bg2); }
+.card-title { font-weight:600; font-size:13px; color:var(--text); display:flex; align-items:center; gap:9px; }
+.ci { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+.ci-blue{background:var(--blue-light);} .ci-green{background:var(--green-light);} .ci-amber{background:var(--amber-light);} .ci-red{background:var(--red-light);} .ci-purple{background:var(--purple-light);}
+.chevron { color:var(--muted2); font-size:14px; transition:transform .2s; flex-shrink:0; }
+.card.open .chevron { transform:rotate(90deg); }
+.card-body { display:none; padding:0 15px 15px; border-top:1px solid var(--border); }
+.card.open .card-body { display:block; }
+.card-body p { color:var(--text2); font-size:13px; margin-top:10px; line-height:1.65; }
+
+/* KV */
+.kv { display:grid; grid-template-columns:auto 1fr; gap:5px 14px; margin-top:10px; font-size:12.5px; }
+.kv-k { color:var(--blue); font-family:'JetBrains Mono',monospace; font-size:11px; white-space:nowrap; padding-top:1px; font-weight:600; }
+.kv-v { color:var(--text2); }
+
+/* ALERTS */
+.alert { margin-top:11px; padding:9px 13px; border-radius:7px; font-size:12px; border-left:3px solid; line-height:1.6; }
+.alert-blue{background:var(--blue-light);border-color:var(--blue);color:var(--text2);}
+.alert-green{background:var(--green-light);border-color:var(--green);color:var(--green);}
+.alert-amber{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+.alert-red{background:var(--red-light);border-color:var(--red);color:var(--red);}
+.alert-purple{background:var(--purple-light);border-color:var(--purple);color:var(--purple);}
+.alert-gold{background:var(--gold-light);border-color:var(--gold);color:#7a5800;}
+.alert strong { font-weight:700; }
+
+/* LIST */
+.lst { margin-top:9px; padding-left:0; list-style:none; }
+.lst li { font-size:12.5px; color:var(--text2); padding:4px 0 4px 15px; position:relative; border-bottom:1px solid var(--border); }
+.lst li:last-child { border-bottom:none; }
+.lst li::before { content:'›'; position:absolute; left:0; color:var(--blue); font-weight:700; font-size:14px; }
+
+/* SUB */
+.sub { margin-top:13px; }
+.sub-title { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--amber); margin-bottom:7px; }
+
+/* TWO COL */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:10px; }
+@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+.mini-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:11px 13px; }
+.mini-card .mt { font-size:11.5px; font-weight:700; color:var(--blue); margin-bottom:4px; }
+.mini-card p { font-size:12px; color:var(--text2); margin:0; }
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; font-size:12px; margin-top:11px; }
+th { background:var(--bg2); color:var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:7px 11px; text-align:left; border-bottom:2px solid var(--border2); }
+td { padding:7px 11px; border-bottom:1px solid var(--border); color:var(--text2); vertical-align:top; }
+td:first-child { font-family:'JetBrains Mono',monospace; color:var(--blue); font-size:11px; font-weight:600; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--bg2); }
+
+/* TABLE - regular first col */
+.tbl-reg td:first-child { font-family:'Inter',sans-serif; color:var(--text); font-size:12px; font-weight:600; }
+
+/* SECTION TITLE */
+.sec-title { font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin:18px 0 9px; display:flex; align-items:center; gap:8px; }
+.sec-title::after { content:''; flex:1; height:1px; background:var(--border2); }
+
+/* EXERCISE CARD */
+.ex-card { background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:9px; box-shadow:var(--shadow); }
+.ex-header { padding:13px 17px; cursor:pointer; display:flex; align-items:flex-start; gap:12px; user-select:none; }
+.ex-header:hover { background:var(--bg2); }
+.ex-num { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; background:var(--green); color:#fff; padding:3px 7px; border-radius:4px; white-space:nowrap; margin-top:2px; }
+.ex-title { font-weight:600; font-size:13px; color:var(--text); flex:1; }
+.ex-sub { font-size:11.5px; color:var(--muted); margin-top:2px; }
+.ex-body { display:none; padding:0 17px 15px; border-top:1px solid var(--border); }
+.ex-card.open .ex-body { display:block; }
+.ex-card.open .chevron { transform:rotate(90deg); }
+.step { display:flex; gap:11px; padding:9px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.step:last-child { border-bottom:none; }
+.step-num { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; background:var(--blue-light); color:var(--blue); width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.step-body { color:var(--text2); flex:1; }
+.step-body strong { color:var(--text); }
+.step-path { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg2); border:1px solid var(--border); border-radius:5px; padding:5px 9px; margin-top:5px; color:var(--blue); display:block; word-break:break-all; }
+
+/* CHAIN */
+.chain-badge { width:32px; height:32px; border-radius:8px; background:var(--gold); color:#fff; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.chain-trigger { font-size:11px; color:var(--muted); margin-top:2px; }
+.chain-label { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--amber); margin:12px 0 8px; }
+.chain-steps { display:flex; flex-direction:column; gap:0; border-left:2px solid var(--border2); margin-left:14px; padding-left:0; }
+.chain-step { display:flex; gap:12px; padding:8px 0 8px 16px; position:relative; border-bottom:1px dashed var(--border); }
+.chain-step:last-child { border-bottom:none; }
+.chain-step::before { content:''; position:absolute; left:-7px; top:14px; width:12px; height:12px; border-radius:50%; background:var(--blue); border:2px solid #fff; box-shadow:0 0 0 2px var(--blue); }
+.chain-final { display:flex; gap:12px; padding:10px 0 4px 16px; position:relative; }
+.chain-final::before { content:''; position:absolute; left:-7px; top:14px; width:12px; height:12px; border-radius:50%; background:var(--green); border:2px solid #fff; box-shadow:0 0 0 2px var(--green); }
+.chain-num { width:22px; height:22px; border-radius:50%; background:var(--blue-light); color:var(--blue); font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.chain-body { flex:1; }
+.chain-title { font-size:12.5px; font-weight:600; color:var(--text); }
+.chain-path { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:3px 7px; margin:3px 0; color:var(--blue); display:inline-block; word-break:break-all; }
+.chain-why { font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.5; }
+.chain-meta { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+@media(max-width:580px){ .chain-meta { grid-template-columns:1fr; } }
+.chain-meta-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:6px; }
+.dep-tag { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; padding:2px 7px; background:var(--blue-light); color:var(--blue); border-radius:4px; margin:2px 3px 2px 0; }
+.chain-errors { margin:0; padding-left:14px; font-size:11.5px; color:var(--muted); line-height:1.6; }
+
+/* PAGE BRAND */
+.page-brand { display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-bottom:12px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); }
+.page-brand span { font-weight:700; color:var(--blue); }
+
+/* FILTER BUTTONS */
+.progress-units { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px; }
+.pu-btn { background:none; border:1px solid var(--border2); padding:4px 11px; border-radius:6px; font-family:'Inter',sans-serif; font-size:11.5px; color:var(--muted); cursor:pointer; transition:all .15s; }
+.pu-btn:hover { border-color:var(--blue); color:var(--blue); }
+.pu-btn.active { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:600; }
+
+/* FOOTER */
+footer { background:#fff; border-top:1px solid var(--border); padding:20px; text-align:center; margin-top:40px; }
+.footer-inner { max-width:1100px; margin:0 auto; }
+.footer-sig { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg, var(--blue-light), var(--purple-light)); border:1px solid var(--blue-mid); border-radius:10px; padding:10px 20px; margin-bottom:8px; }
+.footer-sig .vrf { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--blue); letter-spacing:.05em; }
+.footer-sig .vrf-sub { font-size:11px; color:var(--muted); }
+.footer-meta { font-size:11px; color:var(--muted2); }
+
+@media(max-width:700px){ .topbar-row1 p { display:none; } .mod-header { flex-direction:column; gap:7px; } }
+
+/* Unit colors */
+.u1{background:#1573B6!important;} .u2{background:#0e7490!important;} .u3{background:#15803d!important;}
+.u4{background:#7c3aed!important;} .u5{background:#b91c1c!important;} .u6{background:#d97706!important;}
+.u7{background:#1d4ed8!important;} .u8{background:#0f766e!important;} .u9{background:#6d28d9!important;}
+.u10{background:#0369a1!important;} .u11{background:#92400e!important;} .u12{background:#166534!important;}
+</style>
+</head>
+<body class="lang-es">
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-row1">
+      <span class="topbar-badge">S4C03</span>
+      <h1><span class="es">Implementing SAP S/4HANA Cloud Private Edition &mdash; S4C03</span><span class="en">Implementing SAP S/4HANA Cloud Private Edition &mdash; S4C03</span></h1>
+      <span class="signature-tag">&#9670; Valentina RF</span>
+      <button class="lang-btn" onclick="toggleLang()" id="langBtn">
+        <span class="curr-lang" id="langLabel">EN</span>
+      </button>
+    </div>
+    <div class="search-row">
+      <div class="search-wrap" id="searchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" autocomplete="off"
+          placeholder="&#128269; Buscar... CIAS, Migration Cockpit, Clean Core, Fiori Launchpad, SUM..."
+          oninput="doSearch(this.value)" onkeydown="searchKeyNav(event)">
+        <div id="searchResults"></div>
+      </div>
+      <button id="searchClear" onclick="clearSearch()" title="Limpiar">&#10005;</button>
+      <span id="searchCount"></span>
+    </div>
+    <div class="tabs-wrap">
+      <div class="tab-row tab-row-1 tab-row-fade" id="tabRow1">
+        <button class="tab-btn active" onclick="showView('u1',this)"><span class="tab-num">U1</span><span class="es">Introducci&oacute;n</span><span class="en">Introduction</span></button>
+        <button class="tab-btn" onclick="showView('u2',this)"><span class="tab-num">U2</span><span class="es">Equipo</span><span class="en">Team</span></button>
+        <button class="tab-btn" onclick="showView('u3',this)"><span class="tab-num">U3</span><span class="es">Landscapes</span><span class="en">Landscapes</span></button>
+        <button class="tab-btn" onclick="showView('u4',this)"><span class="tab-num">U4</span><span class="es">Setup</span><span class="en">Setup</span></button>
+        <button class="tab-btn" onclick="showView('u5',this)"><span class="tab-num">U5</span><span class="es">Usuarios</span><span class="en">Users</span></button>
+        <button class="tab-btn" onclick="showView('u6',this)"><span class="tab-num">U6</span><span class="es">Workshops</span><span class="en">Workshops</span></button>
+        <button class="tab-btn" onclick="showView('u7',this)"><span class="tab-num">U7</span><span class="es">Procesos</span><span class="en">Processes</span></button>
+        <button class="tab-btn" onclick="showView('u8',this)"><span class="tab-num">U8</span>Fiori LP</button>
+        <button class="tab-btn" onclick="showView('u9',this)"><span class="tab-num">U9</span><span class="es">Extensibilidad</span><span class="en">Extensibility</span></button>
+        <button class="tab-btn" onclick="showView('u10',this)"><span class="tab-num">U10</span><span class="es">Integraciones</span><span class="en">Integrations</span></button>
+        <button class="tab-btn" onclick="showView('u11',this)"><span class="tab-num">U11</span><span class="es">Migraci&oacute;n</span><span class="en">Migration</span></button>
+        <button class="tab-btn" onclick="showView('u12',this)"><span class="tab-num">U12</span>Testing</button>
+      </div>
+      <div class="tab-row tab-row-2 tab-row-fade" id="tabRow2">
+        <button class="tab-btn" onclick="showView('ex',this)"><span class="tab-num" style="background:var(--green);color:#fff;">EJ</span><span class="es">5 Ejercicios</span><span class="en">5 Exercises</span></button>
+        <button class="tab-btn" onclick="showView('qr',this)"><span class="tab-num" style="background:var(--purple);color:#fff;">QR</span>Quick Ref</button>
+        <button class="tab-btn" onclick="showView('cad',this)"><span class="tab-num" style="background:var(--amber);color:#fff;">&#9881;</span><span class="es">Cadenas</span><span class="en">Chains</span></button>
+        <button class="tab-btn" onclick="showView('cmp',this)"><span class="tab-num" style="background:var(--teal);color:#fff;">&#9889;</span><span class="es">Comparativas</span><span class="en">Comparisons</span></button>
+        <button class="tab-btn" onclick="showView('exam',this)"><span class="tab-num" style="background:var(--red);color:#fff;">&#127919;</span><span class="es">Examen</span><span class="en">Exam</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════ U1 ═══ -->
+<div class="view active" id="u1">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u1">U1</span>
+    <div>
+      <h2><span class="es">Introduciendo SAP S/4HANA Cloud Private Edition</span><span class="en">Introducing SAP S/4HANA Cloud Private Edition</span></h2>
+      <p>RISE with SAP &middot; Clean Core &middot; Transition Paths &middot; SUM &middot; Industries</p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">RISE Adoption Framework (presales) vs RISE Methodology (proyecto). 6 dimensiones Clean Core. Rutas: New Impl 50%, System Conv 48%, Selective 2%. SUM crea shadow repository. Lift &amp; Shift: 3 pasos. Shell Conversion vs Mix &amp; Match.</p>
+    <p class="en">RISE Adoption Framework (presales) vs RISE Methodology (project). 6 Clean Core dimensions. Paths: New Impl 50%, System Conv 48%, Selective 2%. SUM creates shadow repository. Lift &amp; Shift: 3 steps. Shell Conversion vs Mix &amp; Match.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#9728;</div><span class="es">RISE with SAP &mdash; Adoption Framework y Methodology</span><span class="en">RISE with SAP &mdash; Adoption Framework &amp; Methodology</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title"><span class="es">Adoption Framework (Preventa)</span><span class="en">Adoption Framework (Presales)</span></div>
+      <p class="es">Introducido durante conversaciones de preventa (fase <strong>Discover</strong>). Define c&oacute;mo partners, cliente y SAP trabajar&aacute;n juntos desde el inicio hasta el final del proyecto. Objetivo: alinear expectativas de todos los stakeholders antes de firmar. &Uacute;til especialmente para grandes clientes con m&uacute;ltiples partners.</p>
+      <p class="en">Introduced during presales conversations (<strong>Discover</strong> phase). Defines how partners, customer and SAP will work together from start to end of the project. Goal: align all stakeholder expectations before signing. Especially useful for large customers with multiple partners.</p>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">RISE Methodology &mdash; 5 Componentes</span><span class="en">RISE Methodology &mdash; 5 Components</span></div>
+      <div class="kv">
+        <span class="kv-k">Q-Gates</span><span class="kv-v"><span class="es">Checkpoints al final de cada fase. Reuni&oacute;n proactiva con contacto SAP. Evalúan adherencia Clean Core.</span><span class="en">Checkpoints at end of each phase. Proactive meeting with SAP contact. Evaluate Clean Core adherence.</span></span>
+        <span class="kv-k">Clean Core Reports</span><span class="kv-v"><span class="es">Generados desde SAP Cloud ALM en cada Q-Gate. Cubre las 6 dimensiones Clean Core.</span><span class="en">Generated from SAP Cloud ALM at each Q-Gate. Covers all 6 Clean Core dimensions.</span></span>
+        <span class="kv-k">Clean Core Runbook</span><span class="kv-v"><span class="es">Mide performance real vs KPIs del plan. Inventario de extensiones, modelo de gobierno, monitoreo "Keep Clean".</span><span class="en">Measures real performance vs plan KPIs. Extensions inventory, governance model, "Keep Clean" monitoring.</span></span>
+        <span class="kv-k">RISE Methodology Report</span><span class="kv-v"><span class="es">Status report de adherencia a las dimensiones Clean Core durante el proyecto.</span><span class="en">Status report of Clean Core dimension adherence during the project.</span></span>
+        <span class="kv-k">Embedded Launch Expert</span><span class="kv-v"><span class="es">Empleado SAP asignado al inicio del proyecto. Educa al equipo en Clean Core y Cloud ALM. Provisiona Cloud ALM. Check-in en cada Q-Gate.</span><span class="en">SAP employee assigned at project start. Educates team on Clean Core and Cloud ALM. Provisions Cloud ALM. Checks in at each Q-Gate.</span></span>
+      </div></div>
+      <div class="alert alert-blue" style="margin-top:10px">
+        <strong><span class="es">6 Dimensiones Clean Core:</span><span class="en">6 Clean Core Dimensions:</span></strong>
+        <span class="es"> Business Processes &middot; Customizations &middot; Data &middot; Extensibility &middot; Integration &middot; Operations</span>
+        <span class="en"> Business Processes &middot; Customizations &middot; Data &middot; Extensibility &middot; Integration &middot; Operations</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128260;</div><span class="es">Rutas de Transici&oacute;n</span><span class="en">Transition Paths</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Ruta</span><span class="en">Path</span></th><th>%</th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Herramienta</span><span class="en">Tool</span></th></tr>
+        <tr><td>New Implementation</td><td>50%</td><td><span class="es">Instalaci&oacute;n nueva desde cero. Redise&ntilde;o de procesos con SAP Best Practices.</span><span class="en">Fresh installation. Process redesign with SAP Best Practices.</span></td><td>Solution Builder + Migration Cockpit</td></tr>
+        <tr><td>System Conversion</td><td>48%</td><td><span class="es">Conversi&oacute;n 1:1 de SAP ECC. Reutiliza datos, procesos y c&oacute;digo. SUM crea <strong>shadow repository</strong> en el target DB (shadow instance + shadow repository).</span><span class="en">1:1 conversion from SAP ECC. Reuses data, processes, and code. SUM creates a <strong>shadow repository</strong> on target DB (shadow instance + shadow repository).</span></td><td>SUM + DMO / System Move</td></tr>
+        <tr><td>Selective Data Transition</td><td>2%</td><td><span class="es">Shell Conversion (copia sin datos) o Mix &amp; Match (nueva instalaci&oacute;n + transferencia selectiva). Herramientas de partners (no certificadas SAP).</span><span class="en">Shell Conversion (copy without data) or Mix &amp; Match (new install + selective transfer). Partner tools (not SAP-certified).</span></td><td>Partner tools</td></tr>
+        <tr><td>Lift &amp; Shift</td><td>&mdash;</td><td><span class="es">Mueve el sistema entero sin cambios a nueva infraestructura. 3 pasos: 1) Check Prerequisites 2) Provision Target System 3) Backup &amp; Restore (Software Provisioning Manager).</span><span class="en">Moves the entire system unchanged to new infrastructure. 3 steps: 1) Check Prerequisites 2) Provision Target System 3) Backup &amp; Restore (Software Provisioning Manager).</span></td><td>Software Provisioning Manager</td></tr>
+      </table>
+      <div class="alert alert-amber" style="margin-top:10px">
+        <strong>DMO:</strong> <span class="es">Database Migration Option &mdash; combina DB migration + software update + data conversion en un solo paso. System Move = DMO + migraci&oacute;n a nuevo datacenter/hyperscaler. Solo para App Server ABAP.</span>
+        <span class="en">Database Migration Option &mdash; combines DB migration + software update + data conversion in one step. System Move = DMO + migration to new datacenter/hyperscaler. App Server ABAP only.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#127970;</div><span class="es">Procesos de Negocio clave (LoBs) e Industrias</span><span class="en">Key Business Processes (LoBs) &amp; Industries</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="mini-card"><div class="mt">Procure to Pay</div><p><span class="es">Finance + Sourcing &amp; Procurement. Forecast, compra, recepci&oacute;n, pago.</span><span class="en">Finance + Sourcing &amp; Procurement. Forecast, purchase, receipt, payment.</span></p></div>
+        <div class="mini-card"><div class="mt">Order to Cash</div><p><span class="es">Sales + Finance. Pedidos, entregas, cobros, devoluciones.</span><span class="en">Sales + Finance. Orders, deliveries, collections, returns.</span></p></div>
+        <div class="mini-card"><div class="mt">Record to Report</div><p><span class="es">Finance. Cierre de periodo, reconciliaci&oacute;n, reporting fiscal.</span><span class="en">Finance. Period close, reconciliation, fiscal reporting.</span></p></div>
+        <div class="mini-card"><div class="mt">Plan to Fulfill</div><p><span class="es">Manufacturing + Supply Chain. Scheduling, producci&oacute;n, almac&eacute;n.</span><span class="en">Manufacturing + Supply Chain. Scheduling, production, warehouse.</span></p></div>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">6 Sectores de Industria</span><span class="en">6 Industry Sectors</span></div>
+      <ul class="lst">
+        <li>Energy &amp; Natural Resources: Building Materials, Chemicals, Mining, Utilities, Oil &amp; Gas</li>
+        <li>Financial Services: Banking, Insurance</li>
+        <li>Consumer Industries: Agribusiness, Fashion, Life Sciences, Retail</li>
+        <li>Discrete Industries: Aerospace &amp; Defense, Automotive, High Tech, Industrial Manufacturing</li>
+        <li>Service Industries: Logistics, Real Estate, Engineering &amp; Construction, Telecom</li>
+        <li>Public Services: Defense, Healthcare, Higher Education, Public Sector</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#128187; System-Based &amp; Scenario-Based &mdash; Exam 2026</div>
+    <div class="s-q"><span class="es">&#10067; Un cliente tiene SAP ECC con 10 a&ntilde;os de historial y c&oacute;digo ABAP extensamente personalizado. El CFO exige conservar todo el hist&oacute;rico. &iquest;Qu&eacute; ruta de transici&oacute;n recomiendas?</span><span class="en">&#10067; A customer has SAP ECC with 10 years of history and heavily customized ABAP code. The CFO demands all historical data be retained. Which transition path do you recommend?</span></div>
+    <div class="s-a"><span class="es"><strong>Respuesta:</strong> <strong>System Conversion (Brownfield)</strong>. Razones: (1) retenci&oacute;n de hist&oacute;rico 1:1, (2) reutilizaci&oacute;n de c&oacute;digo/configuraci&oacute;n existente, (3) menores costes de migraci&oacute;n de datos. No New Implementation (pierde hist&oacute;rico). No Selective (herramientas partner, mayor complejidad). Antes de la conversi&oacute;n: ejecutar SAP Readiness Check, resolver Financial Data Quality y analizar Custom Code.</span><span class="en"><strong>Answer:</strong> <strong>System Conversion (Brownfield)</strong>. Reasons: (1) 1:1 history retention, (2) reuse of existing code/config, (3) lower data migration costs. Not New Implementation (loses history). Not Selective (partner tools, more complexity). Before conversion: run SAP Readiness Check, resolve Financial Data Quality, and analyze Custom Code.</span></div>
+  </div>
+
+  <div class="sec-title"><span class="es">Resumen del M&oacute;dulo</span><span class="en">Module Summary</span></div>
+  <div class="alert alert-blue">
+    <span class="es">&#10003; <strong>Adoption Framework:</strong> preventa. <strong>RISE Methodology:</strong> proyecto (Q-Gates, Reports, Runbook, Report, Embedded Expert).<br>&#10003; <strong>Clean Core:</strong> 6 dimensiones. Objetivo: sistema upgrade-stable sin bloqueos.<br>&#10003; <strong>New Impl 50% &bull; System Conv 48% &bull; Selective 2%.</strong> Lift &amp; Shift: Check &rarr; Provision &rarr; Backup/Restore.<br>&#10003; <strong>SUM:</strong> shadow repository = shadow instance + shadow repository en target DB.<br>&#10003; <strong>Selective:</strong> Shell Conversion (sin datos) o Mix &amp; Match (instalaci&oacute;n nueva + transferencia selectiva).</span>
+    <span class="en">&#10003; <strong>Adoption Framework:</strong> presales. <strong>RISE Methodology:</strong> project (Q-Gates, Reports, Runbook, Report, Embedded Expert).<br>&#10003; <strong>Clean Core:</strong> 6 dimensions. Goal: upgrade-stable system without blocking.<br>&#10003; <strong>New Impl 50% &bull; System Conv 48% &bull; Selective 2%.</strong> Lift &amp; Shift: Check &rarr; Provision &rarr; Backup/Restore.<br>&#10003; <strong>SUM:</strong> shadow repository = shadow instance + shadow repository on target DB.<br>&#10003; <strong>Selective:</strong> Shell Conversion (no data) or Mix &amp; Match (new install + selective transfer).</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U2 ═══ -->
+<div class="view" id="u2">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u2">U2</span>
+    <div>
+      <h2><span class="es">Building the Implementation Team</span><span class="en">Building the Implementation Team</span></h2>
+      <p><span class="es">Stakeholders &middot; Roles por fase &middot; Steering Committee &middot; Servicios SAP</span><span class="en">Stakeholders &middot; Roles by phase &middot; Steering Committee &middot; SAP Services</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">UAT es mandatory antes de Deploy phase &mdash; mismos Customer LoB Experts de los workshops. Partner PM configura el proyecto en Cloud ALM. Steering Committee = Executive Sponsors (customer + partner). Standard Services = SAP los entrega. Excluded Tasks = solo el cliente.</p>
+    <p class="en">UAT is mandatory before Deploy phase &mdash; same Customer LoB Experts from workshops. Partner PM configures project in Cloud ALM. Steering Committee = Executive Sponsors (customer + partner). Standard Services = SAP delivers. Excluded Tasks = customer only.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128100;</div><span class="es">Stakeholders por Fase del Proyecto</span><span class="en">Stakeholders by Project Phase</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Fase</span><span class="en">Phase</span></th><th><span class="es">Stakeholders activos</span><span class="en">Active stakeholders</span></th><th><span class="es">Actividad principal</span><span class="en">Main activity</span></th></tr>
+        <tr><td>Discover</td><td>Customer Executive Sponsors</td><td><span class="es">Digital Discovery Assessment (DDA). Decisi&oacute;n de compra.</span><span class="en">Digital Discovery Assessment (DDA). Purchase decision.</span></td></tr>
+        <tr><td>Prepare</td><td>IT Contact + Partner PM + Lead Config Expert</td><td><span class="es">Provisionar sistemas, configurar Cloud ALM, acceso al equipo.</span><span class="en">Provision systems, configure Cloud ALM, team access.</span></td></tr>
+        <tr><td>Explore</td><td>Partner LoB Experts + Customer LoB Experts</td><td><span class="es">Fit-to-Standard workshops. Documentar requisitos en Cloud ALM.</span><span class="en">Fit-to-Standard workshops. Document requirements in Cloud ALM.</span></td></tr>
+        <tr><td>Realize</td><td>Partner LoB + Dev + Data Migration Contacts</td><td><span class="es">Configuraci&oacute;n, extensiones, integraciones, migraci&oacute;n.</span><span class="en">Configuration, extensions, integrations, migration.</span></td></tr>
+        <tr><td>Deploy</td><td>Customer LoB Experts (UAT) + Change Mgmt Team</td><td><span class="es">UAT mandatory. Formaci&oacute;n usuarios. Go-live.</span><span class="en">Mandatory UAT. User training. Go-live.</span></td></tr>
+      </table>
+      <div class="alert alert-gold" style="margin-top:10px">
+        <strong>Steering Committee:</strong> <span class="es">Executive Sponsors de cliente y partner. &Uacute;ltimo nivel de escalaci&oacute;n. Revisan estado del proyecto peri&oacute;dicamente. El <strong>Partner PM</strong> es responsable del setup del proyecto en SAP Cloud ALM.</span>
+        <span class="en">Customer and partner Executive Sponsors. Final escalation level. Review project status periodically. The <strong>Partner PM</strong> is responsible for project setup in SAP Cloud ALM.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#128295;</div><span class="es">Tipos de Servicios SAP S/4HANA Cloud PE</span><span class="en">SAP S/4HANA Cloud PE Service Types</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Tipo</span><span class="en">Type</span></th><th><span class="es">Incluido</span><span class="en">Included</span></th><th><span class="es">Entregado por</span><span class="en">Delivered by</span></th><th><span class="es">Ejemplos</span><span class="en">Examples</span></th></tr>
+        <tr><td>Standard Services</td><td>&#10003;</td><td>SAP</td><td><span class="es">Infraestructura, OS, HANA DB, monitoring, backup, SAP Basis (solo client 000).</span><span class="en">Infrastructure, OS, HANA DB, monitoring, backup, SAP Basis (client 000 only).</span></td></tr>
+        <tr><td>Cloud Application Services</td><td><span class="es">Parcial</span><span class="en">Partial</span></td><td><span class="es">Partners o SAP</span><span class="en">Partners or SAP</span></td><td><span class="es">Fiori Launchpad setup, gesti&oacute;n seguridad, activaci&oacute;n Best Practices.</span><span class="en">Fiori Launchpad setup, security management, Best Practices activation.</span></td></tr>
+        <tr><td>Optional Services</td><td>No</td><td><span class="es">Partners o SAP</span><span class="en">Partners or SAP</span></td><td><span class="es">Servicios fuera del alcance est&aacute;ndar. Contrato espec&iacute;fico.</span><span class="en">Services outside standard scope. Specific contract required.</span></td></tr>
+        <tr><td>Excluded Tasks</td><td>N/A</td><td><span class="es">Solo Cliente</span><span class="en">Customer Only</span></td><td><span class="es">Estrategia de negocio, permisos de usuario, procesamiento de datos, compliance GDPR.</span><span class="en">Business strategy, user permissions, data processing, GDPR compliance.</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Resumen del M&oacute;dulo</span><span class="en">Module Summary</span></div>
+  <div class="alert alert-blue">
+    <span class="es">&#10003; Partner PM configura Cloud ALM. Customer IT Contact provisiona sistemas.<br>&#10003; UAT mandatory antes de Deploy &mdash; mismos LoB Experts de los workshops.<br>&#10003; Standard Services (SAP). Excluded Tasks (solo cliente). CAS (partners/SAP, parcialmente incluido).<br>&#10003; Steering Committee = Executive Sponsors. &Uacute;ltima escalaci&oacute;n.</span>
+    <span class="en">&#10003; Partner PM configures Cloud ALM. Customer IT Contact provisions systems.<br>&#10003; UAT mandatory before Deploy &mdash; same LoB Experts from workshops.<br>&#10003; Standard Services (SAP). Excluded Tasks (customer only). CAS (partners/SAP, partially included).<br>&#10003; Steering Committee = Executive Sponsors. Final escalation level.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U3 ═══ -->
+<div class="view" id="u3">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u3">U3</span>
+    <div>
+      <h2><span class="es">Defining System Landscapes</span><span class="en">Defining System Landscapes</span></h2>
+      <p><span class="es">Sistemas &middot; SAP for Me &middot; Cloud ALM &middot; Ciclo Releases</span><span class="en">Systems &middot; SAP for Me &middot; Cloud ALM &middot; Release Cycle</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Client 080 = client-independent (Dev ABAP). Client 100 = client-dependent (config + key user). SAP for Me: 9 dashboards. ONE Support Launchpad: completamente retirado. Ciclo: 2 a&ntilde;os base, 6 meses FPS, 7 a&ntilde;os mainstream. 1 upgrade/a&ntilde;o entitlement.</p>
+    <p class="en">Client 080 = client-independent (Dev ABAP). Client 100 = client-dependent (config + key user). SAP for Me: 9 dashboards. ONE Support Launchpad: fully decommissioned. Cycle: 2-year base, 6-month FPS, 7-year mainstream. 1 upgrade/year entitlement.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#127970;</div><span class="es">System Landscape de Implementaci&oacute;n</span><span class="en">Implementation System Landscape</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Sistema</span><span class="en">System</span></th><th><span class="es">Prop&oacute;sito</span><span class="en">Purpose</span></th><th><span class="es">C&oacute;mo obtener</span><span class="en">How to get it</span></th></tr>
+        <tr><td>Trial</td><td><span class="es">Exploraci&oacute;n. 30 d&iacute;as (~3€/h hosting Azure/GCP/AWS).</span><span class="en">Exploration. 30 days (~€3/hr hosting Azure/GCP/AWS).</span></td><td>SAP Cloud Appliance Library (CAL). Deploy 2-3h.</td></tr>
+        <tr><td>Sandbox</td><td><span class="es">New impl: workshops Fit-to-Standard. System conv: sandbox convertido.</span><span class="en">New impl: Fit-to-Standard workshops. System conv: converted sandbox.</span></td><td><span class="es">CAL o conversi&oacute;n del sandbox existente con SUM.</span><span class="en">CAL or conversion of existing sandbox with SUM.</span></td></tr>
+        <tr><td>Development</td><td><span class="es"><strong>Client 080:</strong> Developer extensibility (ABAP) &mdash; client-independent.<br><strong>Client 100:</strong> Config + Key User extensibility &mdash; client-dependent.</span><span class="en"><strong>Client 080:</strong> Developer extensibility (ABAP) &mdash; client-independent.<br><strong>Client 100:</strong> Config + Key User extensibility &mdash; client-dependent.</span></td><td><span class="es">Nuevo (new impl) o conversi&oacute;n del Dev existente.</span><span class="en">Fresh (new impl) or conversion of existing Dev.</span></td></tr>
+        <tr><td>Quality</td><td><span class="es">Testing formal documentado en Cloud ALM antes de Prod.</span><span class="en">Formal testing documented in Cloud ALM before Prod.</span></td><td><span class="es">Transportes desde Development (SE09).</span><span class="en">Transports from Development (SE09).</span></td></tr>
+        <tr><td>Production</td><td><span class="es">Operaciones diarias del negocio.</span><span class="en">Daily business operations.</span></td><td><span class="es">Transportes desde Quality.</span><span class="en">Transports from Quality.</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128295;</div><span class="es">SAP for Me y Herramientas de Gesti&oacute;n</span><span class="en">SAP for Me &amp; Management Tools</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-amber"><strong>SAP ONE Support Launchpad:</strong> <span class="es">completamente <strong>retirado (decommissioned)</strong>. Reemplazado por SAP for Me.</span><span class="en">completely <strong>decommissioned</strong>. Replaced by SAP for Me.</span></div>
+      <div class="kv" style="margin-top:10px">
+        <span class="kv-k">SAP for Me</span><span class="kv-v"><span class="es">One-stop shop. 9 dashboards: <strong>Customer Success &middot; Finance &amp; Legal &middot; Partner Solutions &middot; Partnership &middot; Products &amp; Portfolio &middot; Sales &amp; Marketing &middot; Services &amp; Support &middot; Systems &amp; Provisioning &middot; Users &amp; Contacts</strong>. Casos de soporte, licencias, provisioning.</span><span class="en">One-stop shop. 9 dashboards: <strong>Customer Success &middot; Finance &amp; Legal &middot; Partner Solutions &middot; Partnership &middot; Products &amp; Portfolio &middot; Sales &amp; Marketing &middot; Services &amp; Support &middot; Systems &amp; Provisioning &middot; Users &amp; Contacts</strong>. Support cases, licenses, provisioning.</span></span>
+        <span class="kv-k">SAP Cloud ALM</span><span class="kv-v"><span class="es">Incluido en Enterprise Support. 4 secciones: <strong>Business Transformation Center</strong> (selective data transition) &middot; <strong>Implementation</strong> (scope, tasks, requirements, test mgmt) &middot; <strong>Operations</strong> (monitoring sistemas productivos) &middot; <strong>Service</strong> (casos soporte y servicios).</span><span class="en">Included in Enterprise Support. 4 sections: <strong>Business Transformation Center</strong> (selective data transition) &middot; <strong>Implementation</strong> (scope, tasks, requirements, test mgmt) &middot; <strong>Operations</strong> (production system monitoring) &middot; <strong>Service</strong> (support cases and services).</span></span>
+        <span class="kv-k">Cloud Identity (IAS+IPS)</span><span class="kv-v"><span class="es">SSO entre sistemas SAP. Auto-provisionado al activar cualquier cloud SAP. <strong>IAS debe activarse PRIMERO</strong> antes de Cloud ALM.</span><span class="en">SSO between SAP systems. Auto-provisioned when any SAP cloud is activated. <strong>IAS must be activated FIRST</strong> before Cloud ALM.</span></span>
+        <span class="kv-k">SAP Signavio</span><span class="kv-v"><span class="es">Process Manager (documentaci&oacute;n custom) + Process Navigator (test scripts Best Practices). Auto-provisionado en RISE.</span><span class="en">Process Manager (custom documentation) + Process Navigator (Best Practices test scripts). Auto-provisioned in RISE.</span></span>
+        <span class="kv-k">SAP BTP</span><span class="kv-v"><span class="es">Motor de Cloud ALM, Cloud Identity, integraciones est&aacute;ndar, SAP Build (low/no-code).</span><span class="en">Engine for Cloud ALM, Cloud Identity, standard integrations, SAP Build (low/no-code).</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-purple">&#128197;</div><span class="es">Ciclo de Releases y Upgrades</span><span class="en">Release Cycle &amp; Upgrades</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Base Release</span><span class="kv-v"><span class="es">Cada <strong>2 a&ntilde;os</strong> (desde 2023). Antes era anual.</span><span class="en">Every <strong>2 years</strong> (since 2023). Previously annual.</span></span>
+        <span class="kv-k">FPS</span><span class="kv-v"><span class="es">Feature Pack Stacks. Cada 6 meses entre releases. <strong>Nuevas features</strong> no disruptivas.</span><span class="en">Feature Pack Stacks. Every 6 months between releases. <strong>New non-disruptive features.</strong></span></span>
+        <span class="kv-k">SPS</span><span class="kv-v"><span class="es">Support Pack Stacks. Cada 6 meses tras el siguiente release. Solo <strong>correcciones</strong>.</span><span class="en">Support Pack Stacks. Every 6 months after next release. <strong>Corrections only.</strong></span></span>
+        <span class="kv-k">Mainstream Maintenance</span><span class="kv-v"><span class="es"><strong>7 a&ntilde;os</strong> por release base. Obligaci&oacute;n: instalar al menos 1 upgrade cada 7 a&ntilde;os. Los clientes tienen <strong>derecho a 1 upgrade/a&ntilde;o</strong> solicitado a SAP.</span><span class="en"><strong>7 years</strong> per base release. Obligation: install at least 1 upgrade every 7 years. Customers are <strong>entitled to 1 upgrade/year</strong> requested from SAP.</span></span>
+        <span class="kv-k">Ejecuci&oacute;n</span><span class="kv-v"><span class="es">SAP ejecuta la parte t&eacute;cnica del upgrade. El cliente gestiona planificaci&oacute;n, preparaci&oacute;n y testing.</span><span class="en">SAP executes the technical upgrade. Customer manages planning, preparation and testing.</span></span>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">Recursos para releases</span><span class="en">Release resources</span></div>
+      <ul class="lst">
+        <li><span class="es">Notification banner en Fiori Launchpad tras cada upgrade.</span><span class="en">Notification banner in Fiori Launchpad after each upgrade.</span></li>
+        <li><strong>SAP Help Portal &rarr; What's New Viewer</strong>: <span class="es">lista de nuevas features, filtrable por LoB.</span><span class="en">list of new features, filterable by LoB.</span></li>
+        <li><strong>SAP Road Map Explorer (roadmaps.sap.com)</strong>: <span class="es">mejoras futuras planificadas por trimestre.</span><span class="en">future planned improvements by quarter.</span></li>
+        <li><strong>Customer Influence (influence.sap.com)</strong>: <span class="es">solicitar mejoras. M&aacute;s votos = mayor prioridad.</span><span class="en">request improvements. More votes = higher priority.</span></li>
+        <li><strong>RASD</strong> (Release Assessment &amp; Scope Dependency): <span class="es">identifica cambios relevantes por cliente post-upgrade.</span><span class="en">identifies relevant changes per customer post-upgrade.</span></li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Resumen del M&oacute;dulo</span><span class="en">Module Summary</span></div>
+  <div class="alert alert-blue">
+    <span class="es">&#10003; <strong>Client 080:</strong> client-independent, Developer ABAP. <strong>Client 100:</strong> client-dependent, config + Key User.<br>&#10003; <strong>SAP for Me:</strong> 9 dashboards. ONE Support Launchpad: <strong>decommissioned</strong>.<br>&#10003; <strong>IAS PRIMERO</strong>, luego Cloud ALM. SAP Signavio y BTP: auto-provisionados.<br>&#10003; <strong>Ciclo:</strong> 2a base &rarr; FPS cada 6m (features) &rarr; SPS cada 6m (fixes). 7a mainstream. 1 upgrade/a&ntilde;o entitlement.</span>
+    <span class="en">&#10003; <strong>Client 080:</strong> client-independent, Developer ABAP. <strong>Client 100:</strong> client-dependent, config + Key User.<br>&#10003; <strong>SAP for Me:</strong> 9 dashboards. ONE Support Launchpad: <strong>decommissioned</strong>.<br>&#10003; <strong>IAS FIRST</strong>, then Cloud ALM. SAP Signavio and BTP: auto-provisioned.<br>&#10003; <strong>Cycle:</strong> 2yr base &rarr; FPS every 6m (features) &rarr; SPS every 6m (fixes). 7yr mainstream. 1 upgrade/year entitlement.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U4 ═══ -->
+<div class="view" id="u4">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u4">U4</span>
+    <div>
+      <h2><span class="es">Setting Up Systems for Implementation</span><span class="en">Setting Up Systems for Implementation</span></h2>
+      <p><span class="es">Onboarding &middot; Provisioning &middot; Cloud ALM Setup &middot; Readiness Check &middot; Fiori Rapid Activation</span><span class="en">Onboarding &middot; Provisioning &middot; Cloud ALM Setup &middot; Readiness Check &middot; Fiori Rapid Activation</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Welcome email: se env&iacute;a UNA vez. IAS primero, luego Cloud ALM. 5 roadmaps en Cloud ALM. Clean Core est&aacute; en TODOS los roadmaps. Readiness Check: 14 &aacute;reas. Rapid Activation crea Z_FIORI_FOUNDATION_USER y Z_FIORI_FOUNDATION_ADMIN.</p>
+    <p class="en">Welcome email: sent ONCE. IAS first, then Cloud ALM. 5 roadmaps in Cloud ALM. Clean Core is in ALL roadmaps. Readiness Check: 14 areas. Rapid Activation creates Z_FIORI_FOUNDATION_USER and Z_FIORI_FOUNDATION_ADMIN.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128231;</div><span class="es">Onboarding y Provisioning</span><span class="en">Onboarding &amp; Provisioning</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Welcome Email</span><span class="kv-v"><span class="es">Se env&iacute;a <strong>UNA sola vez</strong> en la fecha de inicio del contrato. No se puede reenv&iacute;ar. Info disponible en <strong>Customer Onboarding Resource Center</strong> (support.sap.com).</span><span class="en">Sent <strong>ONCE</strong> on the contract start date. Cannot be resent. Info available at <strong>Customer Onboarding Resource Center</strong> (support.sap.com).</span></span>
+        <span class="kv-k">IT Contact</span><span class="kv-v"><span class="es">Solo 1 persona. M&uacute;ltiples <strong>Communication Contacts</strong> para comunicaciones generales. Cambiar: crear caso en SAP for Me con componente XX-S4C-OPR-SRV.</span><span class="en">Only 1 person. Multiple <strong>Communication Contacts</strong> for general communications. To change: create case in SAP for Me with component XX-S4C-OPR-SRV.</span></span>
+      </div>
+      <table class="tbl-reg" style="margin-top:12px">
+        <tr><th><span class="es">Sistema</span><span class="en">System</span></th><th><span class="es">IT Contact activa</span><span class="en">IT Contact activates</span></th><th><span class="es">Autom&aacute;tico</span><span class="en">Automatic</span></th></tr>
+        <tr><td>SAP Cloud ALM</td><td>&#10003; (via SAP for Me &rarr; Systems &amp; Provisioning)</td><td></td></tr>
+        <tr><td>SAP Cloud Identity (IAS + IPS)</td><td></td><td>&#10003;</td></tr>
+        <tr><td>SAP Signavio Process Manager</td><td></td><td>&#10003;</td></tr>
+        <tr><td>SAP Signavio Collaboration Hub</td><td></td><td>&#10003;</td></tr>
+        <tr><td>SAP Business Technology Platform</td><td></td><td>&#10003;</td></tr>
+        <tr><td>SAP S/4HANA Cloud PE systems</td><td><span class="es">New impl: fase posterior. System conv: generado por SUM.</span><span class="en">New impl: later phase. System conv: generated by SUM.</span></td><td></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-purple">&#128247;</div><span class="es">Roadmaps en SAP Cloud ALM</span><span class="en">Roadmaps in SAP Cloud ALM</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-blue" style="margin-bottom:10px"><strong><span class="es">Nota clave:</span><span class="en">Key note:</span></strong> <span class="es">Las tareas y Q-Gates de Clean Core est&aacute;n presentes en <strong>TODOS</strong> los roadmaps de S/4HANA Cloud PE. El roadmap "Clean Core Success Plan" es solo para qui&eacute;n quiere ejecutar Clean Core como <strong>proyecto aut&oacute;nomo separado</strong>.</span><span class="en">Clean Core tasks and Q-Gates are present in <strong>ALL</strong> S/4HANA Cloud PE roadmaps. The "Clean Core Success Plan" roadmap is only for those who want to run Clean Core as a <strong>separate standalone project</strong>.</span></div>
+      <table class="tbl-reg">
+        <tr><th>Roadmap</th><th><span class="es">Caso de uso</span><span class="en">Use case</span></th></tr>
+        <tr><td>RISE with SAP S/4HANA Cloud PE &mdash; Implementation</td><td><span class="es">New implementations (Greenfield).</span><span class="en">New implementations (Greenfield).</span></td></tr>
+        <tr><td>RISE with SAP S/4HANA Cloud PE &mdash; System Conversion</td><td><span class="es">Conversi&oacute;n desde SAP ECC (Brownfield).</span><span class="en">Conversion from SAP ECC (Brownfield).</span></td></tr>
+        <tr><td>RISE with SAP S/4HANA Cloud PE &mdash; Selective Data Transition</td><td><span class="es">Migraci&oacute;n selectiva (Shell Conversion o Mix &amp; Match).</span><span class="en">Selective migration (Shell Conversion or Mix &amp; Match).</span></td></tr>
+        <tr><td>RISE with SAP Methodology &mdash; Clean Core Success Plan</td><td><span class="es">Clean Core como proyecto separado, paralelo a la implementaci&oacute;n.</span><span class="en">Clean Core as separate project, parallel to implementation.</span></td></tr>
+        <tr><td>RISE with SAP S/4HANA Cloud PE &mdash; Upgrade</td><td><span class="es">Tareas durante y despu&eacute;s de cada release upgrade.</span><span class="en">Tasks during and after each release upgrade.</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-red">&#128202;</div><span class="es">SAP Readiness Check &mdash; 14 &Aacute;reas</span><span class="en">SAP Readiness Check &mdash; 14 Areas</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-amber"><strong>Signavio Process Insights (Discovery Edition):</strong> <span class="es">incluida en RISE with SAP. Analiza procesos del sistema ECC del cliente antes de la conversi&oacute;n. An&aacute;lisis expira a los 6 meses. IT Contact conecta el sistema ECC seg&uacute;n instrucciones del welcome email.</span><span class="en">included in RISE with SAP. Analyzes customer's ECC system processes before conversion. Analysis expires after 6 months. IT Contact connects the ECC system per welcome email instructions.</span></div>
+      <div class="two-col" style="margin-top:10px">
+        <div>
+          <ul class="lst">
+            <li>Simplification Items</li>
+            <li>Compatibility Scope Analysis</li>
+            <li>Compatibility of Add-Ons &amp; Business Functions</li>
+            <li>SAP S/4HANA Sizing &amp; Data Volume Management</li>
+            <li>Custom Code Analysis</li>
+            <li>Integration (Interface Analysis)</li>
+            <li>Customer Vendor Integration Analysis</li>
+          </ul>
+        </div>
+        <div>
+          <ul class="lst">
+            <li><span class="es">Planned Downtime Calculator</span><span class="en">Planned Downtime Calculator</span></li>
+            <li><strong style="color:var(--red)">Financial Data Quality &#9888;&#65039; CR&Iacute;TICO</strong></li>
+            <li>App Availability</li>
+            <li>Recommended SAP Fiori Apps</li>
+            <li>Business Process Discovery</li>
+            <li>Innovation Potential</li>
+            <li>SAP Innovative Business Solutions (IBSO)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="kv" style="margin-top:10px">
+        <span class="kv-k">Custom Code Migration App</span><span class="kv-v"><span class="es">An&aacute;lisis detallado (vs estimaci&oacute;n del Readiness Check). Ejecuta en SAP BTP. Compara c&oacute;digo custom contra Simplification Database.</span><span class="en">Detailed analysis (vs Readiness Check estimation). Runs on SAP BTP. Compares custom code against Simplification Database.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#9889;</div><span class="es">SAP Fiori Rapid Activation</span><span class="en">SAP Fiori Rapid Activation</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <p class="es">SUM <strong>no genera</strong> el SAP Fiori Launchpad autom&aacute;ticamente durante la conversi&oacute;n. La Rapid Activation configura el Launchpad con prefijo del cliente (ej: Z_).</p>
+      <p class="en">SUM does <strong>not automatically generate</strong> the SAP Fiori Launchpad during conversion. Rapid Activation configures the Launchpad with a customer prefix (e.g., Z_).</p>
+      <div class="kv" style="margin-top:10px">
+        <span class="kv-k">Z_FIORI_FOUNDATION_USER</span><span class="kv-v"><span class="es">Composite role para usuarios finales del SAP Fiori Launchpad.</span><span class="en">Composite role for SAP Fiori Launchpad end users.</span></span>
+        <span class="kv-k">Z_FIORI_FOUNDATION_ADMIN</span><span class="kv-v"><span class="es">Composite role para administradores del SAP Fiori Launchpad.</span><span class="en">Composite role for SAP Fiori Launchpad administrators.</span></span>
+        <span class="kv-k">Task List</span><span class="kv-v">SAP_FIORI_FOUNDATION_S4</span>
+        <span class="kv-k">Arquitectura requerida</span><span class="kv-v"><span class="es">Embedded (recomendada desde S/4HANA 1909).</span><span class="en">Embedded (recommended since S/4HANA 1909).</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U5 ═══ -->
+<div class="view" id="u5">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u5">U5</span>
+    <div>
+      <h2><span class="es">Creating Users and Defining Authorizations</span><span class="en">Creating Users and Defining Authorizations</span></h2>
+      <p>SU01 &middot; PFCG &middot; Launchpad App Manager &middot; Spaces &amp; Pages &middot; OData</p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Jerarqu&iacute;a: User &rarr; Business Role &rarr; Business Catalog &rarr; Technical Catalog. Launchpad Designer: <strong>NO deprecated</strong>, superseded pero a&uacute;n v&aacute;lido. Groups: deprecated desde 2021. OData Services: activar para cada app. M&aacute;x: 35 tiles/page.</p>
+    <p class="en">Hierarchy: User &rarr; Business Role &rarr; Business Catalog &rarr; Technical Catalog. Launchpad Designer: <strong>NOT deprecated</strong>, superseded but still valid. Groups: deprecated since 2021. OData Services: activate per app. Max: 35 tiles/page.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128272;</div><span class="es">Jerarqu&iacute;a de Autorizaci&oacute;n IAM</span><span class="en">IAM Authorization Hierarchy</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Objeto</span><span class="en">Object</span></th><th><span class="es">Contiene</span><span class="en">Contains</span></th><th><span class="es">Administrado con</span><span class="en">Managed with</span></th></tr>
+        <tr><td>Business User</td><td><span class="es">Asignado a uno o m&aacute;s Business Roles.</span><span class="en">Assigned to one or more Business Roles.</span></td><td>SU01</td></tr>
+        <tr><td>Business Role</td><td><span class="es">Uno o m&aacute;s Business Catalogs + Launchpad Space.</span><span class="en">One or more Business Catalogs + Launchpad Space.</span></td><td>PFCG</td></tr>
+        <tr><td>Business Catalog</td><td><span class="es">Referencias a tiles y target mappings del Technical Catalog por job role.</span><span class="en">References to Technical Catalog tiles and target mappings per job role.</span></td><td>/UI2/FLPCM_CUST</td></tr>
+        <tr><td>Technical Catalog</td><td><span class="es">Definici&oacute;n original del tile y target mapping (App Descriptor). Una por app.</span><span class="en">Original tile and target mapping definition (App Descriptor). One per app.</span></td><td>/UI2/FLPAM</td></tr>
+        <tr><td>Launchpad Space</td><td><span class="es">Una o m&aacute;s Pages. Se asigna al Business Role en PFCG.</span><span class="en">One or more Pages. Assigned to Business Role in PFCG.</span></td><td>Manage Launchpad Spaces (F4834)</td></tr>
+        <tr><td>Launchpad Page</td><td><span class="es">Secciones con app tiles. Asociada a un Space.</span><span class="en">Sections with app tiles. Associated with a Space.</span></td><td>Manage Launchpad Pages (F4512)</td></tr>
+      </table>
+      <div class="alert alert-blue" style="margin-top:10px">
+        <strong><span class="es">3 capas de configuraci&oacute;n:</span><span class="en">3 configuration layers:</span></strong>
+        <span class="es"> Cross Client (Fiori Admin, client-independent) &middot; Client-specific Customizing (Fiori Admin, client-dependent) &middot; Personalization (End User via User Action Menu).</span>
+        <span class="en"> Cross Client (Fiori Admin, client-independent) &middot; Client-specific Customizing (Fiori Admin, client-dependent) &middot; Personalization (End User via User Action Menu).</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#9881;&#65039;</div><span class="es">Transacciones Clave y OData</span><span class="en">Key Transactions &amp; OData</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">SU01</span><span class="kv-v"><span class="es">User Maintenance. Campos m&iacute;nimos: Last Name + Password. Tab Roles: asignar Business Roles.</span><span class="en">User Maintenance. Minimum fields: Last Name + Password. Roles tab: assign Business Roles.</span></span>
+        <span class="kv-k">PFCG</span><span class="kv-v"><span class="es">Role Maintenance. Asignar Business Catalog (Menu &rarr; Insert Node &rarr; SAP Fiori LP &rarr; Launchpad Catalog) y Space (Launchpad Space).</span><span class="en">Role Maintenance. Assign Business Catalog (Menu &rarr; Insert Node &rarr; SAP Fiori LP &rarr; Launchpad Catalog) and Space (Launchpad Space).</span></span>
+        <span class="kv-k">/UI2/FLPAM</span><span class="kv-v"><span class="es">Launchpad App Manager: gestiona Technical Catalogs. Sustituy&oacute; a Mass Maintenance en S/4HANA 2020.</span><span class="en">Launchpad App Manager: manages Technical Catalogs. Replaced Mass Maintenance in S/4HANA 2020.</span></span>
+        <span class="kv-k">/UI2/FLPCM_CUST</span><span class="kv-v"><span class="es">Launchpad Content Manager (client-specific). Business Catalogs.</span><span class="en">Launchpad Content Manager (client-specific). Business Catalogs.</span></span>
+        <span class="kv-k">/UI2/FLPD_CONF/CUST</span><span class="kv-v"><span class="es">Launchpad Designer. <strong>NO deprecated</strong> &mdash; superseded para uso general. A&uacute;n necesario en casos espec&iacute;ficos (subgrupos de usuarios en un client).</span><span class="en">Launchpad Designer. <strong>NOT deprecated</strong> &mdash; superseded for general use. Still needed in specific cases (user subgroups in a client).</span></span>
+        <span class="kv-k">OData Services</span><span class="kv-v"><span class="es"><strong>Deben activarse para cada app</strong> individualmente o usando task lists. SPRO &rarr; SAP NetWeaver &rarr; UI Technologies &rarr; SAP Fiori.</span><span class="en"><strong>Must be activated for each app</strong> individually or using task lists. SPRO &rarr; SAP NetWeaver &rarr; UI Technologies &rarr; SAP Fiori.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128203;</div>Spaces &amp; Pages vs Groups</div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th></th><th>Spaces &amp; Pages (Fiori 3.0)</th><th>Groups (Fiori 2.0)</th></tr>
+        <tr><td><span class="es">Estado</span><span class="en">Status</span></td><td><span class="es">Recomendado desde S/4HANA 2021.</span><span class="en">Recommended since S/4HANA 2021.</span></td><td><strong style="color:var(--red)"><span class="es">Deprecated desde S/4HANA 2021.</span><span class="en">Deprecated since S/4HANA 2021.</span></strong></td></tr>
+        <tr><td>Context check</td><td><span class="es">S&iacute;: "Out of Context" si tile no pertenece al rol.</span><span class="en">Yes: "Out of Context" if tile doesn't belong to role.</span></td><td><span class="es">No: cualquier tile a cualquier group.</span><span class="en">No: any tile to any group.</span></td></tr>
+        <tr><td>PFCG</td><td><span class="es">Space asignado al rol. Pages van al Space.</span><span class="en">Space assigned to role. Pages go to Space.</span></td><td><span class="es">Group asignado directamente al rol.</span><span class="en">Group assigned directly to role.</span></td></tr>
+        <tr><td><span class="es">Personalizaci&oacute;n</span><span class="en">Personalization</span></td><td><span class="es">Admins pueden deshabilitar. Protegido.</span><span class="en">Admins can disable. Protected.</span></td><td><span class="es">Si usuario personaliza, cambios admin no aplican.</span><span class="en">If user personalizes, admin changes don't apply.</span></td></tr>
+      </table>
+      <div class="alert alert-gold" style="margin-top:10px">
+        <strong><span class="es">L&iacute;mites recomendados:</span><span class="en">Recommended limits:</span></strong>
+        <span class="es"> M&aacute;x 35 tiles/page &middot; 5-7 secciones/page &middot; 5-7 apps/secci&oacute;n &middot; 100 apps/cat&aacute;logo. <strong>NO modificar cat&aacute;logos SAP directamente &mdash; copiar primero.</strong></span>
+        <span class="en"> Max 35 tiles/page &middot; 5-7 sections/page &middot; 5-7 apps/section &middot; 100 apps/catalog. <strong>DO NOT modify SAP catalogs directly &mdash; copy first.</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U6 ═══ -->
+<div class="view" id="u6">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u6">U6</span>
+    <div>
+      <h2><span class="es">Gathering Data in Fit-to-Standard Workshops</span><span class="en">Gathering Data in Fit-to-Standard Workshops</span></h2>
+      <p><span class="es">An&aacute;lisis &middot; Sistemas para Workshops &middot; Planificaci&oacute;n &middot; Cloud Mindset</span><span class="en">Analysis &middot; Systems for Workshops &middot; Planning &middot; Cloud Mindset</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Siempre primero: Chart of Accounts + Organizational Structure. M&iacute;n 2, m&aacute;x 4 participantes por business role. Cloud Mindset: solo "need to have". Fully-Activated Appliance = mejor opci&oacute;n para workshops.</p>
+    <p class="en">Always first: Chart of Accounts + Organizational Structure. Min 2, max 4 participants per business role. Cloud Mindset: "need to have" only. Fully-Activated Appliance = best option for workshops.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128196;</div><span class="es">Prop&oacute;sito y Planificaci&oacute;n de Workshops</span><span class="en">Workshop Purpose &amp; Planning</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="mini-card"><div class="mt"><span class="es">New Implementation</span><span class="en">New Implementation</span></div><p><span class="es">Evaluar la soluci&oacute;n predefinida en sandbox vs. requisitos del cliente. Recoger valores de configuraci&oacute;n y requisitos de customizaci&oacute;n.</span><span class="en">Evaluate predefined solution in sandbox vs. customer requirements. Collect configuration values and customization requirements.</span></p></div>
+        <div class="mini-card"><div class="mt"><span class="es">System Conversion</span><span class="en">System Conversion</span></div><p><span class="es">Evaluar nuevas features y procesos en compatibility scope. Documentar requisitos de Simplification Items.</span><span class="en">Evaluate new features and processes in compatibility scope. Document Simplification Items requirements.</span></p></div>
+      </div>
+      <div class="kv" style="margin-top:12px">
+        <span class="kv-k"><span class="es">Orden</span><span class="en">Order</span></span><span class="kv-v"><strong><span class="es">SIEMPRE primero:</span><span class="en">ALWAYS first:</span></strong> <span class="es">Chart of Accounts + Organizational Structure. El resto de LoBs puede hacerse en paralelo en cualquier orden.</span><span class="en">Chart of Accounts + Organizational Structure. Other LoBs can be done in parallel in any order.</span></span>
+        <span class="kv-k"><span class="es">Participantes</span><span class="en">Participants</span></span><span class="kv-v"><span class="es">M&iacute;nimo <strong>2</strong>, m&aacute;ximo <strong>4</strong> por business role por workshop.</span><span class="en">Minimum <strong>2</strong>, maximum <strong>4</strong> per business role per workshop.</span></span>
+        <span class="kv-k"><span class="es">Estimaci&oacute;n</span><span class="en">Estimation</span></span><span class="kv-v"><span class="es">1-2 procesos por workshop de medio d&iacute;a (4h). 2-3 procesos por d&iacute;a completo.</span><span class="en">1-2 processes per half-day workshop (4h). 2-3 processes per full day.</span></span>
+        <span class="kv-k">Sandbox recomendado</span><span class="kv-v"><strong>SAP S/4HANA Fully-Activated Appliance</strong> <span class="es">(CAL, ~3€/h). Best Practices activados, datos demo, SAP Fiori activo.</span><span class="en">(CAL, ~€3/hr). Best Practices activated, demo data, SAP Fiori active.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#9728;</div>Cloud Mindset</div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-red">
+        <strong>&#9888;&#65039; <span class="es">Regla de oro:</span><span class="en">Golden rule:</span></strong>
+        <span class="es"> Cualquier cambio al proceso est&aacute;ndar a&ntilde;ade complejidad en futuros upgrades. Solo documentar requisitos absolutamente necesarios para el trabajo diario del usuario ("<strong>need to have</strong>"). Distinguir siempre de "nice to have". Pregunta clave: <em>"Sin este cambio, &iquest;el usuario no puede completar su tarea diaria?"</em> Solo si la respuesta es S&Iacute;.</span>
+        <span class="en"> Any change to the standard process adds complexity in future upgrades. Only document requirements absolutely necessary for daily user work ("<strong>need to have</strong>"). Always distinguish from "nice to have". Key question: <em>"Without this change, can the user not complete their daily task?"</em> Only if the answer is YES.</span>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">Informaci&oacute;n recogida en cada workshop</span><span class="en">Information collected in each workshop</span></div>
+      <ul class="lst">
+        <li><span class="es">Valores de configuraci&oacute;n del proceso de negocio.</span><span class="en">Business process configuration values.</span></li>
+        <li><span class="es">Business role y customizaciones de Space/Page.</span><span class="en">Business role and Space/Page customizations.</span></li>
+        <li><span class="es">Key user in-app extensions (campos custom, l&oacute;gica custom).</span><span class="en">Key user in-app extensions (custom fields, custom logic).</span></li>
+        <li><span class="es">Customizaciones de output forms y email templates.</span><span class="en">Output form and email template customizations.</span></li>
+        <li><span class="es">Datos para migraci&oacute;n o contacto de extracci&oacute;n del sistema legacy.</span><span class="en">Data for migration or legacy system extraction contact.</span></li>
+        <li><span class="es">Requisitos adicionales de integraci&oacute;n.</span><span class="en">Additional integration requirements.</span></li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U7 ═══ -->
+<div class="view" id="u7">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u7">U7</span>
+    <div>
+      <h2><span class="es">Validating and Configuring Business Processes</span><span class="en">Validating and Configuring Business Processes</span></h2>
+      <p><span class="es">Solution Builder &middot; Activaci&oacute;n Best Practices &middot; Sprint 1 &amp; 2 &middot; Partner Packaged Solutions</span><span class="en">Solution Builder &middot; Best Practices Activation &middot; Sprint 1 &amp; 2 &middot; Partner Packaged Solutions</span></p></div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Solution Builder = /n/SMB/BBI. Activar Best Practices solo 1 vez en Dev. NUNCA editar el proceso SAP directamente &mdash; copiar primero. Sprint 1 = validar funcionalidad existente. Sprint 2 = adoptar Fiori apps. Algunas Fiori apps son obligatorias en conversiones.</p>
+    <p class="en">Solution Builder = /n/SMB/BBI. Activate Best Practices only once in Dev. NEVER edit SAP process directly &mdash; copy first. Sprint 1 = validate existing functionality. Sprint 2 = adopt Fiori apps. Some Fiori apps are mandatory in conversions.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#9881;&#65039;</div><span class="es">SAP Best Practices &mdash; New Implementations</span><span class="en">SAP Best Practices &mdash; New Implementations</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Transacci&oacute;n</span><span class="kv-v"><strong>/n/SMB/BBI</strong> &mdash; SAP Best Practices Solution Builder</span>
+        <span class="kv-k">Estructura</span><span class="kv-v">Solution &rarr; Scenarios &rarr; Building Blocks (<span class="es">entidades autocontenidas y reutilizables</span><span class="en">self-contained and reusable entities</span>)</span>
+        <span class="kv-k"><span class="es">Regla cr&iacute;tica</span><span class="en">Critical rule</span></span><span class="kv-v"><span class="es">Activar <strong>solo 1 vez en Development</strong>. Usar transportes para QA y Prod. <strong>NUNCA editar el proceso SAP directamente</strong> &mdash; hacer copia primero.</span><span class="en">Activate <strong>only once in Development</strong>. Use transports for QA and Prod. <strong>NEVER edit the SAP process directly</strong> &mdash; copy first.</span></span>
+        <span class="kv-k">Documentaci&oacute;n</span><span class="kv-v">SAP Signavio Process Navigator: <span class="es">test scripts de todos los procesos Best Practice.</span><span class="en">test scripts for all Best Practice processes.</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#9989;</div><span class="es">System Conversion &mdash; Sprint 1 y Sprint 2</span><span class="en">System Conversion &mdash; Sprint 1 &amp; Sprint 2</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th>Sprint</th><th><span class="es">Foco</span><span class="en">Focus</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th></tr>
+        <tr><td>Sprint 1</td><td><span class="es">Validaci&oacute;n funcional</span><span class="en">Functional validation</span></td><td><span class="es">Confirmar que los procesos funcionan igual que antes de la conversi&oacute;n. SAP GUI y web GUI. Algunas Fiori apps son <strong>obligatorias</strong> como reemplazo directo de transacciones.</span><span class="en">Confirm processes work the same as before conversion. SAP GUI and web GUI. Some Fiori apps are <strong>mandatory</strong> as direct replacements for transactions.</span></td></tr>
+        <tr><td>Sprint 2</td><td><span class="es">Mejoras e innovaci&oacute;n</span><span class="en">Improvements &amp; innovation</span></td><td><span class="es">Probar Fiori apps que reemplazan transacciones SAP GUI. El cliente ve sus propios datos con las nuevas apps.</span><span class="en">Test Fiori apps replacing SAP GUI transactions. Customer sees their own data with the new apps.</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U8 ═══ -->
+<div class="view" id="u8">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u8">U8</span>
+    <div>
+      <h2><span class="es">Working with the SAP Fiori Launchpad</span><span class="en">Working with the SAP Fiori Launchpad</span></h2>
+      <p><span class="es">My Home &middot; Iconos &middot; Joule &middot; Situation Handling &middot; Analytics</span><span class="en">My Home &middot; Icons &middot; Joule &middot; Situation Handling &middot; Analytics</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Joule = icono &#9670; (Diamond). Graduation cap = simulations SAP Enable Now. Megaphone = What's New. My Home: 5 secciones. CDS views &rarr; VDM &rarr; Apps Fiori. Query Browser: ejecuta analytical queries.</p>
+    <p class="en">Joule = &#9670; (Diamond) icon. Graduation cap = SAP Enable Now simulations. Megaphone = What's New. My Home: 5 sections. CDS views &rarr; VDM &rarr; Fiori Apps. Query Browser: runs analytical queries.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#127968;</div><span class="es">My Home &mdash; 5 Secciones</span><span class="en">My Home &mdash; 5 Sections</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">To-Dos</span><span class="kv-v"><span class="es">Tareas de My Inbox + situaciones de Situation Handling que requieren atenci&oacute;n.</span><span class="en">My Inbox tasks + Situation Handling situations requiring attention.</span></span>
+        <span class="kv-k">Pages</span><span class="kv-v"><span class="es">News tile (configurable por admin, off por defecto) + Pages predefinidas del Business Role.</span><span class="en">News tile (configurable by admin, off by default) + Business Role predefined Pages.</span></span>
+        <span class="kv-k">Apps and Activities</span><span class="kv-v"><span class="es">Favoritos manuales + actividades recientes/frecuentes (generadas autom&aacute;ticamente).</span><span class="en">Manual favorites + recent/frequent activities (auto-generated).</span></span>
+        <span class="kv-k">Insights &mdash; Tiles</span><span class="kv-v"><span class="es">Tiles de monitoring del Business Role. El usuario puede a&ntilde;adir/eliminar/cambiar visualizaci&oacute;n.</span><span class="en">Business Role monitoring tiles. User can add/remove/change visualization.</span></span>
+        <span class="kv-k">Insights &mdash; Cards</span><span class="kv-v"><span class="es">Cards anal&iacute;ticas (analytical, list, table). A&ntilde;adidas manualmente por el usuario.</span><span class="en">Analytical cards (analytical, list, table). Added manually by the user.</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-purple">&#128161;</div><span class="es">Iconos Clave del Launchpad</span><span class="en">Key Launchpad Icons</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Icono</span><span class="en">Icon</span></th><th><span class="es">Funci&oacute;n</span><span class="en">Function</span></th></tr>
+        <tr><td>? <span class="es">(Interrogante)</span><span class="en">(Question mark)</span></td><td><span class="es">Ayuda contextual. Contiene: &#127891; <strong>Graduation cap</strong> (simulations SAP Enable Now) y &#128226; <strong>Megaphone</strong> (What's New tras upgrade).</span><span class="en">Contextual help. Contains: &#127891; <strong>Graduation cap</strong> (SAP Enable Now simulations) and &#128226; <strong>Megaphone</strong> (What's New after upgrade).</span></td></tr>
+        <tr><td>&#127911; <span class="es">(Auriculares)</span><span class="en">(Headphones)</span></td><td><span class="es">Soporte embebido. Canales de soporte SAP. Requiere SAP Universal ID.</span><span class="en">Embedded support. SAP support channels. Requires SAP Universal ID.</span></td></tr>
+        <tr><td>&#9670; <span class="es">(Diamond)</span><span class="en">(Diamond)</span></td><td><strong>Joule AI.</strong> <span class="es">Asistente generativo IA. Usa datos cross-portfolio. Requiere setup en SAP BTP. Reemplaza SAP Conversational AI.</span><span class="en">Generative AI assistant. Uses cross-portfolio data. Requires setup on SAP BTP. Replaces SAP Conversational AI.</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128202;</div><span class="es">Analytics Embebida &mdash; Arquitectura</span><span class="en">Embedded Analytics &mdash; Architecture</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Core Data Services (CDS)</span><span class="kv-v"><span class="es">Lenguaje universal para leer y procesar datos. Representa la capa de datos del VDM.</span><span class="en">Universal language to read and process data. Represents the VDM data layer.</span></span>
+        <span class="kv-k">Virtual Data Model (VDM)</span><span class="kv-v"><span class="es">Capa intermedia entre HANA DB y apps Fiori. Expone datos de negocio estructurados.</span><span class="en">Intermediate layer between HANA DB and Fiori apps. Exposes structured business data.</span></span>
+        <span class="kv-k">View Browser</span><span class="kv-v"><span class="es">Explorar y ejecutar CDS views disponibles (SAP + custom).</span><span class="en">Explore and run available CDS views (SAP + custom).</span></span>
+        <span class="kv-k">Custom CDS Views</span><span class="kv-v"><span class="es">Crear CDS views propias o copiar y personalizar las de SAP.</span><span class="en">Create custom CDS views or copy and customize SAP's.</span></span>
+        <span class="kv-k">Query Browser</span><span class="kv-v"><span class="es">Explorar y ejecutar analytical queries. Base para: Data Analyzer, Multidimensional Reports, Review Booklets, SAC Stories.</span><span class="en">Explore and run analytical queries. Base for: Data Analyzer, Multidimensional Reports, Review Booklets, SAC Stories.</span></span>
+        <span class="kv-k">Manage KPIs and Reports</span><span class="kv-v"><span class="es">Ver/crear KPIs y Reports (F2814). Desde S/4HANA 1909. <strong>NUNCA editar los SAP-delivered directamente &mdash; copiar primero.</strong></span><span class="en">View/create KPIs and Reports (F2814). Since S/4HANA 1909. <strong>NEVER edit SAP-delivered directly &mdash; copy first.</strong></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U9 ═══ -->
+<div class="view" id="u9">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u9">U9</span>
+    <div>
+      <h2><span class="es">Customizing Applications (Extensibilidad)</span><span class="en">Customizing Applications (Extensibility)</span></h2>
+      <p><span class="es">Tier 1/2/3 &middot; Key User Apps &middot; SAP Build &middot; Extensibility Explorer</span><span class="en">Tier 1/2/3 &middot; Key User Apps &middot; SAP Build &middot; Extensibility Explorer</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Tier 1 = upgrade-stable (Key User + ABAP Cloud). Tier 3 = puede bloquear upgrades. Custom Field: publicar = proceso as&iacute;ncrono ~30 min. Verificar soporte: SAP Fiori Apps Reference Library &rarr; App Extensibility. SAP Build incluido en RISE with SAP.</p>
+    <p class="en">Tier 1 = upgrade-stable (Key User + ABAP Cloud). Tier 3 = can block upgrades. Custom Field: publish = async process ~30 min. Verify support: SAP Fiori Apps Reference Library &rarr; App Extensibility. SAP Build included in RISE with SAP.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128260;</div><span class="es">Modelo de Extensibilidad &mdash; Tiers</span><span class="en">Extensibility Model &mdash; Tiers</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th>Tier</th><th><span class="es">Nombre</span><span class="en">Name</span></th><th><span class="es">D&oacute;nde</span><span class="en">Where</span></th><th>Upgrade-stable</th><th><span class="es">Herramientas</span><span class="en">Tools</span></th></tr>
+        <tr><td><strong style="color:var(--green)">Tier 1a</strong></td><td>Key User In-App</td><td>Client 100</td><td>&#10003;</td><td>Custom Fields, Custom Logic, Adapt UI...</td></tr>
+        <tr><td><strong style="color:var(--green)">Tier 1b</strong></td><td>Developer (ABAP Cloud)</td><td>Client 080</td><td>&#10003;</td><td>ABAP Cloud (solo objetos released, Eclipse)</td></tr>
+        <tr><td><strong style="color:var(--amber)">Tier 2</strong></td><td>Bridge (transitorio)</td><td>Client 080</td><td><span class="es">Parcial</span><span class="en">Partial</span></td><td><span class="es">Wrappers para objetos SAP no released. Reemplazar con Tier 1 cuando disponible.</span><span class="en">Wrappers for non-released SAP objects. Replace with Tier 1 when available.</span></td></tr>
+        <tr><td><strong style="color:var(--red)">Tier 3</strong></td><td>Classic ABAP</td><td>Client 080</td><td>&#10007;</td><td><span class="es">ABAP Workbench (SE80). Puede bloquear upgrades. <strong>EVITAR en c&oacute;digo nuevo.</strong></span><span class="en">ABAP Workbench (SE80). Can block upgrades. <strong>AVOID in new code.</strong></span></td></tr>
+        <tr><td><strong style="color:var(--blue)">Side-by-Side</strong></td><td>SAP BTP</td><td>SAP BTP</td><td>&#10003;</td><td>SAP Build (RISE incluido) &middot; SAP Business Application Studio (licencia extra)</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#128736;&#65039;</div><span class="es">Key User In-App Extensibility &mdash; Apps Fiori</span><span class="en">Key User In-App Extensibility &mdash; Fiori Apps</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-amber"><strong><span class="es">Verificar soporte antes de extender:</span><span class="en">Verify support before extending:</span></strong> <span class="es">SAP Fiori Apps Reference Library &rarr; App Documentation &rarr; secci&oacute;n "<strong>App Extensibility</strong>" en SAP Help Portal. Si no existe esa secci&oacute;n, la app <strong>NO</strong> soporta extensibilidad key user.</span><span class="en">SAP Fiori Apps Reference Library &rarr; App Documentation &rarr; "<strong>App Extensibility</strong>" section in SAP Help Portal. If this section doesn't exist, the app <strong>does NOT</strong> support key user extensibility.</span></div>
+      <div class="kv" style="margin-top:10px">
+        <span class="kv-k">Custom Fields</span><span class="kv-v"><span class="es">Campos custom reutilizables en UIs, reports, forms y APIs del mismo Business Context. Publicar = proceso as&iacute;ncrono (<strong>hasta 30 minutos</strong>).</span><span class="en">Custom fields reusable across UIs, reports, forms and APIs within the same Business Context. Publish = async process (<strong>up to 30 minutes</strong>).</span></span>
+        <span class="kv-k">Custom Logic</span><span class="kv-v"><span class="es">BAdIs released sin c&oacute;digo profundo. Editor de c&oacute;digo ABAP disponible. <strong>Solo BAdIs "released"</strong>.</span><span class="en">Released BAdIs without deep coding. ABAP code editor available. <strong>Released BAdIs only</strong>.</span></span>
+        <span class="kv-k">Adapt UI</span><span class="kv-v"><span class="es">Mover/combinar/eliminar campos en apps Fiori (Runtime Authoring). Exportable via transport.</span><span class="en">Move/merge/remove fields in Fiori apps (Runtime Authoring). Exportable via transport.</span></span>
+        <span class="kv-k">Custom Business Objects</span><span class="kv-v"><span class="es">Crear objetos de negocio propios con tabla de datos + app simplificada.</span><span class="en">Create custom business objects with a data table + simplified app.</span></span>
+        <span class="kv-k">Extensibility Inventory</span><span class="kv-v"><span class="es">Rastrear todas las extensiones: qui&eacute;n, cu&aacute;ndo, si est&aacute; exportada/importada.</span><span class="en">Track all extensions: who, when, if exported/imported.</span></span>
+      </div>
+      <div class="kv" style="margin-top:10px">
+        <span class="kv-k">SAP Build Apps</span><span class="kv-v"><span class="es">Low/no-code. <strong>Incluido en RISE with SAP</strong>. Side-by-side extensions.</span><span class="en">Low/no-code. <strong>Included in RISE with SAP</strong>. Side-by-side extensions.</span></span>
+        <span class="kv-k">SAP Extensibility Explorer</span><span class="kv-v">sap.com/extends4 &mdash; <span class="es">directorio de APIs y extensiones disponibles para SAP S/4HANA.</span><span class="en">directory of available APIs and extensions for SAP S/4HANA.</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U10 ═══ -->
+<div class="view" id="u10">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u10">U10</span>
+    <div>
+      <h2><span class="es">Setting Up Integrations</span><span class="en">Setting Up Integrations</span></h2>
+      <p>ISA-M &middot; CIAS &middot; SAP Integration Suite &middot; SAP Business Accelerator Hub</p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">ISA-M = metodolog&iacute;a para estrategia de integraci&oacute;n. CIAS: 3 tipos de tareas (Automated, Semi-automated, Manual). 2 accesos: Cloud ALM y SAP for Me &rarr; Maintenance Planner. SAP API Business Hub = ahora SAP Business Accelerator Hub.</p>
+    <p class="en">ISA-M = methodology for integration strategy. CIAS: 3 task types (Automated, Semi-automated, Manual). 2 access paths: Cloud ALM and SAP for Me &rarr; Maintenance Planner. SAP API Business Hub = now SAP Business Accelerator Hub.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128257;</div><span class="es">ISA-M y 4 Principios de Integraci&oacute;n SAP</span><span class="en">ISA-M &amp; 4 SAP Integration Principles</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <p class="es"><strong>Integration Solution Advisory Methodology (ISA-M):</strong> dise&ntilde;ada para ayudar a los clientes a definir, documentar y gobernar su estrategia de integraci&oacute;n. Cubre todos los estilos: Process, Data, UX, IoT, Analytics.</p>
+      <p class="en"><strong>Integration Solution Advisory Methodology (ISA-M):</strong> designed to help customers shape, document, and govern their integration strategy. Covers all flavors: Process, Data, UX, IoT, Analytics.</p>
+      <div class="two-col" style="margin-top:10px">
+        <div class="mini-card"><div class="mt">&#128230; Out-of-the-box</div><p><span class="es">CIAS + Signavio. Integraciones prebuilt SAP-to-SAP.</span><span class="en">CIAS + Signavio. Prebuilt SAP-to-SAP integrations.</span></p></div>
+        <div class="mini-card"><div class="mt">&#128275; Open</div><p><span class="es">APIs p&uacute;blicas en SAP Business Accelerator Hub (api.sap.com). Pol&iacute;tica de deprecaci&oacute;n SAP = estabilidad garantizada.</span><span class="en">Public APIs on SAP Business Accelerator Hub (api.sap.com). SAP deprecation policy = guaranteed stability.</span></p></div>
+        <div class="mini-card"><div class="mt">&#128221; Holistic</div><p>ISA-M. <span class="es">Metodolog&iacute;a integral de estrategia de integraci&oacute;n.</span><span class="en">Comprehensive integration strategy methodology.</span></p></div>
+        <div class="mini-card"><div class="mt">&#129302; AI-driven</div><p>SAP Integration Advisor. <span class="es">Generaci&oacute;n autom&aacute;tica de MIG y MAG con ML.</span><span class="en">Automatic MIG and MAG generation with ML.</span></p></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128279;</div>Cloud Integration Automation Service (CIAS)</div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k"><span class="es">Qu&eacute; hace</span><span class="en">What it does</span></span><span class="kv-v"><span class="es">Automatiza la activaci&oacute;n de integraciones SAP est&aacute;ndar mediante workflows guiados. Gratuito en SAP BTP.</span><span class="en">Automates activation of standard SAP integrations through guided workflows. Free in SAP BTP.</span></span>
+        <span class="kv-k">3 <span class="es">tipos de tareas</span><span class="en">task types</span></span><span class="kv-v"><strong>Automated</strong> (API autom&aacute;tica) &middot; <strong>Semi-automated</strong> (<span class="es">datos del cliente necesarios</span><span class="en">customer data needed</span>) &middot; <strong>Manual</strong> (<span class="es">instrucciones guiadas</span><span class="en">guided instructions</span>)</span>
+        <span class="kv-k">Acceso 1</span><span class="kv-v">SAP Cloud ALM &rarr; Implementation &rarr; Cloud Integration Automation Service app</span>
+        <span class="kv-k">Acceso 2</span><span class="kv-v">SAP for Me &rarr; Services &amp; Support &rarr; Application Lifecycle Management &rarr; Maintenance Planner &rarr; Plan for Cloud Integration Scenario</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-purple">&#128196;</div><span class="es">SAP Integration Suite &mdash; Componentes</span><span class="en">SAP Integration Suite &mdash; Components</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <ul class="lst">
+        <li><strong>Integration Assessment</strong> &amp; <strong>Migration Assessment</strong></li>
+        <li><strong>Cloud Integration</strong>: <span class="es">middleware, orquesta mensajes (Apache Camel).</span><span class="en">middleware, orchestrates messages (Apache Camel).</span></li>
+        <li><strong>Integration Advisor</strong>: <span class="es">MIG/MAG autom&aacute;ticos con ML.</span><span class="en">automatic MIG/MAG with ML.</span></li>
+        <li><strong>API Management</strong>: <span class="es">expone, protege y monetiza APIs.</span><span class="en">exposes, protects and monetizes APIs.</span></li>
+        <li><strong>Open Connectors</strong>: <span class="es">+170 conectores preconstruidos para sistemas terceros (Salesforce, ServiceNow...).</span><span class="en">+170 prebuilt connectors for third-party systems (Salesforce, ServiceNow...).</span></li>
+        <li><strong>SAP Event Mesh</strong> &middot; <strong>SAP Connectivity Service</strong> &middot; <strong>Trading Partner Management</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U11 ═══ -->
+<div class="view" id="u11">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u11">U11</span>
+    <div>
+      <h2><span class="es">Migrating Data</span><span class="en">Migrating Data</span></h2>
+      <p><span class="es">Migration Cockpit &middot; 3 M&eacute;todos &middot; Procedimiento Guiado &middot; Validaci&oacute;n</span><span class="en">Migration Cockpit &middot; 3 Methods &middot; Guided Procedure &middot; Validation</span></p></div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Paste Values Only (V) = cr&iacute;tico. 12 pasos del procedimiento guiado. Predecessor objects deben migrarse antes. Default 8 migration jobs paralelos. Extended Statistics captura source/target values. Close Project: definir data retention period.</p>
+    <p class="en">Paste Values Only (V) = critical. 12 steps in guided procedure. Predecessor objects must migrate first. Default 8 parallel migration jobs. Extended Statistics captures source/target values. Close Project: define data retention period.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128230;</div><span class="es">SAP S/4HANA Migration Cockpit &mdash; Visi&oacute;n General</span><span class="en">SAP S/4HANA Migration Cockpit &mdash; Overview</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-gold">
+        <strong><span class="es">Importante &mdash; Objetos predecesores y permisos:</span><span class="en">Important &mdash; Predecessor objects and permissions:</span></strong>
+        <span class="es"> Los migration objects visibles dependen de los business processes activos en el sistema. Verificar: (1) tienes el business role para la app de validaci&oacute;n. (2) los <strong>predecessor objects</strong> ya han sido migrados (ej: migrar Customer antes de Sales Order).</span>
+        <span class="en"> Visible migration objects depend on active business processes in the system. Verify: (1) you have the business role for the validation app. (2) <strong>predecessor objects</strong> are already migrated (e.g., migrate Customer before Sales Order).</span>
+      </div>
+      <table class="tbl-reg" style="margin-top:10px">
+        <tr><th><span class="es">M&eacute;todo</span><span class="en">Method</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Mejor para</span><span class="en">Best for</span></th></tr>
+        <tr><td>Local SAP S/4HANA DB Schema</td><td><span class="es">Template XML/CSV + Excel. M&aacute;x 100MB por archivo. El m&aacute;s usado.</span><span class="en">XML/CSV template + Excel. Max 100MB per file. Most common.</span></td><td><span class="es">Vol&uacute;menes moderados.</span><span class="en">Moderate volumes.</span></td></tr>
+        <tr><td>Remote SAP HANA DB Schema</td><td>SAP HANA Cloud <span class="es">como staging intermedio.</span><span class="en">as intermediate staging.</span></td><td><span class="es">Grandes vol&uacute;menes.</span><span class="en">Large volumes.</span></td></tr>
+        <tr><td>Direct from SAP System</td><td>RFC <span class="es">entre SAP ECC (origen) y S/4HANA Cloud PE (destino).</span><span class="en">between SAP ECC (source) and S/4HANA Cloud PE (target).</span></td><td><span class="es">Migraci&oacute;n desde SAP existente.</span><span class="en">Migration from existing SAP.</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#128203;</div><span class="es">Procedimiento Guiado &mdash; 12 Pasos</span><span class="en">Guided Procedure &mdash; 12 Steps</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-red"><strong>&#9888;&#65039; Paste Values Only (V):</strong> <span class="es">SIEMPRE al copiar datos en el template XML. Cualquier formato copiado corrompe el archivo y el Migration Cockpit rechazar&aacute; el upload.</span><span class="en">ALWAYS when pasting data into the XML template. Any copied formatting corrupts the file and the Migration Cockpit will reject the upload.</span></div>
+      <ol style="margin:10px 0 0 18px; font-size:12.5px; color:var(--text2); line-height:1.9">
+        <li><span class="es">Crear Migration Project &rarr; elegir approach.</span><span class="en">Create Migration Project &rarr; choose approach.</span></li>
+        <li><span class="es">Seleccionar Migration Object(s). Verificar app de validaci&oacute;n y rol.</span><span class="en">Select Migration Object(s). Verify validation app and role.</span></li>
+        <li><span class="es">Descargar template: XML (recomendado) o CSV.</span><span class="en">Download template: XML (recommended) or CSV.</span></li>
+        <li><span class="es">Rellenar datos en Excel. <strong>Paste Values Only (V).</strong></span><span class="en">Fill data in Excel. <strong>Paste Values Only (V).</strong></span></li>
+        <li><span class="es">Upload del template al Migration Cockpit.</span><span class="en">Upload template to Migration Cockpit.</span></li>
+        <li><span class="es">Preparar Staging Tables (Consistency Check ON &rarr; Prepare).</span><span class="en">Prepare Staging Tables (Consistency Check ON &rarr; Prepare).</span></li>
+        <li><span class="es">Mapping Tasks: Value Mapping + Fixed Value Tasks.</span><span class="en">Mapping Tasks: Value Mapping + Fixed Value Tasks.</span></li>
+        <li><span class="es">(Opcional) Simular la migraci&oacute;n.</span><span class="en">(Optional) Simulate the migration.</span></li>
+        <li><span class="es">(Opcional) Crear correction file si hay errores.</span><span class="en">(Optional) Create correction file if there are errors.</span></li>
+        <li><span class="es">Migrar los datos &rarr; Monitoring.</span><span class="en">Migrate the data &rarr; Monitoring.</span></li>
+        <li><span class="es">Validar en la app correspondiente (SAP Help: Post-Processing section).</span><span class="en">Validate in the corresponding app (SAP Help: Post-Processing section).</span></li>
+        <li><span class="es">Cerrar el proyecto &rarr; definir <strong>data retention period</strong>.</span><span class="en">Close the project &rarr; define <strong>data retention period</strong>.</span></li>
+      </ol>
+      <div class="kv" style="margin-top:12px">
+        <span class="kv-k">Extended Statistics</span><span class="kv-v"><span class="es">Captura source values, target values y target IDs. Activado por defecto. &Uacute;til para auditor&iacute;a.</span><span class="en">Captures source values, target values, and target IDs. Enabled by default. Useful for audit.</span></span>
+        <span class="kv-k">Data Migration Status</span><span class="kv-v"><span class="es">Resumen estado de todos los migration objects. Integrado con Situation Handling (notificaci&oacute;n al completar).</span><span class="en">Status summary of all migration objects. Integrated with Situation Handling (notification on completion).</span></span>
+        <span class="kv-k">Max. jobs paralelos</span><span class="kv-v"><span class="es">8 por defecto.</span><span class="en">8 by default.</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ U12 ═══ -->
+<div class="view" id="u12">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u12">U12</span>
+    <div>
+      <h2><span class="es">Testing Configured Business Processes</span><span class="en">Testing Configured Business Processes</span></h2>
+      <p><span class="es">Estrategia de Testing &middot; Cloud ALM Test Management &middot; Tricentis</span><span class="en">Testing Strategy &middot; Cloud ALM Test Management &middot; Tricentis</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">UAT = mandatory antes de Deploy. Mismos Customer LoB Experts de los workshops. Tricentis incluido en Enterprise Support SAP. Tests formales se documentan en Cloud ALM. Unit/String tests = informales. Configurar Tricentis durante Realize phase.</p>
+    <p class="en">UAT = mandatory before Deploy. Same Customer LoB Experts from workshops. Tricentis included in SAP Enterprise Support. Formal tests documented in Cloud ALM. Unit/String tests = informal. Configure Tricentis during Realize phase.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128203;</div><span class="es">Tipos de Test y Estrategia</span><span class="en">Test Types &amp; Strategy</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Tipo</span><span class="en">Type</span></th><th><span class="es">Fase</span><span class="en">Phase</span></th><th><span class="es">Responsable</span><span class="en">Responsible</span></th><th>Formal</th></tr>
+        <tr><td>Unit / String Test</td><td>Realize</td><td>Partner LoB Experts</td><td><span class="es">No (informal)</span><span class="en">No (informal)</span></td></tr>
+        <tr><td>Business Process Test (E2E)</td><td>Realize</td><td>Partner LoB Experts</td><td>&#10003;</td></tr>
+        <tr><td>Integration Test</td><td>Realize</td><td>Partner LoB Experts</td><td>&#10003;</td></tr>
+        <tr><td>Data Migration Test</td><td>Realize</td><td>Partner LoB Experts</td><td>&#10003;</td></tr>
+        <tr><td><strong>User Acceptance Test (UAT)</strong></td><td>Realize</td><td><strong><span class="es">Customer LoB Experts</span><span class="en">Customer LoB Experts</span></strong></td><td><strong>&#10003; <span class="es">Mandatory</span><span class="en">Mandatory</span></strong></td></tr>
+        <tr><td>Regression Test</td><td>Run (post go-live)</td><td><span class="es">Cliente</span><span class="en">Customer</span></td><td>&#10003;</td></tr>
+      </table>
+      <div class="alert alert-gold" style="margin-top:10px"><strong>UAT:</strong> <span class="es">mandatory antes de pasar a Deploy phase. Los <strong>mismos Customer LoB Experts</strong> que participaron en los Fit-to-Standard workshops deben ejecutarlo. Deben existir como usuarios en Cloud ALM.</span><span class="en">mandatory before moving to Deploy phase. The <strong>same Customer LoB Experts</strong> who participated in Fit-to-Standard workshops must execute it. They must exist as users in Cloud ALM.</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#129302;</div>Tricentis Test Automation for SAP</div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k"><span class="es">Incluido en</span><span class="en">Included in</span></span><span class="kv-v">SAP Enterprise Support. <span class="es">Sin coste adicional.</span><span class="en">No additional cost.</span></span>
+        <span class="kv-k"><span class="es">Capacidades</span><span class="en">Capabilities</span></span><span class="kv-v"><span class="es">Test automation de SAP UIs y APIs (cloud + on-premise). Test recorder para usuarios no t&eacute;cnicos. Robusto ante cambios de UI.</span><span class="en">Test automation for SAP UIs and APIs (cloud + on-premise). Test recorder for non-technical users. Robust to UI changes.</span></span>
+        <span class="kv-k">Setup</span><span class="kv-v">Cloud ALM &rarr; Administration &rarr; <em>Set Up Tricentis Test Automation for SAP</em></span>
+        <span class="kv-k"><span class="es">Mejor pr&aacute;ctica</span><span class="en">Best practice</span></span><span class="kv-v"><span class="es">Configurar tests automatizados <strong>durante la fase Realize</strong>, no despu&eacute;s del go-live. As&iacute; estar&aacute;n listos para el primer release upgrade.</span><span class="en">Configure automated tests <strong>during the Realize phase</strong>, not after go-live. This way they'll be ready for the first release upgrade.</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ EJERCICIOS ═══ -->
+<div class="view" id="ex">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--green)">EJ</span>
+    <div>
+      <h2><span class="es">5 Ejercicios + Soluciones</span><span class="en">5 Exercises + Solutions</span></h2>
+      <p><span class="es">Sistema T41 &middot; ## = n&uacute;mero de usuario asignado &middot; Acceso via WTS (Windows Terminal Server)</span><span class="en">System T41 &middot; ## = assigned user number &middot; Access via WTS (Windows Terminal Server)</span></p>
+    </div>
+  </div>
+
+  <!-- EJ1 -->
+  <div class="ex-card open">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ1</span>
+      <div class="ex-title">
+        <div>Access, Explore, and Personalize the SAP Fiori Launchpad</div>
+        <div class="ex-sub"><span class="es">Unidad 5 &middot; SAP GUI + Fiori Launchpad &middot; ~45 min</span><span class="en">Unit 5 &middot; SAP GUI + Fiori Launchpad &middot; ~45 min</span></div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="alert alert-blue"><strong><span class="es">Objetivo:</span><span class="en">Objective:</span></strong> <span class="es">Crear un nuevo usuario, asignarle roles y personalizar el SAP Fiori Launchpad (My Home, secciones, tiles).</span><span class="en">Create a new user, assign roles, and personalize the SAP Fiori Launchpad (My Home, sections, tiles).</span></div>
+
+      <div class="sec-title">Task 1 &mdash; <span class="es">Crear usuario S4C_USER_##</span><span class="en">Create user S4C_USER_##</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>SAP Logon &rarr; T41</strong> &rarr; login <span class="es">con credenciales proporcionadas.</span><span class="en">with provided credentials.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Command field &rarr; SU01 &rarr; Enter</span><span class="es">User field: <strong>S4C_USER_##</strong> &rarr; Create User button.</span><span class="en">User field: <strong>S4C_USER_##</strong> &rarr; Create User button.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Tab Address: Last Name y First Name (cualquier valor). Tab Logon Data: New Password = <strong>Welcome123</strong>.</span><span class="en">Address tab: Last Name and First Name (any value). Logon Data tab: New Password = <strong>Welcome123</strong>.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Tab Roles &rarr; a&ntilde;adir: </span><span class="en">Roles tab &rarr; add: </span><strong>Z_FIORI_FOUNDATION_USER &middot; Z_BR_S4C03_USER_ROLE &middot; Z_S4C02</strong></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Save &rarr; Abrir Fiori Launchpad &rarr; login con S4C_USER_## / Welcome123 &rarr; cambiar password a <strong>Training##</strong> &rarr; verificar acceso al space S4C03 Apps &rarr; Sign Out. <strong>Usar el usuario original para los dem&aacute;s ejercicios.</strong></span><span class="en">Save &rarr; Open Fiori Launchpad &rarr; login with S4C_USER_## / Welcome123 &rarr; change password to <strong>Training##</strong> &rarr; verify access to S4C03 Apps space &rarr; Sign Out. <strong>Use the original user for remaining exercises.</strong></span></div></div>
+
+      <div class="sec-title">Task 2 &mdash; <span class="es">Personalizar My Home</span><span class="en">Personalize My Home</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Abrir Fiori Launchpad con usuario original. Cerrar Quick Tour.</span><span class="en">Open Fiori Launchpad with original user. Close Quick Tour.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>User Action Menu &rarr; Edit Current Page &rarr; +Add Section &rarr; "My Favorites"</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">+Add Section &rarr; "Custom Logic Apps" &rarr; drag header &rarr; mover ARRIBA de "My Favorites" &rarr; Delete Section "Custom Logic Apps".</span><span class="en">+Add Section &rarr; "Custom Logic Apps" &rarr; drag header &rarr; move ABOVE "My Favorites" &rarr; Delete Section "Custom Logic Apps".</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Add Tile en My Apps &rarr; cat&aacute;logo "Analytics - Query Browser" &rarr; + en <strong>Query Browser</strong>. Add Tile &rarr; "Analytics - Query Design" &rarr; + en <strong>View Browser</strong>.</span><span class="en">Add Tile in My Apps &rarr; catalog "Analytics - Query Browser" &rarr; + on <strong>Query Browser</strong>. Add Tile &rarr; "Analytics - Query Design" &rarr; + on <strong>View Browser</strong>.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Tile Actions (...) en Query Browser &rarr; <strong>Convert to Link</strong>. Tile Actions en View Browser &rarr; cambiar tama&ntilde;o.</span><span class="en">Tile Actions (...) on Query Browser &rarr; <strong>Convert to Link</strong>. Tile Actions on View Browser &rarr; change size.</span></div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-body"><span class="es">Space S4C03 Apps &rarr; Edit &rarr; X en tile del Exercises section &rarr; Close &rarr; verificar desaparici&oacute;n. Edit &rarr; <strong>Reset Section</strong> (Exercises) &rarr; Close. Tile reaparece.</span><span class="en">S4C03 Apps space &rarr; Edit &rarr; X on tile in Exercises section &rarr; Close &rarr; verify disappearance. Edit &rarr; <strong>Reset Section</strong> (Exercises) &rarr; Close. Tile reappears.</span></div></div>
+      <div class="alert alert-amber" style="margin-top:10px"><strong>&#9888;&#65039;</strong> <span class="es">Solo las secciones creadas por el usuario pueden eliminarse. Las secciones admin-defined se pueden resetear pero NO eliminar.</span><span class="en">Only user-created sections can be deleted. Admin-defined sections can be reset but NOT deleted.</span></div>
+    </div>
+  </div>
+
+  <!-- EJ2 -->
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ2</span>
+      <div class="ex-title">
+        <div>Define an Organizational Structure Entity</div>
+        <div class="ex-sub"><span class="es">Unidad 4/5 &middot; SAP GUI IMG &middot; ~15 min</span><span class="en">Unit 4/5 &middot; SAP GUI IMG &middot; ~15 min</span></div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="alert alert-blue"><strong><span class="es">Objetivo:</span><span class="en">Objective:</span></strong> <span class="es">Crear una nueva empresa en la estructura organizativa usando el SAP GUI IMG.</span><span class="en">Create a new company in the organizational structure using SAP GUI IMG.</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body">SAP Logon &rarr; T41 &rarr; <span class="step-path">Command field &rarr; SPRO &rarr; Enter &rarr; SAP Reference IMG button</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Enterprise Structure &rarr; Definition &rarr; Financial Accounting &rarr; Define company</span><span class="es"> (icono de actividad IMG a la izquierda del texto).</span><span class="en"> (IMG activity icon to the left of the text).</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">New Entries &rarr; rellenar:</span><span class="en">New Entries &rarr; fill in:</span></div></div>
+      <table class="tbl-reg" style="margin:8px 0 8px 32px; width:calc(100% - 32px)">
+        <tr><td>Company</td><td><strong>S4C-##</strong></td></tr>
+        <tr><td>Company Name</td><td>Test Company S4C-##</td></tr>
+        <tr><td>Street</td><td>3999 West Chester Pike</td></tr>
+        <tr><td>Postal Code</td><td>19073</td></tr>
+        <tr><td>City</td><td>Newtown Square</td></tr>
+        <tr><td>Country</td><td>US</td></tr>
+        <tr><td>Language Key</td><td>EN</td></tr>
+        <tr><td>Currency</td><td>USD</td></tr>
+      </table>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Save. Si aparece di&aacute;logo de Customizing Request: <strong>Create Request (F8)</strong> &rarr; Short Description: <strong>System Exercise_##</strong> &rarr; Save &rarr; Continue.</span><span class="en">Save. If Customizing Request dialog appears: <strong>Create Request (F8)</strong> &rarr; Short Description: <strong>System Exercise_##</strong> &rarr; Save &rarr; Continue.</span></div></div>
+    </div>
+  </div>
+
+  <!-- EJ3 -->
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ3</span>
+      <div class="ex-title">
+        <div>Access the Cloud Integration Automation Service (CIAS)</div>
+        <div class="ex-sub"><span class="es">Unidad 10 &middot; SAP Activate Roadmap Viewer &middot; Acceso an&oacute;nimo (propio PC) &middot; ~10 min</span><span class="en">Unit 10 &middot; SAP Activate Roadmap Viewer &middot; Anonymous access (own PC) &middot; ~10 min</span></div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">go.support.sap.com/roadmapviewer/</span> &mdash; <span class="es">no requiere WTS.</span><span class="en">no WTS required.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Seleccionar: <strong>SAP Activate Methodology for RISE with SAP S/4HANA Cloud Private Edition</strong>.</span><span class="en">Select: <strong>SAP Activate Methodology for RISE with SAP S/4HANA Cloud Private Edition</strong>.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Tab <strong>Content</strong> &rarr; marcar checkbox <strong>Prepare</strong> &rarr; expandir: <em>Initial System Access for SAP Business Technology Platform</em>.</span><span class="en"><strong>Content</strong> tab &rarr; check <strong>Prepare</strong> checkbox &rarr; expand: <em>Initial System Access for SAP Business Technology Platform</em>.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Abrir task: <strong>Subscribe to Cloud Integration Automation Services within SAP BTP</strong> &rarr; revisar requisitos t&eacute;cnicos &rarr; cerrar.</span><span class="en">Open task: <strong>Subscribe to Cloud Integration Automation Services within SAP BTP</strong> &rarr; review technical requirements &rarr; close.</span></div></div>
+    </div>
+  </div>
+
+  <!-- EJ4 -->
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ4</span>
+      <div class="ex-title">
+        <div>Adding a Custom Field</div>
+        <div class="ex-sub"><span class="es">Unidad 9 &middot; App Fiori: Custom Fields &middot; ~15 min</span><span class="en">Unit 9 &middot; Fiori App: Custom Fields &middot; ~15 min</span></div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Fiori Launchpad &rarr; Space S4C03 Apps &rarr; app <strong>Custom Fields</strong> (Exercises section) &rarr; bot&oacute;n <strong>+</strong>.</span><span class="en">Fiori Launchpad &rarr; S4C03 Apps space &rarr; <strong>Custom Fields</strong> app (Exercises section) &rarr; <strong>+</strong> button.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Business Context: buscar "Bank" &rarr; seleccionar <strong>Bank Account Master Data</strong>.</span><span class="en">Business Context: search "Bank" &rarr; select <strong>Bank Account Master Data</strong>.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Label: <strong>Custom Field S4C-##</strong> &middot; Identifier: CustomFieldS4C## (auto) &middot; Type: <strong>Text</strong> &middot; Length: <strong>20</strong> &rarr; Create and Edit.</span><span class="en">Label: <strong>Custom Field S4C-##</strong> &middot; Identifier: CustomFieldS4C## (auto) &middot; Type: <strong>Text</strong> &middot; Length: <strong>20</strong> &rarr; Create and Edit.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Tab <strong>User Interfaces</strong> &rarr; Enable Usage para: <strong>C_BANKACCOUNTTP</strong> y <strong>FCLM_BAM_ACCOUNTWD_SRV</strong>.</span><span class="en"><strong>User Interfaces</strong> tab &rarr; Enable Usage for: <strong>C_BANKACCOUNTTP</strong> and <strong>FCLM_BAM_ACCOUNTWD_SRV</strong>.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Para <strong>C_BankAccountTPType</strong>: blue arrow &rarr; detail view &rarr; <strong>Search Relevance</strong> toggle ON &rarr; Back.</span><span class="en">For <strong>C_BankAccountTPType</strong>: blue arrow &rarr; detail view &rarr; <strong>Search Relevance</strong> toggle ON &rarr; Back.</span></div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-body"><strong>Save &rarr; Publish</strong> &mdash; <span class="es">proceso as&iacute;ncrono, puede tardar <strong>hasta 30 minutos</strong>.</span><span class="en">async process, may take <strong>up to 30 minutes</strong>.</span></div></div>
+    </div>
+  </div>
+
+  <!-- EJ5 -->
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ5</span>
+      <div class="ex-title">
+        <div>Migrate Legacy Data &mdash; Bank Master Data</div>
+        <div class="ex-sub"><span class="es">Unidad 11 &middot; App Fiori: Migrate Your Data &middot; ~40 min</span><span class="en">Unit 11 &middot; Fiori App: Migrate Your Data &middot; ~40 min</span></div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="sec-title">Task 1 &mdash; <span class="es">App de validaci&oacute;n</span><span class="en">Validation app</span></div>
+      <p style="font-size:12px; color:var(--text2); margin-top:6px"><span class="es">SAP Help Portal &rarr; Available Migration Objects &rarr; <strong>Bank</strong> (Staging Table) &rarr; Post-Processing: SAP GUI <strong>FI03</strong> (Display Bank) &middot; Fiori: <strong>Manage Banks</strong>.</span><span class="en">SAP Help Portal &rarr; Available Migration Objects &rarr; <strong>Bank</strong> (Staging Table) &rarr; Post-Processing: SAP GUI <strong>FI03</strong> (Display Bank) &middot; Fiori: <strong>Manage Banks</strong>.</span></p>
+
+      <div class="sec-title">Task 2 &mdash; <span class="es">Crear Migration Project</span><span class="en">Create Migration Project</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">App <strong>Migrate Your Data</strong> &rarr; Create &rarr; <strong>Migrate Data Using Staging Tables</strong>.</span><span class="en"><strong>Migrate Your Data</strong> app &rarr; Create &rarr; <strong>Migrate Data Using Staging Tables</strong>.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Name: <strong>Migrate Bank Data ##</strong> &middot; DB Connection: <strong>Local SAP S/4HANA Database Schema</strong> &middot; Step 2: Local Package &middot; Step 3.</span><span class="en">Name: <strong>Migrate Bank Data ##</strong> &middot; DB Connection: <strong>Local SAP S/4HANA Database Schema</strong> &middot; Step 2: Local Package &middot; Step 3.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Checkbox <strong>Bank</strong> &rarr; bot&oacute;n &gt; &rarr; Review &rarr; <strong>Create Project</strong>.</span><span class="en">Checkbox <strong>Bank</strong> &rarr; button &gt; &rarr; Review &rarr; <strong>Create Project</strong>.</span></div></div>
+
+      <div class="sec-title">Task 3-4 &mdash; <span class="es">Template y datos</span><span class="en">Template and data</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Checkbox Bank &rarr; <strong>Download Template &rarr; Download XML File</strong> &rarr; guardar en Downloads.</span><span class="en">Bank checkbox &rarr; <strong>Download Template &rarr; Download XML File</strong> &rarr; save to Downloads.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Abrir en Excel &rarr; tab <strong>Field List</strong> (referencia) &rarr; tab <strong>Bank Master</strong> &rarr; rellenar datos (<strong>Paste Values Only (V)</strong>):</span><span class="en">Open in Excel &rarr; <strong>Field List</strong> tab (reference) &rarr; <strong>Bank Master</strong> tab &rarr; fill data (<strong>Paste Values Only (V)</strong>):</span></div></div>
+      <table class="tbl-reg" style="margin:8px 0 8px 32px; width:calc(100% - 32px)">
+        <tr><th>Bank Country</th><th>Bank Key</th><th>Name of Bank</th><th>Street</th><th>City</th></tr>
+        <tr><td>CN</td><td><strong>9601##</strong></td><td>ICBC, China</td><td>ChenHui RD, 1001</td><td>Shanghai</td></tr>
+        <tr><td>CN</td><td><strong>9602##</strong></td><td>ICBC, China</td><td>Main RD, 3002</td><td>Shanghai</td></tr>
+        <tr><td>CN</td><td><strong>9603##</strong></td><td>ICBC, China</td><td>PuDong RD, 1003</td><td>Shanghai</td></tr>
+      </table>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">File &rarr; Save As &rarr; <strong>Source Data for Bank_##.xml</strong> &rarr; YES (mantener formato XML).</span><span class="en">File &rarr; Save As &rarr; <strong>Source Data for Bank_##.xml</strong> &rarr; YES (keep XML format).</span></div></div>
+
+      <div class="sec-title">Task 5 &mdash; <span class="es">Upload y Migraci&oacute;n</span><span class="en">Upload &amp; Migration</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Upload File &rarr; Upload &rarr; </strong><span class="es">buscar archivo &rarr; Open.</span><span class="en">find file &rarr; Open.</span> <span class="es">Status: "Data Successfully Transferred to Staging Tables".</span><span class="en">Status: "Data Successfully Transferred to Staging Tables".</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Prepare</strong> &rarr; Consistency Check <strong>ON</strong> &rarr; Prepare Staging Tables &rarr; Monitoring.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Mapping Tasks</strong> &rarr; <em>Mapping of Country/Region Key</em>: checkbox &rarr; Confirm. <em>Mapping of Bank Key</em>: seleccionar todos &rarr; Confirm.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Simulate</strong> &rarr; All Instances &rarr; Start Simulation &rarr; Monitoring.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><strong>Migrate</strong> &rarr; All Instances &rarr; Start Migration &rarr; OK &rarr; Monitoring &rarr; <span class="es">confirmaci&oacute;n de &eacute;xito.</span><span class="en">success confirmation.</span></div></div>
+
+      <div class="sec-title">Task 6 &mdash; <span class="es">Validar en Manage Banks</span><span class="en">Validate in Manage Banks</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">SAP Logo &rarr; buscar app <strong>Manage Banks</strong> &rarr; Filtro Bank Country/Region: <strong>CN</strong> &rarr; OK &rarr; <strong>Go</strong>.</span><span class="en">SAP Logo &rarr; search app <strong>Manage Banks</strong> &rarr; Bank Country/Region filter: <strong>CN</strong> &rarr; OK &rarr; <strong>Go</strong>.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Verificar que aparecen los <strong>3 registros</strong> (9601##, 9602##, 9603##).</span><span class="en">Verify that <strong>3 records</strong> appear (9601##, 9602##, 9603##).</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ QUICK REF ═══ -->
+<div class="view" id="qr">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--purple)">QR</span>
+    <div><h2>Quick Reference &mdash; S4C03</h2><p><span class="es">Transacciones, apps Fiori y recursos externos</span><span class="en">Transactions, Fiori apps, and external resources</span></p></div>
+  </div>
+
+  <div class="sec-title"><span class="es">Transacciones SAP GUI</span><span class="en">SAP GUI Transactions</span></div>
+  <table id="qr">
+    <tr><th><span class="es">Transacci&oacute;n</span><span class="en">Transaction</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th>&Aacute;rea</th></tr>
+    <tr><td>SU01</td><td><span class="es">User Maintenance: crear/modificar usuarios. Campos m&iacute;nimos: Last Name + Password.</span><span class="en">User Maintenance: create/modify users. Minimum fields: Last Name + Password.</span></td><td>Users</td></tr>
+    <tr><td>PFCG</td><td><span class="es">Role Maintenance: crear roles, asignar catalogs (Menu &rarr; Insert Node &rarr; SAP Fiori LP) y Spaces.</span><span class="en">Role Maintenance: create roles, assign catalogs (Menu &rarr; Insert Node &rarr; SAP Fiori LP) and Spaces.</span></td><td>Auth</td></tr>
+    <tr><td>SPRO</td><td><span class="es">SAP Reference IMG: acceso a toda la customizaci&oacute;n de implementaci&oacute;n.</span><span class="en">SAP Reference IMG: access to all implementation customization.</span></td><td>Config</td></tr>
+    <tr><td>SE09</td><td><span class="es">Transport Organizer: release de transport requests desde Development.</span><span class="en">Transport Organizer: release transport requests from Development.</span></td><td>Transport</td></tr>
+    <tr><td>/UI2/FLPAM</td><td><span class="es">Launchpad App Manager: Technical Catalogs. Reemplaz&oacute; Mass Maintenance (S/4HANA 2020).</span><span class="en">Launchpad App Manager: Technical Catalogs. Replaced Mass Maintenance (S/4HANA 2020).</span></td><td>Fiori Admin</td></tr>
+    <tr><td>/UI2/FLPCM_CONF</td><td><span class="es">Launchpad Content Manager (cross client / configuration scope).</span><span class="en">Launchpad Content Manager (cross client / configuration scope).</span></td><td>Fiori Admin</td></tr>
+    <tr><td>/UI2/FLPCM_CUST</td><td><span class="es">Launchpad Content Manager (client-specific / customizing scope). Business Catalogs.</span><span class="en">Launchpad Content Manager (client-specific / customizing scope). Business Catalogs.</span></td><td>Fiori Admin</td></tr>
+    <tr><td>/UI2/FLPD_CONF</td><td><span class="es">Launchpad Designer (cross client). <strong>No deprecated</strong> &mdash; superseded para uso general.</span><span class="en">Launchpad Designer (cross client). <strong>Not deprecated</strong> &mdash; superseded for general use.</span></td><td>Fiori Admin</td></tr>
+    <tr><td>/UI2/FLPD_CUST</td><td><span class="es">Launchpad Designer (client-specific). Superseded pero disponible para casos espec&iacute;ficos.</span><span class="en">Launchpad Designer (client-specific). Superseded but available for specific cases.</span></td><td>Fiori Admin</td></tr>
+    <tr><td>/n/SMB/BBI</td><td><span class="es">SAP Best Practices Solution Builder: activar Best Practices en new implementations.</span><span class="en">SAP Best Practices Solution Builder: activate Best Practices in new implementations.</span></td><td>Impl</td></tr>
+    <tr><td>FI03</td><td><span class="es">Display Bank: validar datos de bancos migrados.</span><span class="en">Display Bank: validate migrated bank data.</span></td><td>FI</td></tr>
+  </table>
+
+  <div class="sec-title"><span class="es">Apps Fiori Clave</span><span class="en">Key Fiori Apps</span></div>
+  <table id="qr">
+    <tr><th><span class="es">App</span><span class="en">App</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th></tr>
+    <tr><td>Migrate Your Data</td><td><span class="es">SAP S/4HANA Migration Cockpit. Crear proyectos y migrar datos maestros.</span><span class="en">SAP S/4HANA Migration Cockpit. Create projects and migrate master data.</span></td></tr>
+    <tr><td>Manage Banks</td><td><span class="es">Validar datos de bancos migrados. Filtro: Bank Country/Region.</span><span class="en">Validate migrated bank data. Filter: Bank Country/Region.</span></td></tr>
+    <tr><td>Custom Fields</td><td><span class="es">Crear campos custom para UIs, reports, forms y APIs del mismo Business Context.</span><span class="en">Create custom fields for UIs, reports, forms, and APIs within the same Business Context.</span></td></tr>
+    <tr><td>Custom Logic</td><td><span class="es">Implementar BAdIs released sin c&oacute;digo profundo.</span><span class="en">Implement released BAdIs without deep coding.</span></td></tr>
+    <tr><td>Extensibility Inventory</td><td><span class="es">Rastrear todas las extensiones key user del sistema.</span><span class="en">Track all key user extensions in the system.</span></td></tr>
+    <tr><td>Manage Launchpad Spaces (F4834)</td><td><span class="es">Crear y gestionar Spaces para el Fiori Launchpad.</span><span class="en">Create and manage Spaces for the Fiori Launchpad.</span></td></tr>
+    <tr><td>Manage Launchpad Pages (F4512)</td><td><span class="es">Crear y gestionar Pages y secciones de tiles.</span><span class="en">Create and manage Pages and tile sections.</span></td></tr>
+    <tr><td>View Browser</td><td><span class="es">Explorar y ejecutar CDS views disponibles.</span><span class="en">Explore and run available CDS views.</span></td></tr>
+    <tr><td>Query Browser</td><td><span class="es">Explorar y ejecutar analytical queries.</span><span class="en">Explore and run analytical queries.</span></td></tr>
+    <tr><td>Manage KPIs and Reports (F2814)</td><td><span class="es">Ver/crear KPIs y Reports. Desde S/4HANA 1909.</span><span class="en">View/create KPIs and Reports. Since S/4HANA 1909.</span></td></tr>
+    <tr><td>Data Migration Status</td><td><span class="es">Resumen estado de todos los migration objects activos.</span><span class="en">Status summary of all active migration objects.</span></td></tr>
+  </table>
+
+  <div class="sec-title"><span class="es">Rutas IMG Clave</span><span class="en">Key IMG Paths</span></div>
+  <table id="qr">
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Ruta en IMG</span><span class="en">IMG Path</span></th></tr>
+    <tr><td><span class="es">Definir empresa</span><span class="en">Define company</span></td><td><span class="step-path" style="display:inline-block">Enterprise Structure &rarr; Definition &rarr; Financial Accounting &rarr; Define company</span></td></tr>
+    <tr><td><span class="es">Activar OData Services</span><span class="en">Activate OData Services</span></td><td><span class="step-path" style="display:inline-block">SAP NetWeaver &rarr; UI Technologies &rarr; SAP Fiori</span></td></tr>
+    <tr><td><span class="es">Activar Best Practices</span><span class="en">Activate Best Practices</span></td><td><span class="step-path" style="display:inline-block">/n/SMB/BBI (direct transaction)</span></td></tr>
+  </table>
+
+  <div class="sec-title"><span class="es">Recursos Externos</span><span class="en">External Resources</span></div>
+  <table id="qr">
+    <tr><th><span class="es">Recurso</span><span class="en">Resource</span></th><th>URL</th></tr>
+    <tr><td>SAP Activate Roadmap Viewer</td><td>go.support.sap.com/roadmapviewer/</td></tr>
+    <tr><td>SAP Signavio Process Navigator</td><td>me.sap.com/processnavigator/</td></tr>
+    <tr><td>SAP Fiori Apps Reference Library</td><td>fioriappslibrary.hana.ondemand.com</td></tr>
+    <tr><td>SAP Cloud Appliance Library</td><td>cal.sap.com</td></tr>
+    <tr><td>SAP for Me</td><td>me.sap.com</td></tr>
+    <tr><td>SAP Business Accelerator Hub</td><td>api.sap.com</td></tr>
+    <tr><td>SAP Road Map Explorer</td><td>roadmaps.sap.com</td></tr>
+    <tr><td>SAP Discovery Center</td><td>discovery-center.cloud.sap</td></tr>
+    <tr><td>Customer Onboarding Resource Center</td><td>support.sap.com/en/product/onboarding-resource-center/rise/rise-private.html</td></tr>
+    <tr><td>Available Migration Objects</td><td>tinyurl.com/migration-objects-CL</td></tr>
+    <tr><td>SAP Extensibility Explorer</td><td>sap.com/extends4</td></tr>
+    <tr><td>ISA-M</td><td>sap.com/services-support/integration-solution-advisory-methodology.html</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ CADENAS ═══ -->
+<div class="view" id="cad">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--amber)">&#9881;</span>
+    <div><h2><span class="es">Cadenas de Implementaci&oacute;n</span><span class="en">Implementation Chains</span></h2><p><span class="es">Orden correcto y errores si falta un paso</span><span class="en">Correct order and errors if a step is missing</span></p></div>
+  </div>
+
+  <!-- CADENA 1 -->
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title">
+        <div class="chain-badge">1</div>
+        <div>
+          <div><span class="es">Setup completo de acceso usuario Fiori</span><span class="en">Complete Fiori user access setup</span></div>
+          <div class="chain-trigger">&#9654; <span class="es">Proceso final: usuario accede al Launchpad con sus apps visibles.</span><span class="en">Final process: user accesses Launchpad with their apps visible.</span></div>
+        </div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">CADENA &mdash; en este orden:</span><span class="en">CHAIN &mdash; in this order:</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Activar SAP Cloud Identity Services (IAS)</span><span class="en">Activate SAP Cloud Identity Services (IAS)</span></div><div class="chain-path">SAP for Me &rarr; Systems &amp; Provisioning</div><div class="chain-why"><span class="es">IAS debe estar activo PRIMERO. Sin IAS no se pueden crear usuarios en Cloud ALM.</span><span class="en">IAS must be active FIRST. Without IAS, users cannot be created in Cloud ALM.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Activar SAP Cloud ALM</span><span class="en">Activate SAP Cloud ALM</span></div><div class="chain-path">SAP for Me &rarr; Systems &amp; Provisioning &rarr; Cloud ALM</div><div class="chain-why"><span class="es">IT Contact provisiona manualmente. El Embedded Launch Expert lo configura.</span><span class="en">IT Contact provisions manually. Embedded Launch Expert configures it.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Crear usuario en SAP S/4HANA (SU01)</span><span class="en">Create user in SAP S/4HANA (SU01)</span></div><div class="chain-path">Command field &rarr; SU01</div><div class="chain-why"><span class="es">Campos m&iacute;nimos: Last Name + Password.</span><span class="en">Minimum fields: Last Name + Password.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Business Role (PFCG) con Business Catalog</span><span class="en">Create Business Role (PFCG) with Business Catalog</span></div><div class="chain-path">PFCG &rarr; Menu &rarr; Insert Node &rarr; SAP Fiori LP &rarr; Launchpad Catalog</div><div class="chain-why"><span class="es">Catalog = referencia a las apps que ver&aacute; el usuario. Authorization objects se a&ntilde;aden autom&aacute;ticamente.</span><span class="en">Catalog = reference to the apps the user will see. Authorization objects added automatically.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Space y Page &rarr; asignar Space al rol</span><span class="en">Create Space and Page &rarr; assign Space to role</span></div><div class="chain-path">Manage Launchpad Spaces &rarr; Manage Launchpad Pages &rarr; PFCG &rarr; Launchpad Space</div><div class="chain-why"><span class="es">El Space define c&oacute;mo se organizan las apps visualmente en el Launchpad.</span><span class="en">The Space defines how apps are visually organized in the Launchpad.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">6</div><div class="chain-body"><div class="chain-title"><span class="es">Asignar el rol al usuario (SU01)</span><span class="en">Assign role to user (SU01)</span></div><div class="chain-path">SU01 &rarr; Tab Roles</div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Usuario accede al Fiori Launchpad y ve sus apps</span><span class="en">User accesses Fiori Launchpad and sees their apps</span></strong></div></div></div>
+      </div>
+      <div class="chain-meta">
+        <div><div class="chain-meta-label"><span class="es">Rol base obligatorio</span><span class="en">Required base role</span></div><div><span class="dep-tag">Z_FIORI_FOUNDATION_USER</span></div></div>
+        <div><div class="chain-meta-label">&#9888;&#65039; <span class="es">Si falta paso 4-5...</span><span class="en">If step 4-5 missing...</span></div><ul class="chain-errors"><li><span class="es">Usuario ve el Launchpad vac&iacute;o: catalog asignado sin Space &rarr; no hay p&aacute;gina de tiles.</span><span class="en">User sees empty Launchpad: catalog assigned without Space &rarr; no tile page.</span></li><li><span class="es">Apps visibles pero error al abrir: authorization objects no generados (PFCG no ejecutado completamente).</span><span class="en">Apps visible but error on open: authorization objects not generated (PFCG not fully executed).</span></li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CADENA 2 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title">
+        <div class="chain-badge">2</div>
+        <div>
+          <div><span class="es">Activar nuevo proceso de negocio (New Implementation)</span><span class="en">Activate new business process (New Implementation)</span></div>
+          <div class="chain-trigger">&#9654; <span class="es">Proceso final: transportar a Producci&oacute;n tras UAT aprobado.</span><span class="en">Final process: transport to Production after approved UAT.</span></div>
+        </div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">CADENA &mdash; en este orden:</span><span class="en">CHAIN &mdash; in this order:</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Identificar proceso en SAP Signavio Process Navigator</span><span class="en">Identify process in SAP Signavio Process Navigator</span></div><div class="chain-why"><span class="es">Test script, roles involucrados, building blocks necesarios.</span><span class="en">Test script, involved roles, required building blocks.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Fit-to-Standard workshop &rarr; documentar requisitos en Cloud ALM</span><span class="en">Fit-to-Standard workshop &rarr; document requirements in Cloud ALM</span></div><div class="chain-path">Cloud ALM &rarr; Implementation &rarr; Requirements app</div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Activar building blocks con Solution Builder en Dev</span><span class="en">Activate building blocks with Solution Builder in Dev</span></div><div class="chain-path">/n/SMB/BBI &mdash; solo 1 vez en Development</div><div class="chain-why"><span class="es">NUNCA editar el proceso SAP directamente &mdash; copiar primero.</span><span class="en">NEVER edit the SAP process directly &mdash; copy first.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Configurar en IMG (Client 100) + extensiones key user si necesario</span><span class="en">Configure in IMG (Client 100) + key user extensions if needed</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><span class="es">Transportar Dev &rarr; QA (SE09)</span><span class="en">Transport Dev &rarr; QA (SE09)</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">6</div><div class="chain-body"><div class="chain-title"><span class="es">Business Process Test en QA &rarr; documentar en Cloud ALM</span><span class="en">Business Process Test in QA &rarr; document in Cloud ALM</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">7</div><div class="chain-body"><div class="chain-title"><strong>UAT con Customer LoB Experts en QA</strong></div><div class="chain-why"><span class="es">Mandatory antes de Deploy. Mismos expertos de los workshops.</span><span class="en">Mandatory before Deploy. Same experts from the workshops.</span></div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Transportar Dev &rarr; Prod. Go-Live.</span><span class="en">Transport Dev &rarr; Prod. Go-Live.</span></strong></div></div></div>
+      </div>
+      <div class="chain-meta">
+        <div><div class="chain-meta-label"><span class="es">Error cr&iacute;tico</span><span class="en">Critical error</span></div><ul class="chain-errors"><li><span class="es">Sin UAT completado no se puede pasar a Deploy phase.</span><span class="en">Without completed UAT, cannot move to Deploy phase.</span></li></ul></div>
+        <div><div class="chain-meta-label">&#9888;&#65039; <span class="es">Si falta paso 3...</span><span class="en">If step 3 missing...</span></div><ul class="chain-errors"><li><span class="es">El proceso SAP no est&aacute; activado en el sistema: los usuarios no ver&aacute;n las apps del proceso en el Launchpad.</span><span class="en">The SAP process is not activated in the system: users won't see the process apps in the Launchpad.</span></li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CADENA 3 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title">
+        <div class="chain-badge">3</div>
+        <div>
+          <div><span class="es">Migraci&oacute;n de datos con Migration Cockpit</span><span class="en">Data migration with Migration Cockpit</span></div>
+          <div class="chain-trigger">&#9654; <span class="es">Proceso final: validar datos migrados en la app correspondiente.</span><span class="en">Final process: validate migrated data in the corresponding app.</span></div>
+        </div>
+      </div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">CADENA &mdash; en este orden:</span><span class="en">CHAIN &mdash; in this order:</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Verificar app de validaci&oacute;n + rol de usuario + objetos predecesores</span><span class="en">Verify validation app + user role + predecessor objects</span></div><div class="chain-path">SAP Help Portal &rarr; Available Migration Objects &rarr; Post-Processing</div><div class="chain-why"><span class="es">Si faltan objetos predecesores la migraci&oacute;n fallar&aacute; con errores de referencia.</span><span class="en">If predecessor objects are missing, migration will fail with reference errors.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Migration Project</span><span class="en">Create Migration Project</span></div><div class="chain-path">Migrate Your Data &rarr; Create &rarr; Staging Tables &rarr; Local SAP S/4HANA DB Schema</div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Descargar template XML + rellenar datos (Paste Values Only)</span><span class="en">Download XML template + fill data (Paste Values Only)</span></div><div class="chain-why"><span class="es">Formato copiado = corrupci&oacute;n del archivo XML. Upload ser&aacute; rechazado.</span><span class="en">Copied formatting = XML file corruption. Upload will be rejected.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Upload del template</span><span class="en">Upload the template</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><span class="es">Prepare Staging Tables (Consistency Check ON)</span><span class="en">Prepare Staging Tables (Consistency Check ON)</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">6</div><div class="chain-body"><div class="chain-title"><span class="es">Mapping Tasks: Value Mapping + Fixed Value Tasks</span><span class="en">Mapping Tasks: Value Mapping + Fixed Value Tasks</span></div><div class="chain-why"><span class="es">Sin Mapping Tasks: migraci&oacute;n falla con errores de mapeo de valores.</span><span class="en">Without Mapping Tasks: migration fails with value mapping errors.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">7</div><div class="chain-body"><div class="chain-title"><span class="es">Simular (opcional) &rarr; Migrar &rarr; Monitoring</span><span class="en">Simulate (optional) &rarr; Migrate &rarr; Monitoring</span></div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Validar en app &rarr; Cerrar proyecto (data retention period)</span><span class="en">Validate in app &rarr; Close project (data retention period)</span></strong></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ COMPARATIVAS ═══ -->
+<div class="view" id="cmp">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--teal)">&#9889;</span>
+    <div><h2><span class="es">Comparativas Cr&iacute;ticas</span><span class="en">Critical Comparisons</span></h2><p><span class="es">Las diferencias m&aacute;s preguntadas en el examen</span><span class="en">The most examined differences</span></p></div>
+  </div>
+
+  <div class="sec-title"><span class="es">New Implementation vs System Conversion</span><span class="en">New Implementation vs System Conversion</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th>New Implementation</th><th>System Conversion</th></tr>
+    <tr><td><span class="es">Punto de partida</span><span class="en">Starting point</span></td><td><span class="es">Sistema completamente nuevo.</span><span class="en">Completely new system.</span></td><td><span class="es">Sistema SAP ECC existente.</span><span class="en">Existing SAP ECC system.</span></td></tr>
+    <tr><td><span class="es">Datos hist&oacute;ricos</span><span class="en">Historical data</span></td><td><span class="es">No se migran transacciones cerradas.</span><span class="en">Closed transactions not migrated.</span></td><td><span class="es">Todo el hist&oacute;rico se convierte 1:1.</span><span class="en">All history converted 1:1.</span></td></tr>
+    <tr><td><span class="es">Procesos de negocio</span><span class="en">Business processes</span></td><td><span class="es">Redise&ntilde;ados con SAP Best Practices.</span><span class="en">Redesigned with SAP Best Practices.</span></td><td><span class="es">Reutilizados del ECC. Solo nuevos procesos en workshops.</span><span class="en">Reused from ECC. Only new processes in workshops.</span></td></tr>
+    <tr><td><span class="es">Herramienta principal</span><span class="en">Main tool</span></td><td>Solution Builder + Migration Cockpit</td><td>SUM + DMO</td></tr>
+    <tr><td>% <span class="es">proyectos SAP</span><span class="en">SAP projects</span></td><td><strong>50%</strong></td><td><strong>48%</strong></td></tr>
+    <tr><td>Clean Core</td><td><span class="es">Se empieza limpio. M&aacute;s f&aacute;cil de mantener.</span><span class="en">Starts clean. Easier to maintain.</span></td><td><span class="es">Depende de la limpieza del c&oacute;digo ECC previo.</span><span class="en">Depends on pre-existing ECC code cleanliness.</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px">Technical Catalog vs Business Catalog</div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Technical Catalog</th><th>Business Catalog</th></tr>
+    <tr><td><span class="es">Contiene</span><span class="en">Contains</span></td><td><span class="es">Definici&oacute;n original del tile y target mapping.</span><span class="en">Original tile and target mapping definition.</span></td><td><span class="es">Referencias al Technical Catalog por job role.</span><span class="en">References to Technical Catalog by job role.</span></td></tr>
+    <tr><td><span class="es">Alcance</span><span class="en">Scope</span></td><td><span class="es">Configuration scope (cross client).</span><span class="en">Configuration scope (cross client).</span></td><td><span class="es">Customizing scope (client-specific).</span><span class="en">Customizing scope (client-specific).</span></td></tr>
+    <tr><td><span class="es">Herramienta</span><span class="en">Tool</span></td><td>/UI2/FLPAM</td><td>/UI2/FLPCM_CUST</td></tr>
+    <tr><td><span class="es">Asignar a usuario</span><span class="en">Assign to user</span></td><td><strong><span class="es">Nunca directamente.</span><span class="en">Never directly.</span></strong></td><td><span class="es">Se asigna al Business Role en PFCG.</span><span class="en">Assigned to Business Role in PFCG.</span></td></tr>
+    <tr><td><span class="es">Editar catalogs SAP</span><span class="en">Edit SAP catalogs</span></td><td><strong><span class="es">NO modificar directamente.</span><span class="en">DO NOT modify directly.</span></strong></td><td><strong><span class="es">Copiar y personalizar la copia.</span><span class="en">Copy and customize the copy.</span></strong></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px">Spaces &amp; Pages (Fiori 3.0) vs Groups (Fiori 2.0)</div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Spaces &amp; Pages (Fiori 3.0)</th><th>Groups (Fiori 2.0)</th></tr>
+    <tr><td>Estado</td><td><span class="es">Recomendado desde S/4HANA 2021.</span><span class="en">Recommended since S/4HANA 2021.</span></td><td><strong style="color:var(--red)"><span class="es">Deprecated desde S/4HANA 2021.</span><span class="en">Deprecated since S/4HANA 2021.</span></strong></td></tr>
+    <tr><td>Context check</td><td><span class="es">S&iacute;: "Out of Context" si tile no es del rol.</span><span class="en">Yes: "Out of Context" if tile not from role.</span></td><td><span class="es">No.</span><span class="en">No.</span></td></tr>
+    <tr><td>PFCG</td><td><span class="es">Space asignado al rol. Pages van al Space.</span><span class="en">Space assigned to role. Pages go to Space.</span></td><td><span class="es">Group asignado directamente al rol.</span><span class="en">Group assigned directly to role.</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px"><span class="es">Extensibilidad &mdash; Tier 1 vs Tier 2 vs Tier 3</span><span class="en">Extensibility &mdash; Tier 1 vs Tier 2 vs Tier 3</span></div>
+  <table class="tbl-reg">
+    <tr><th>Tier</th><th><span class="es">D&oacute;nde</span><span class="en">Where</span></th><th>Upgrade-stable</th><th><span class="es">Herramientas</span><span class="en">Tools</span></th><th><span class="es">C&oacute;digo</span><span class="en">Code</span></th></tr>
+    <tr><td><strong style="color:var(--green)">Tier 1a</strong> (Key User)</td><td>Client 100</td><td>&#10003;</td><td>Custom Fields, Custom Logic, Adapt UI</td><td><span class="es">No / m&iacute;nimo</span><span class="en">No / minimal</span></td></tr>
+    <tr><td><strong style="color:var(--green)">Tier 1b</strong> (ABAP Cloud)</td><td>Client 080</td><td>&#10003;</td><td>ABAP Cloud (Eclipse), objetos released</td><td>S&iacute;</td></tr>
+    <tr><td><strong style="color:var(--amber)">Tier 2</strong> (Bridge)</td><td>Client 080</td><td><span class="es">Parcial</span><span class="en">Partial</span></td><td><span class="es">Custom wrappers objetos no released</span><span class="en">Custom wrappers for non-released objects</span></td><td>S&iacute;</td></tr>
+    <tr><td><strong style="color:var(--red)">Tier 3</strong> (Classic)</td><td>Client 080</td><td><strong style="color:var(--red)">&#10007;</strong></td><td>ABAP Workbench (SE80)</td><td>S&iacute;</td></tr>
+    <tr><td><strong style="color:var(--blue)">Side-by-Side</strong></td><td>SAP BTP</td><td>&#10003;</td><td>SAP Build, BAS</td><td><span class="es">Low/no-code (Build)</span><span class="en">Low/no-code (Build)</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ EXAMEN ═══ -->
+<div class="view" id="exam">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4C03 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--red)">&#127919;</span>
+    <div><h2><span class="es">Escenarios de Examen 2026</span><span class="en">Exam Scenarios 2026</span></h2><p><span class="es">System-Based (open book en el sistema) + Scenario-Based (avatar IA)</span><span class="en">System-Based (open book in the system) + Scenario-Based (AI avatar)</span></p></div>
+  </div>
+
+  <div class="alert alert-blue" style="margin-bottom:18px">
+    <strong>System-Based:</strong> <span class="es">Se ejecuta en SAP S/4HANA Cloud PE real. Navegar y ejecutar correctamente. Memorizar rutas exactas: SU01, PFCG, SPRO &rarr; IMG, /n/SMB/BBI, Migrate Your Data, Custom Fields.</span>
+    <span class="en">Runs on real SAP S/4HANA Cloud PE. Navigate and execute correctly. Memorize exact paths: SU01, PFCG, SPRO &rarr; IMG, /n/SMB/BBI, Migrate Your Data, Custom Fields.</span>
+    <br><strong>Scenario-Based:</strong> <span class="es">Avatar IA presenta una situaci&oacute;n. Razonar cu&aacute;l es la mejor soluci&oacute;n y por qu&eacute; no las alternativas.</span>
+    <span class="en">AI avatar presents a situation. Reason which is the best solution and why not the alternatives.</span>
+  </div>
+
+  <div class="sec-title">System-Based <span class="es">Escenarios</span><span class="en">Scenarios</span></div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--blue-light),#eff6ff);border-color:var(--blue-mid);">
+    <div class="s-label" style="color:var(--blue)">&#128187; System-Based 1</div>
+    <div class="s-q"><span class="es">&#10067; Crear usuario con acceso al Fiori Launchpad y asignarle los roles correctos.</span><span class="en">&#10067; Create a user with Fiori Launchpad access and assign the correct roles.</span></div>
+    <div class="s-a"><strong><span class="es">Ruta exacta:</span><span class="en">Exact path:</span></strong> <span class="step-path" style="margin-top:5px">SU01 &rarr; User: [nombre] &rarr; Create &rarr; Tab Address (Last Name) &rarr; Tab Logon Data (Password) &rarr; Tab Roles (Z_FIORI_FOUNDATION_USER + roles de negocio) &rarr; Save</span>
+    <span class="es"><strong>Verificar:</strong> usuario puede abrir Fiori Launchpad y ver los tiles de los cat&aacute;logos asignados.</span><span class="en"><strong>Verify:</strong> user can open Fiori Launchpad and see tiles from assigned catalogs.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--blue-light),#eff6ff);border-color:var(--blue-mid);">
+    <div class="s-label" style="color:var(--blue)">&#128187; System-Based 2</div>
+    <div class="s-q"><span class="es">&#10067; Crear una empresa en la estructura organizativa (Define company).</span><span class="en">&#10067; Create a company in the organizational structure (Define company).</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">SPRO &rarr; SAP Reference IMG &rarr; Enterprise Structure &rarr; Definition &rarr; Financial Accounting &rarr; Define company &rarr; New Entries</span>
+    <span class="es"><strong>Campos clave:</strong> Company (S4C-##), Company Name, Country (US), Language Key (EN), Currency (USD). Si aparece di&aacute;logo: Create Request &rarr; descripci&oacute;n &rarr; Save.</span><span class="en"><strong>Mandatory fields:</strong> Company (S4C-##), Company Name, Country (US), Language Key (EN), Currency (USD). If dialog appears: Create Request &rarr; description &rarr; Save.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--blue-light),#eff6ff);border-color:var(--blue-mid);">
+    <div class="s-label" style="color:var(--blue)">&#128187; System-Based 3</div>
+    <div class="s-q"><span class="es">&#10067; Crear un campo custom para una app SAP Fiori y publicarlo.</span><span class="en">&#10067; Create a custom field for a SAP Fiori app and publish it.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">App Custom Fields &rarr; + &rarr; Business Context &rarr; Label, Type, Length &rarr; Create and Edit &rarr; Tab User Interfaces &rarr; Enable Usage &rarr; Save &rarr; Publish</span>
+    <span class="es"><strong>Cr&iacute;tico:</strong> verificar soporte en Fiori Apps Reference Library (secci&oacute;n "App Extensibility"). Publish = proceso as&iacute;ncrono hasta 30 minutos.</span><span class="en"><strong>Critical:</strong> verify support in Fiori Apps Reference Library (section "App Extensibility"). Publish = async process up to 30 minutes.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--blue-light),#eff6ff);border-color:var(--blue-mid);">
+    <div class="s-label" style="color:var(--blue)">&#128187; System-Based 4</div>
+    <div class="s-q"><span class="es">&#10067; Ejecutar una migraci&oacute;n completa de datos maestros de bancos.</span><span class="en">&#10067; Execute a complete migration of bank master data.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">Migrate Your Data &rarr; Create &rarr; Staging Tables &rarr; Local Schema &rarr; a&ntilde;adir objeto Bank &rarr; Download XML &rarr; rellenar en Excel (Paste Values Only) &rarr; Upload &rarr; Prepare (CC ON) &rarr; Mapping Tasks (confirmar) &rarr; Simulate &rarr; Migrate &rarr; Manage Banks (filtro CN) &rarr; Go</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--blue-light),#eff6ff);border-color:var(--blue-mid);">
+    <div class="s-label" style="color:var(--blue)">&#128187; System-Based 5</div>
+    <div class="s-q"><span class="es">&#10067; Localizar la tarea de CIAS en la metodolog&iacute;a SAP Activate.</span><span class="en">&#10067; Locate the CIAS task in the SAP Activate Methodology.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">go.support.sap.com/roadmapviewer/ &rarr; RISE with SAP S/4HANA Cloud PE &rarr; Content tab &rarr; Prepare &rarr; Initial System Access for SAP BTP &rarr; Subscribe to Cloud Integration Automation Services</span></div>
+  </div>
+
+  <div class="sec-title" style="margin-top:20px">Scenario-Based <span class="es">Escenarios</span><span class="en">Scenarios</span></div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 1</div>
+    <div class="s-q"><span class="es">&#10067; Un cliente tiene SAP ECC con 20 a&ntilde;os de hist&oacute;rico y el CFO exige conservar todos los datos. &iquest;Qu&eacute; ruta de transici&oacute;n recomiendas y por qu&eacute;?</span><span class="en">&#10067; A customer has SAP ECC with 20 years of history and the CFO demands all data be retained. Which transition path do you recommend and why?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es"><strong>System Conversion (Brownfield)</strong>. (1) Retenci&oacute;n de hist&oacute;rico 1:1. (2) Reutilizaci&oacute;n del c&oacute;digo/configuraci&oacute;n. (3) Menores costes de migraci&oacute;n. <strong>Por qu&eacute; no las alternativas:</strong> New Implementation pierde el hist&oacute;rico. Selective Data Transition usa herramientas partner no certificadas por SAP con mayor riesgo. Antes de la conversi&oacute;n: ejecutar SAP Readiness Check y resolver Financial Data Quality.</span><span class="en"><strong>System Conversion (Brownfield)</strong>. (1) 1:1 history retention. (2) Code/configuration reuse. (3) Lower migration costs. <strong>Why not alternatives:</strong> New Implementation loses history. Selective Data Transition uses non-SAP-certified partner tools with higher risk. Before conversion: run SAP Readiness Check and resolve Financial Data Quality.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 2</div>
+    <div class="s-q"><span class="es">&#10067; El usuario puede ver los tiles de las apps en el Launchpad pero al abrirlas recibe un error de autorizaci&oacute;n. &iquest;Cu&aacute;l es la causa m&aacute;s probable?</span><span class="en">&#10067; The user can see app tiles in the Launchpad but gets an authorization error when opening them. What is the most likely cause?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">El Business Catalog est&aacute; asignado al rol (por eso el tile es visible) pero los <strong>authorization objects no fueron generados o activados en PFCG</strong>. Verificar en PFCG: tab Authorizations &rarr; Generate Authorization Profile. Tambi&eacute;n verificar que el rol fue completamente activado (no draft).</span><span class="en">The Business Catalog is assigned to the role (that's why the tile is visible) but the <strong>authorization objects were not generated or activated in PFCG</strong>. Check in PFCG: Authorizations tab &rarr; Generate Authorization Profile. Also verify the role was fully activated (not draft).</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 3</div>
+    <div class="s-q"><span class="es">&#10067; El cliente insiste en a&ntilde;adir 20 campos custom a una app est&aacute;ndar porque "as&iacute; funcionaba en el sistema antiguo". &iquest;C&oacute;mo lo manejas?</span><span class="en">&#10067; The customer insists on adding 20 custom fields to a standard app because "that's how it worked in the old system". How do you handle this?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">Aplicar el <strong>Cloud Mindset</strong>: (1) Verificar con el cliente cu&aacute;les son "need to have" vs "nice to have". (2) Para cada campo: "Sin este campo, &iquest;el usuario no puede completar su tarea diaria?". (3) Evaluar impacto en upgrades futuros. (4) Documentar solo los aprobados en Cloud ALM &rarr; Requirements app. <strong>No rechazar directamente</strong> &mdash; sino facilitar la decisi&oacute;n informada del cliente.</span><span class="en">Apply the <strong>Cloud Mindset</strong>: (1) Verify with the customer which are "need to have" vs "nice to have". (2) For each field: "Without this field, can the user not complete their daily task?". (3) Evaluate impact on future upgrades. (4) Document only approved ones in Cloud ALM &rarr; Requirements app. <strong>Don't reject directly</strong> &mdash; facilitate the customer's informed decision.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 4</div>
+    <div class="s-q"><span class="es">&#10067; La migraci&oacute;n de datos falla con errores de mapeo. El log muestra que el campo "Payment Terms" tiene valores "30D" en el sistema legacy que no existen en S/4HANA. &iquest;C&oacute;mo resuelves esto?</span><span class="en">&#10067; Data migration fails with mapping errors. The log shows the "Payment Terms" field has values "30D" in the legacy system that don't exist in S/4HANA. How do you resolve this?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">En el paso de <strong>Mapping Tasks</strong> del Migration Cockpit: (1) Abrir la <em>Value Mapping task</em> para "Payment Terms". (2) Mapear cada valor origen ("30D") a su equivalente en S/4HANA (ej: "ZB30"). (3) Confirmar los mappings. (4) Re-ejecutar Simulate y luego Migrate. <strong>NO editar el template XML</strong> para cambiar valores &mdash; Mapping Tasks es exactamente para esto.</span><span class="en">In the Migration Cockpit <strong>Mapping Tasks</strong> step: (1) Open the <em>Value Mapping task</em> for "Payment Terms". (2) Map each source value ("30D") to its S/4HANA equivalent (e.g., "ZB30"). (3) Confirm the mappings. (4) Re-run Simulate then Migrate. <strong>DO NOT edit the XML template</strong> to change values &mdash; Mapping Tasks is exactly for this.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 5</div>
+    <div class="s-q"><span class="es">&#10067; El cliente tiene su sistema SAP S/4HANA Cloud PE con release 2022 (instalado en 2022). Ahora es 2030. &iquest;Est&aacute; en riesgo de salir de mainstream maintenance?</span><span class="en">&#10067; The customer has their SAP S/4HANA Cloud PE system on release 2022 (installed 2022). It is now 2030. Are they at risk of leaving mainstream maintenance?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es"><strong>S&iacute;, ya est&aacute; fuera.</strong> El release 2022 tiene 7 a&ntilde;os de mainstream maintenance, lo que significa que sali&oacute; de mantenimiento en 2029. En 2030, el cliente est&aacute; en <em>customer-specific maintenance</em> con costes adicionales. Deber&iacute;a haber solicitado el upgrade a SAP como m&iacute;nimo en 2028. Los clientes tienen <strong>derecho a 1 upgrade/a&ntilde;o</strong> solicitado a SAP.</span><span class="en"><strong>Yes, already out.</strong> The 2022 release has 7 years of mainstream maintenance, meaning it exited in 2029. In 2030, the customer is in <em>customer-specific maintenance</em> with additional costs. They should have requested the upgrade from SAP at least by 2028. Customers are <strong>entitled to 1 upgrade/year</strong> requested from SAP.</span></div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-sig">
+      <div>
+        <div class="vrf">Valentina RF</div>
+        <div class="vrf-sub"><span class="es">Gu&iacute;a de Estudio SAP FI &middot; C_TS4FI_2023</span><span class="en">SAP FI Study Guide &middot; C_TS4FI_2023</span></div>
+      </div>
+    </div>
+    <div class="footer-meta">
+      S4C03 &middot; Implementing SAP S/4HANA Cloud Private Edition &middot; Course Version 26 &middot; 2026
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── VIEW SWITCHING ────────────────────────────────────────────
+function showView(id, btn) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  var el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── CARD TOGGLE ───────────────────────────────────────────────
+function toggle(hdr) {
+  hdr.parentElement.classList.toggle('open');
+}
+function toggleEx(hdr) {
+  hdr.parentElement.classList.toggle('open');
+}
+
+// ── LANG TOGGLE ───────────────────────────────────────────────
+function toggleLang() {
+  var body = document.body;
+  var isEs = body.classList.contains('lang-es');
+  body.classList.toggle('lang-es', !isEs);
+  body.classList.toggle('lang-en', isEs);
+  document.getElementById('langLabel').textContent = isEs ? 'ES' : 'EN';
+}
+
+// ── SEARCH ────────────────────────────────────────────────────
+var MODULE_LABELS = {
+  u1:'U1', u2:'U2', u3:'U3', u4:'U4', u5:'U5', u6:'U6',
+  u7:'U7', u8:'U8', u9:'U9', u10:'U10', u11:'U11', u12:'U12',
+  ex:'EJ', qr:'QR', cad:'CAD', cmp:'CMP', exam:'EXAM'
+};
+var MODULE_COLORS = {
+  u1:'#1573B6', u2:'#0e7490', u3:'#15803d', u4:'#7c3aed',
+  u5:'#b91c1c', u6:'#d97706', u7:'#1d4ed8', u8:'#0f766e',
+  u9:'#6d28d9', u10:'#0369a1', u11:'#92400e', u12:'#166534',
+  ex:'#15803d', qr:'#7c3aed', cad:'#d97706', cmp:'#0f766e', exam:'#b91c1c'
+};
+
+var searchIndex = [];
+function buildIndex() {
+  var views = document.querySelectorAll('.view');
+  views.forEach(function(view) {
+    var vid = view.id;
+    var cards = view.querySelectorAll('.card, .ex-card, .scenario-sb, tr');
+    cards.forEach(function(card) {
+      var raw = (card.innerText || card.textContent || '').replace(/\s+/g,' ').trim();
+      if (raw.length < 10) return;
+      var title = '';
+      var h = card.querySelector('.card-title, .ex-title, .s-q, th');
+      if (h) title = (h.innerText || h.textContent || '').replace(/\s+/g,' ').trim().slice(0,70);
+      if (!title) title = raw.slice(0, 60);
+      searchIndex.push({ vid: vid, title: title, text: raw });
+    });
+  });
+}
+
+var lastQuery = '';
+var selectedIdx = -1;
+var currentResults = [];
+
+function doSearch(q) {
+  q = q.trim();
+  var clearBtn = document.getElementById('searchClear');
+  var countEl = document.getElementById('searchCount');
+  var resEl = document.getElementById('searchResults');
+  clearBtn.style.display = q.length > 0 ? 'block' : 'none';
+  removeHighlights();
+  if (q.length < 2) { resEl.style.display='none'; countEl.textContent=''; lastQuery=''; currentResults=[]; return; }
+  lastQuery = q;
+  var words = q.toLowerCase().split(/\s+/).filter(function(w){ return w.length > 0; });
+  var scored = [];
+  var seenVidTitle = {};
+  searchIndex.forEach(function(entry) {
+    var tl = entry.text.toLowerCase();
+    var allMatch = words.every(function(w){ return tl.indexOf(w) !== -1; });
+    if (!allMatch) return;
+    var score = 0;
+    words.forEach(function(w) {
+      if (entry.title.toLowerCase().indexOf(w) !== -1) score += 10;
+      var count=0, pos=0;
+      while ((pos=tl.indexOf(w,pos)) !== -1) { count++; pos++; }
+      score += count;
+    });
+    var key = entry.vid + '::' + entry.title.slice(0,40);
+    if (!seenVidTitle[key] || seenVidTitle[key].score < score) seenVidTitle[key] = { score: score, entry: entry };
+  });
+  currentResults = Object.values(seenVidTitle).sort(function(a,b){ return b.score-a.score; }).slice(0,12).map(function(x){ return x.entry; });
+  selectedIdx = -1;
+  renderResults(words);
+}
+
+function renderResults(words) {
+  var resEl = document.getElementById('searchResults');
+  var countEl = document.getElementById('searchCount');
+  if (currentResults.length === 0) {
+    resEl.innerHTML = '<div class="sr-empty">&#128269; <span class="es">Sin resultados para &ldquo;'+escHtml(lastQuery)+'&rdquo;</span><span class="en">No results for &ldquo;'+escHtml(lastQuery)+'&rdquo;</span></div>';
+    resEl.style.display = 'block'; countEl.textContent = '0'; return;
+  }
+  countEl.textContent = currentResults.length + (currentResults.length === 12 ? '+' : '');
+  var html = '';
+  currentResults.forEach(function(entry, i) {
+    var modLabel = MODULE_LABELS[entry.vid] || entry.vid.toUpperCase();
+    var modColor = MODULE_COLORS[entry.vid] || '#64748b';
+    var snippet = getSnippet(entry.text, words, 90);
+    html += '<div class="sr-item" data-idx="'+i+'" onclick="goResult('+i+')">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">'
+      +'<span class="sr-mod" style="background:'+modColor+'">'+modLabel+'</span>'
+      +'<span class="sr-title">'+highlightWords(escHtml(entry.title), words)+'</span></div>'
+      +'<div class="sr-snippet">'+snippet+'</div></div>';
+  });
+  resEl.innerHTML = html; resEl.style.display = 'block';
+}
+
+function getSnippet(text, words, maxLen) {
+  var tl = text.toLowerCase(); var best = 0;
+  words.forEach(function(w){ var pos=tl.indexOf(w); if(pos!==-1) best=pos; });
+  var start = Math.max(0, best-30);
+  return highlightWords(escHtml((start>0?'…':'')+text.slice(start,start+maxLen)+(start+maxLen<text.length?'…':'')), words);
+}
+function highlightWords(html, words) {
+  words.forEach(function(w){ if(w.length<2)return; html=html.replace(new RegExp('('+escRe(w)+')','gi'),'<mark>$1</mark>'); });
+  return html;
+}
+function goResult(idx) {
+  if (idx<0||idx>=currentResults.length) return;
+  var entry = currentResults[idx];
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  var targetView = document.getElementById(entry.vid);
+  if (targetView) targetView.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'"+entry.vid+"'") !== -1) b.classList.add('active');
+  });
+  document.querySelectorAll('#'+entry.vid+' .card, #'+entry.vid+' .ex-card').forEach(function(card){
+    var raw = (card.innerText||card.textContent||'').toLowerCase();
+    var words = lastQuery.toLowerCase().split(/\s+/);
+    if (words.every(function(w){ return raw.indexOf(w)!==-1; })) card.classList.add('open');
+  });
+  removeHighlights();
+  highlightInView(entry.vid, lastQuery.split(/\s+/));
+  document.getElementById('searchResults').style.display = 'none';
+  setTimeout(function(){
+    var first = document.querySelector('#'+entry.vid+' mark.hl');
+    if (first) first.scrollIntoView({behavior:'smooth',block:'center'});
+    else window.scrollTo(0,0);
+  }, 80);
+}
+function highlightInView(vid, words) {
+  var view = document.getElementById(vid); if(!view) return;
+  var walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null, false);
+  var nodes=[]; var node;
+  while(node=walker.nextNode()) nodes.push(node);
+  nodes.forEach(function(node){
+    var val=node.nodeValue; if(!val||val.trim().length<2) return;
+    var lval=val.toLowerCase();
+    var needsMark=words.some(function(w){ return w.length>1&&lval.indexOf(w.toLowerCase())!==-1; });
+    if(!needsMark) return;
+    var frag=document.createDocumentFragment();
+    var re=new RegExp('('+words.map(escRe).join('|')+')','gi');
+    val.split(re).forEach(function(part){
+      if(re.test(part)){ var mark=document.createElement('mark'); mark.className='hl'; mark.textContent=part; frag.appendChild(mark); }
+      else frag.appendChild(document.createTextNode(part));
+    });
+    if(frag.childNodes.length>0&&node.parentNode) node.parentNode.replaceChild(frag,node);
+  });
+}
+function removeHighlights() {
+  document.querySelectorAll('mark.hl').forEach(function(m){
+    var p=m.parentNode; if(p){ p.replaceChild(document.createTextNode(m.textContent),m); p.normalize(); }
+  });
+}
+function clearSearch() {
+  var inp=document.getElementById('globalSearch'); inp.value='';
+  document.getElementById('searchResults').style.display='none';
+  document.getElementById('searchClear').style.display='none';
+  document.getElementById('searchCount').textContent='';
+  removeHighlights(); lastQuery=''; currentResults=[]; inp.focus();
+}
+function searchKeyNav(e) {
+  var resEl=document.getElementById('searchResults');
+  if(resEl.style.display==='none') return;
+  var items=resEl.querySelectorAll('.sr-item');
+  if(e.key==='ArrowDown'){e.preventDefault();selectedIdx=Math.min(selectedIdx+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();selectedIdx=Math.max(selectedIdx-1,-1);}
+  else if(e.key==='Enter'){e.preventDefault();if(selectedIdx>=0)goResult(selectedIdx);else if(currentResults.length>0)goResult(0);return;}
+  else if(e.key==='Escape'){resEl.style.display='none';return;}
+  else{return;}
+  items.forEach(function(it,i){ it.style.background=i===selectedIdx?'var(--blue-light)':''; });
+  if(selectedIdx>=0&&items[selectedIdx]) items[selectedIdx].scrollIntoView({block:'nearest'});
+}
+document.addEventListener('click', function(e){
+  if(!document.getElementById('searchWrap').contains(e.target)){
+    var resEl=document.getElementById('searchResults'); if(resEl) resEl.style.display='none';
+  }
+});
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+// Tab scroll fade
+function initTabFade() {
+  ['tabRow1','tabRow2'].forEach(function(rowId){
+    var row=document.getElementById(rowId); if(!row) return;
+    function updateFade(){ row.classList.toggle('at-end', row.scrollLeft+row.clientWidth>=row.scrollWidth-4); }
+    row.addEventListener('scroll',updateFade); updateFade();
+  });
+}
+window.addEventListener('load', function(){ initTabFade(); setTimeout(buildIndex,200); });
+</script>
+<script src="assistant.js"></script>
+</body>
+</html>

@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S4F17 &middot; Asset Accounting in SAP S/4HANA | Valentina RF</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root {
+  --bg:#fff; --bg2:#f0fdf4; --green:#166534; --green-dark:#14532d; --green-light:#dcfce7; --green-mid:#86efac;
+  --blue:#1d4ed8; --blue-light:#eff6ff; --blue-mid:#bfdbfe;
+  --amber:#b45309; --amber-light:#fffbeb; --amber-mid:#fde68a;
+  --red:#b91c1c; --red-light:#fef2f2;
+  --purple:#7c3aed; --purple-light:#f5f3ff;
+  --teal:#0f766e; --teal-light:#f0fdfa;
+  --orange:#c2410c; --orange-light:#fff7ed;
+  --text:#0f172a; --text2:#334155; --muted:#64748b; --muted2:#94a3b8;
+  --border:#e2e8f0; --border2:#cbd5e1;
+  --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg2);color:var(--text);font-size:14px;line-height:1.65;}
+body.lang-en .es{display:none!important;} body.lang-es .en{display:none!important;}
+
+.topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;box-shadow:var(--shadow);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:12px 20px 0;}
+.topbar-row1{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.topbar-badge{background:var(--green);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em;white-space:nowrap;}
+.topbar-row1 h1{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em;flex:1;}
+.lang-btn{display:flex;align-items:center;gap:6px;background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s;box-shadow:var(--shadow);white-space:nowrap;}
+.lang-btn:hover{background:var(--green-dark);transform:translateY(-1px);box-shadow:var(--shadow-md);}
+.signature-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;white-space:nowrap;letter-spacing:.04em;}
+.search-row{display:flex;align-items:center;gap:8px;padding:8px 0 6px;border-top:1px solid var(--border);}
+.search-wrap{flex:1;position:relative;max-width:480px;}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted2);pointer-events:none;width:15px;height:15px;}
+#globalSearch{width:100%;padding:7px 12px 7px 34px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter',sans-serif;font-size:12.5px;color:var(--text);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;}
+#globalSearch:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(22,101,52,.12);}
+#searchClear{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:16px;padding:0 4px;display:none;line-height:1;}
+#searchClear:hover{color:var(--red);}
+#searchCount{font-size:11px;color:var(--muted);white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+#searchResults{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border2);border-radius:10px;box-shadow:var(--shadow-md);max-height:360px;overflow-y:auto;z-index:500;}
+.sr-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+.sr-item:last-child{border-bottom:none;} .sr-item:hover{background:var(--green-light);}
+.sr-mod{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#fff;padding:2px 6px;border-radius:4px;margin-right:7px;text-transform:uppercase;}
+.sr-title{font-size:13px;font-weight:600;color:var(--text);}
+.sr-snippet{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-snippet mark,.sr-empty{padding:16px 14px;text-align:center;font-size:12.5px;color:var(--muted);}
+mark.hl{background:#fef08a;color:var(--text);border-radius:2px;padding:0 2px;}
+
+.tabs-wrap{border-top:1px solid var(--border);}
+.tab-row{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;position:relative;}
+.tab-row::-webkit-scrollbar{display:none;} .tab-row-1{border-bottom:1px solid var(--border);}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab-btn:hover{color:var(--green);border-bottom-color:var(--green-mid);}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green);font-weight:700;}
+.tab-num{background:var(--green-light);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;}
+.tab-btn.active .tab-num{background:var(--green);color:#fff;}
+.tab-row-fade{position:relative;}
+.tab-row-fade::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;background:linear-gradient(to right,transparent,#fff 70%);display:flex;align-items:center;justify-content:flex-end;padding-right:4px;color:var(--muted2);font-size:16px;pointer-events:none;transition:opacity .2s;}
+.tab-row-fade.at-end::after{opacity:0;}
+
+main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;}
+.view{display:none;} .view.active{display:block;}
+
+.mod-header{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow);}
+.mod-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:var(--green);padding:3px 9px;border-radius:5px;white-space:nowrap;margin-top:3px;letter-spacing:.04em;}
+.mod-header h2{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.mod-header p{font-size:12px;color:var(--muted);margin-top:3px;}
+
+.exam-tip{background:linear-gradient(135deg,var(--green-light),#eff6ff);border:1px solid var(--green-mid);border-radius:10px;padding:13px 17px;margin-bottom:16px;font-size:13px;}
+.exam-tip .label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:4px;}
+.exam-tip p{color:var(--text2);margin:0;}
+
+.scenario-sb{background:linear-gradient(135deg,var(--purple-light),#faf5ff);border:1px solid #ddd6fe;border-radius:10px;padding:15px 17px;margin:12px 0;}
+.scenario-sb .s-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:8px;}
+.scenario-sb .s-q{font-weight:600;font-size:13px;color:var(--text);margin-bottom:7px;}
+.scenario-sb .s-a{font-size:12.5px;color:var(--text2);line-height:1.65;}
+.scenario-sb .s-a strong{color:var(--purple);}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;box-shadow:var(--shadow);transition:box-shadow .15s;}
+.card:hover{box-shadow:var(--shadow-md);}
+.card-header{padding:12px 15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;gap:10px;}
+.card-header:hover{background:var(--bg2);}
+.card-title{font-weight:600;font-size:13px;color:var(--text);display:flex;align-items:center;gap:9px;}
+.ci{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.ci-green{background:var(--green-light);} .ci-blue{background:var(--blue-light);} .ci-amber{background:var(--amber-light);} .ci-red{background:var(--red-light);} .ci-purple{background:var(--purple-light);} .ci-orange{background:var(--orange-light);}
+.chevron{color:var(--muted2);font-size:14px;transition:transform .2s;flex-shrink:0;}
+.card.open .chevron{transform:rotate(90deg);}
+.card-body{display:none;padding:0 15px 15px;border-top:1px solid var(--border);}
+.card.open .card-body{display:block;}
+.card-body p{color:var(--text2);font-size:13px;margin-top:10px;line-height:1.65;}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin-top:10px;font-size:12.5px;}
+.kv-k{color:var(--green);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;padding-top:1px;font-weight:600;}
+.kv-v{color:var(--text2);}
+
+.alert{margin-top:11px;padding:9px 13px;border-radius:7px;font-size:12px;border-left:3px solid;line-height:1.6;}
+.alert-green{background:var(--green-light);border-color:var(--green);color:var(--text2);}
+.alert-blue{background:var(--blue-light);border-color:var(--blue);color:var(--text2);}
+.alert-amber{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+.alert-red{background:var(--red-light);border-color:var(--red);color:var(--red);}
+.alert-purple{background:var(--purple-light);border-color:var(--purple);color:var(--purple);}
+.alert-orange{background:var(--orange-light);border-color:var(--orange);color:#7c2d12;}
+.alert strong{font-weight:700;}
+
+.lst{margin-top:9px;padding-left:0;list-style:none;}
+.lst li{font-size:12.5px;color:var(--text2);padding:4px 0 4px 15px;position:relative;border-bottom:1px solid var(--border);}
+.lst li:last-child{border-bottom:none;}
+.lst li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:700;font-size:14px;}
+
+.sub{margin-top:13px;}
+.sub-title{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--amber);margin-bottom:7px;}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
+@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+.mini-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.mini-card .mt{font-size:11.5px;font-weight:700;color:var(--green);margin-bottom:4px;}
+.mini-card p{font-size:12px;color:var(--text2);margin:0;}
+
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:11px;}
+th{background:var(--bg2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:7px 11px;text-align:left;border-bottom:2px solid var(--border2);}
+td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+td:first-child{font-family:'JetBrains Mono',monospace;color:var(--green);font-size:11px;font-weight:600;}
+tr:last-child td{border-bottom:none;} tr:hover td{background:var(--bg2);}
+.tbl-reg td:first-child{font-family:'Inter',sans-serif;color:var(--text);font-size:12px;font-weight:600;}
+
+.sec-title{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 9px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+.ex-card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:9px;box-shadow:var(--shadow);}
+.ex-header{padding:13px 17px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;user-select:none;}
+.ex-header:hover{background:var(--bg2);}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;background:var(--green);color:#fff;padding:3px 7px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+.ex-title{font-weight:600;font-size:13px;color:var(--text);flex:1;}
+.ex-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.ex-body{display:none;padding:0 17px 15px;border-top:1px solid var(--border);}
+.ex-card.open .ex-body{display:block;} .ex-card.open .chevron{transform:rotate(90deg);}
+.step{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.step:last-child{border-bottom:none;}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;background:var(--green-light);color:var(--green);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-body{color:var(--text2);flex:1;} .step-body strong{color:var(--text);}
+.step-path{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:5px 9px;margin-top:5px;color:var(--green);display:block;word-break:break-all;}
+
+/* CHAIN */
+.chain-badge{width:32px;height:32px;border-radius:8px;background:var(--amber);color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chain-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--amber);margin:12px 0 8px;}
+.chain-steps{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--border2);margin-left:14px;padding-left:0;}
+.chain-step{display:flex;gap:12px;padding:8px 0 8px 16px;position:relative;border-bottom:1px dashed var(--border);}
+.chain-step:last-child{border-bottom:none;}
+.chain-step::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 0 0 2px var(--green);}
+.chain-final{display:flex;gap:12px;padding:10px 0 4px 16px;position:relative;}
+.chain-final::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue);}
+.chain-num{width:22px;height:22px;border-radius:50%;background:var(--green-light);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.chain-body{flex:1;}
+.chain-title{font-size:12.5px;font-weight:600;color:var(--text);}
+.chain-path{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:3px 7px;margin:3px 0;color:var(--green);display:inline-block;word-break:break-all;}
+.chain-why{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.chain-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.chain-meta-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;}
+.dep-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;padding:2px 7px;background:var(--green-light);color:var(--green);border-radius:4px;margin:2px 3px 2px 0;}
+.chain-errors{margin:0;padding-left:14px;font-size:11.5px;color:var(--muted);line-height:1.6;}
+.chain-trigger{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.page-brand{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);}
+.page-brand span{font-weight:700;color:var(--green);}
+
+footer{background:#fff;border-top:1px solid var(--border);padding:20px;text-align:center;margin-top:40px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-sig{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--green-light),#eff6ff);border:1px solid var(--green-mid);border-radius:10px;padding:10px 20px;margin-bottom:8px;}
+.footer-sig .vrf{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--green);letter-spacing:.05em;}
+.footer-sig .vrf-sub{font-size:11px;color:var(--muted);}
+.footer-meta{font-size:11px;color:var(--muted2);}
+
+@media(max-width:700px){.topbar-row1 p{display:none;} .mod-header{flex-direction:column;gap:7px;}}
+
+/* Unit colors */
+.u1{background:#166534!important;} .u2{background:#15803d!important;} .u3{background:#0f766e!important;}
+.u4{background:#1d4ed8!important;} .u5{background:#7c3aed!important;} .u6{background:#b45309!important;}
+
+/* QR override */
+#qr td:first-child{font-family:'Inter',sans-serif;color:var(--text);font-size:12px;font-weight:600;}
+</style>
+</head>
+<body class="lang-es">
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-row1">
+      <span class="topbar-badge">S4F17</span>
+      <h1><span class="es">Asset Accounting en SAP S/4HANA &mdash; S4F17</span><span class="en">Asset Accounting in SAP S/4HANA &mdash; S4F17</span></h1>
+      <span class="signature-tag">&#9670; Valentina RF</span>
+      <button class="lang-btn" onclick="toggleLang()" id="langBtn"><span class="curr-lang" id="langLabel">EN</span></button>
+    </div>
+    <div class="search-row">
+      <div class="search-wrap" id="searchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" autocomplete="off"
+          placeholder="&#128269; Buscar... AW01N, Depreciation Key, Asset Class, AuC, ABZOL, Retirement..."
+          oninput="doSearch(this.value)" onkeydown="searchKeyNav(event)">
+        <div id="searchResults"></div>
+      </div>
+      <button id="searchClear" onclick="clearSearch()" title="Limpiar">&#10005;</button>
+      <span id="searchCount"></span>
+    </div>
+    <div class="tabs-wrap">
+      <div class="tab-row tab-row-1 tab-row-fade" id="tabRow1">
+        <button class="tab-btn active" onclick="showView('u1',this)"><span class="tab-num">U1</span><span class="es">Org. Structures</span><span class="en">Org. Structures</span></button>
+        <button class="tab-btn" onclick="showView('u2',this)"><span class="tab-num">U2</span><span class="es">Master Data</span><span class="en">Master Data</span></button>
+        <button class="tab-btn" onclick="showView('u3',this)"><span class="tab-num">U3</span><span class="es">Transacciones</span><span class="en">Transactions</span></button>
+        <button class="tab-btn" onclick="showView('u4',this)"><span class="tab-num">U4</span><span class="es">Periodic. &amp; Valuation</span><span class="en">Periodic. &amp; Valuation</span></button>
+        <button class="tab-btn" onclick="showView('u5',this)"><span class="tab-num">U5</span><span class="es">Reporting</span><span class="en">Reporting</span></button>
+        <button class="tab-btn" onclick="showView('u6',this)"><span class="tab-num">U6</span><span class="es">Legacy Data Transfer</span><span class="en">Legacy Data Transfer</span></button>
+      </div>
+      <div class="tab-row tab-row-2 tab-row-fade" id="tabRow2">
+        <button class="tab-btn" onclick="showView('ex',this)"><span class="tab-num" style="background:var(--orange);color:#fff;">EJ</span><span class="es">39 Ejercicios</span><span class="en">39 Exercises</span></button>
+        <button class="tab-btn" onclick="showView('qr',this)"><span class="tab-num" style="background:var(--purple);color:#fff;">QR</span>Quick Ref</button>
+        <button class="tab-btn" onclick="showView('img',this)"><span class="tab-num" style="background:var(--blue);color:#fff;">IMG</span><span class="es">Rutas IMG</span><span class="en">IMG Paths</span></button>
+        <button class="tab-btn" onclick="showView('cad',this)"><span class="tab-num" style="background:var(--amber);color:#fff;">&#9881;</span><span class="es">Cadenas</span><span class="en">Chains</span></button>
+        <button class="tab-btn" onclick="showView('cmp',this)"><span class="tab-num" style="background:var(--teal);color:#fff;">&#9889;</span><span class="es">Comparativas</span><span class="en">Comparisons</span></button>
+        <button class="tab-btn" onclick="showView('exam',this)"><span class="tab-num" style="background:var(--red);color:#fff;">&#127919;</span><span class="es">Examen</span><span class="en">Exam</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+<main>
+<!-- ═══ U1: ORGANIZATIONAL STRUCTURES ═══ -->
+<div class="view active" id="u1">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u1">U1</span>
+    <div>
+      <h2><span class="es">Organizational Structures</span><span class="en">Organizational Structures</span></h2>
+      <p><span class="es">Chart of Depreciation &middot; Depreciation Areas &middot; Asset Classes &middot; GL Integration</span><span class="en">Chart of Depreciation &middot; Depreciation Areas &middot; Asset Classes &middot; GL Integration</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Chart of Depreciation (CoD) = directorio de hasta 99 depreciation areas. CoD se define a nivel client; chart of accounts se asigna al company code. Z000 = template de formaci&oacute;n. Copying country sample 0DE/0US. Asset class = nivel client. Account determination key → G/L accounts. 4 posting indicators del &aacute;rea.</p>
+    <p class="en">Chart of Depreciation (CoD) = directory of up to 99 depreciation areas. CoD defined at client level; chart of accounts assigned at company code. Z000 = training template. Copy country sample 0DE/0US. Asset class = client level. Account determination key → G/L accounts. 4 area posting indicators.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128209;</div><span class="es">Chart of Depreciation y Depreciation Areas</span><span class="en">Chart of Depreciation &amp; Depreciation Areas</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Chart of Depreciation</span><span class="kv-v"><span class="es">Directorio de hasta <strong>99 depreciation areas</strong> organizado seg&uacute;n requisitos de gesti&oacute;n. Se define a nivel <strong>client</strong>. En formaci&oacute;n se usa Z000 (copia de 0DE). En producci&oacute;n: copiar de la muestra de pa&iacute;s (0DE=Alemania, 0US=EEUU, 0GB=UK).</span><span class="en">Directory of up to <strong>99 depreciation areas</strong> organized per business management requirements. Defined at <strong>client</strong> level. In training, use Z000 (copy of 0DE). In production: copy from country sample (0DE=Germany, 0US=USA, 0GB=UK).</span></span>
+        <span class="kv-k">Depreciation Area</span><span class="kv-v"><span class="es">Valora los activos para un prop&oacute;sito espec&iacute;fico (contabilidad, costes, impuestos, IFRS). Identificada por clave num&eacute;rica de 2 d&iacute;gitos.</span><span class="en">Values assets for a specific purpose (book, cost accounting, tax, IFRS). Identified by 2-digit numeric key.</span></span>
+        <span class="kv-k">Area 01</span><span class="kv-v"><span class="es">Book depreciation. Publica a G/L en tiempo real (posting indicator 1). Obligatoria.</span><span class="en">Book depreciation. Posts to G/L in real time (posting indicator 1). Mandatory.</span></span>
+        <span class="kv-k">Area 20</span><span class="kv-v"><span class="es">Cost-accounting depreciation. Solo para CO, NO publica a G/L (indicator 0). No requiere cuenta G/L.</span><span class="en">Cost-accounting depreciation. CO only, does NOT post to G/L (indicator 0). No G/L account needed.</span></span>
+        <span class="kv-k">Area 30+</span><span class="kv-v"><span class="es">Tax depreciation, IFRS, US GAAP. Posting indicator var&iacute;a seg&uacute;n configuraci&oacute;n.</span><span class="en">Tax depreciation, IFRS, US GAAP. Posting indicator varies per configuration.</span></span>
+        <span class="kv-k">Area 32</span><span class="kv-v"><span class="es">Derived area: toma valores de otra &aacute;rea. Posting indicator 6 (solo reporting).</span><span class="en">Derived area: takes values from another area. Posting indicator 6 (reporting only).</span></span>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">4 Posting Indicators para Depreciation Areas</span><span class="en">4 Depreciation Area Posting Indicators</span></div>
+      <table class="tbl-reg">
+        <tr><th><span class="es">Indicador</span><span class="en">Indicator</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th></tr>
+        <tr><td>0</td><td><span class="es">No publica a G/L. Solo para CO o reporting interno.</span><span class="en">Does not post to G/L. For CO or internal reporting only.</span></td></tr>
+        <tr><td>1</td><td><span class="es">Publica en <strong>tiempo real</strong> con cada transacci&oacute;n de activos.</span><span class="en">Posts in <strong>real time</strong> with each asset transaction.</span></td></tr>
+        <tr><td>2</td><td><span class="es">Publica <strong>peri&oacute;dicamente</strong> (depreciation run).</span><span class="en">Posts <strong>periodically</strong> (depreciation run).</span></td></tr>
+        <tr><td>6</td><td><span class="es">Solo reporting. Valores derivados de otra &aacute;rea, sin posteo propio.</span><span class="en">Reporting only. Values derived from another area, no own posting.</span></td></tr>
+      </table></div>
+      <div class="alert alert-amber"><strong>Accounting Principle:</strong> <span class="es">Asignar un accounting principle a cada depreciation area que publica a G/L. Garantiza la coherencia entre FI-AA y el ledger correspondiente. Parallel currencies de FI-AA deben alinearse con las del G/L.</span><span class="en">Assign an accounting principle to each depreciation area that posts to G/L. Ensures consistency between FI-AA and the corresponding ledger. Parallel currencies in FI-AA must be aligned with G/L.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#127970;</div><span class="es">Asset Classes &mdash; Componentes y Control</span><span class="en">Asset Classes &mdash; Components &amp; Control</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <p class="es">La asset class es el <strong>criterio principal de clasificaci&oacute;n</strong> de activos. Se crea a nivel <strong>client</strong> y puede vincularse a m&uacute;ltiples charts of depreciation (catálogo global uniforme).</p>
+      <p class="en">The asset class is the <strong>main classification criterion</strong> for assets. Created at <strong>client</strong> level and can be linked to multiple charts of depreciation (globally uniform catalog).</p>
+      <div class="sub"><div class="sub-title"><span class="es">3 Componentes de control de una Asset Class</span><span class="en">3 Control Components of an Asset Class</span></div>
+      <div class="kv">
+        <span class="kv-k">Account Determination</span><span class="kv-v"><span class="es">Clave que vincula la asset class con las cuentas G/L (APC, depreciaci&oacute;n, etc.). Puede ser igual al n&uacute;mero de cuenta G/L si el cat&aacute;logo es peque&ntilde;o. Una clave puede usarse en m&uacute;ltiples clases similares.</span><span class="en">Key linking the asset class to G/L accounts (APC, depreciation, etc.). Can equal the G/L account number if catalog is small. One key can be used in multiple similar classes.</span></span>
+        <span class="kv-k">Number Range Interval</span><span class="kv-v"><span class="es">Define el rango de n&uacute;meros de activo. <strong>Interno</strong>: el sistema asigna. <strong>Externo</strong>: el usuario introduce. Se puede cambiar despu&eacute;s de la transferencia de datos heredados.</span><span class="en">Defines the asset number range. <strong>Internal</strong>: system assigns. <strong>External</strong>: user enters. Can be changed after legacy data transfer completes.</span></span>
+        <span class="kv-k">Screen Layout</span><span class="kv-v"><span class="es">Controla qu&eacute; campos son obligatorios, opcionales o suprimidos en el master record. Se define por separado para master data y depreciation areas.</span><span class="en">Controls which fields are mandatory, optional, or suppressed in the master record. Defined separately for master data and depreciation areas.</span></span>
+      </div></div>
+      <div class="two-col" style="margin-top:12px">
+        <div class="mini-card"><div class="mt">&#127958; <span class="es">Clases est&aacute;ndar</span><span class="en">Standard classes</span></div><p>Buildings (1xxx) &middot; Vehicles (2xxx) &middot; Machines (3xxx) &middot; AuC (4000/4001) &middot; LVA (5xxx) &middot; Intangibles (6xxx)</p></div>
+        <div class="mini-card"><div class="mt">&#9888;&#65039; <span class="es">Clases especiales</span><span class="en">Special classes</span></div><p><strong>AuC (4000):</strong> <span class="es">activos en construcci&oacute;n (vita &uacute;til 0, 100% en 1 a&ntilde;o).</span><span class="en">assets under construction (0 useful life, 100% year 1).</span><br><strong>LVA:</strong> <span class="es">activos de bajo valor, depreciaci&oacute;n completa en a&ntilde;o de adquisici&oacute;n.</span><span class="en">low-value assets, full depreciation in year of acquisition.</span></p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128200;</div><span class="es">Integraci&oacute;n FI-AA con G/L y CO</span><span class="en">FI-AA Integration with G/L &amp; CO</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">G/L Integration</span><span class="kv-v"><span class="es">FI-AA opera como subledger del G/L. Cada transacci&oacute;n de activos actualiza las cuentas G/L correspondientes. Posting indicator 1: tiempo real. Indicator 2: peri&oacute;dico (depreciation run).</span><span class="en">FI-AA operates as a G/L subledger. Every asset transaction updates the corresponding G/L accounts. Posting indicator 1: real time. Indicator 2: periodic (depreciation run).</span></span>
+        <span class="kv-k">CO Integration</span><span class="kv-v"><span class="es">En el asset master record se asigna: Cost Center, Internal Order (real o estad&iacute;stico), Activity Type (solo estad&iacute;stico). &Aacute;rea 20 publica costs a CO en cada depreciation run.</span><span class="en">In the asset master record, assign: Cost Center, Internal Order (real or statistical), Activity Type (statistical only). Area 20 posts costs to CO in each depreciation run.</span></span>
+        <span class="kv-k">Account Determination</span><span class="kv-v"><span class="es">Define las cuentas G/L para: APC (adquisici&oacute;n), accumulated depreciation, depreciation expense, write-up revenue, gain/loss on retirement.</span><span class="en">Defines G/L accounts for: APC (acquisition), accumulated depreciation, depreciation expense, write-up revenue, gain/loss on retirement.</span></span>
+        <span class="kv-k">Financial Statement Version</span><span class="kv-v"><span class="es">Asignar una FSV por depreciation area para mostrar financial statement items en los asset reports.</span><span class="en">Assign a FSV per depreciation area to display financial statement items in asset reports.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#128187; System-Based &amp; Scenario-Based &mdash; Exam 2026</div>
+    <div class="s-q"><span class="es">&#10067; Un activo se valora de forma diferente para contabilidad financiera, contabilidad de costes e informes fiscales. &iquest;C&oacute;mo modela esto SAP S/4HANA?</span><span class="en">&#10067; An asset is valued differently for financial accounting, cost accounting, and tax reporting. How does SAP S/4HANA model this?</span></div>
+    <div class="s-a"><span class="es"><strong>Respuesta:</strong> Mediante <strong>Depreciation Areas</strong> dentro del Chart of Depreciation. Cada &aacute;rea tiene su propia m&eacute;trica de valoraci&oacute;n: &Aacute;rea 01 (book depreciation → G/L real-time), &Aacute;rea 20 (cost accounting → CO peri&oacute;dico, no G/L), &Aacute;rea 30 (tax). El Chart of Depreciation puede gestionar hasta 99 &aacute;reas en paralelo.</span><span class="en"><strong>Answer:</strong> Through <strong>Depreciation Areas</strong> within the Chart of Depreciation. Each area has its own valuation approach: Area 01 (book depreciation → G/L real-time), Area 20 (cost accounting → CO periodic, no G/L), Area 30 (tax). The Chart of Depreciation can manage up to 99 areas in parallel.</span></div>
+  </div>
+  <div class="sec-title"><span class="es">Resumen U1</span><span class="en">U1 Summary</span></div>
+  <div class="alert alert-green">
+    <span class="es">&#10003; Chart of Depreciation = nivel client. Hasta 99 depreciation areas. Z000 = template formaci&oacute;n.<br>&#10003; Posting indicators: 0 (sin G/L) · 1 (real-time) · 2 (peri&oacute;dico) · 6 (solo reporting).<br>&#10003; Asset class = nivel client. 3 componentes: Account Determination + Number Range + Screen Layout.<br>&#10003; G/L integration: subledger. CO integration: cost center/order en master record. &Aacute;rea 20 → CO.</span>
+    <span class="en">&#10003; Chart of Depreciation = client level. Up to 99 depreciation areas. Z000 = training template.<br>&#10003; Posting indicators: 0 (no G/L) · 1 (real-time) · 2 (periodic) · 6 (reporting only).<br>&#10003; Asset class = client level. 3 components: Account Determination + Number Range + Screen Layout.<br>&#10003; G/L integration: subledger. CO integration: cost center/order in master record. Area 20 → CO.</span>
+  </div>
+</div>
+
+<!-- ═══ U2: MASTER DATA ═══ -->
+<div class="view" id="u2">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u2">U2</span>
+    <div>
+      <h2><span class="es">Master Data</span><span class="en">Master Data</span></h2>
+      <p><span class="es">Asset Class &middot; Master Record &middot; Screen Layout &middot; LVA &middot; Subnumbers &middot; Mass Changes</span><span class="en">Asset Class &middot; Master Record &middot; Screen Layout &middot; LVA &middot; Subnumbers &middot; Mass Changes</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">AS01/AS02/AS03. Account determination = link entre asset class y G/L. Number range interno = sistema asigna. Screen layout = qu&eacute; campos son obligatorios. LVA: vida &uacute;til 0, depreciaci&oacute;n 100% a&ntilde;o 1. Subnumbers para gestionar componentes separados. Mass changes via worklist.</p>
+    <p class="en">AS01/AS02/AS03. Account determination = link between asset class and G/L. Internal number range = system assigns. Screen layout = which fields are mandatory. LVA: useful life 0, 100% depreciation year 1. Subnumbers to manage separate components. Mass changes via worklist.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128220;</div><span class="es">Asset Master Record &mdash; Estructura y Transacciones</span><span class="en">Asset Master Record &mdash; Structure &amp; Transactions</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">AS01 / AS02 / AS03</span><span class="kv-v"><span class="es">Crear / Cambiar / Visualizar activo. Fiori: <strong>Create Asset</strong> / <strong>Change Asset</strong> / <strong>Display Asset</strong>.</span><span class="en">Create / Change / Display asset. Fiori: <strong>Create Asset</strong> / <strong>Change Asset</strong> / <strong>Display Asset</strong>.</span></span>
+        <span class="kv-k">OAOA</span><span class="kv-v"><span class="es">Define Asset Classes: overview y gesti&oacute;n de todas las asset classes (Customizing). &Uacute;nico punto de entrada para crear/copiar clases.</span><span class="en">Define Asset Classes: overview and management of all asset classes (Customizing). Single entry point to create/copy classes.</span></span>
+        <span class="kv-k">OAYZ</span><span class="kv-v"><span class="es">Determine Depreciation Areas in Asset Class: asignar screen layout rule y depreciation keys a cada &aacute;rea por clase. Clave: LINK (est&aacute;ndar), LINA (&aacute;reas 20 y 15).</span><span class="en">Determine Depreciation Areas in Asset Class: assign screen layout rule and depreciation keys per area per class. Key: LINK (standard), LINA (areas 20 and 15).</span></span>
+        <span class="kv-k">AO21</span><span class="kv-v"><span class="es">Define Screen Layout for Asset Depreciation Areas: controla qu&eacute; campos son obligatorios en las depreciation areas (ej: Depreciation Key = Required en screen layout rule 2000).</span><span class="en">Define Screen Layout for Asset Depreciation Areas: controls which fields are mandatory in depreciation areas (e.g., Depreciation Key = Required in screen layout rule 2000).</span></span>
+        <span class="kv-k">General tab</span><span class="kv-v"><span class="es">Informaci&oacute;n descriptiva: descripci&oacute;n, n&uacute;mero de inventario, serial, ubicaci&oacute;n, informaci&oacute;n de origen.</span><span class="en">Descriptive information: description, inventory number, serial, location, origin information.</span></span>
+        <span class="kv-k">Depreciation Areas tab</span><span class="kv-v"><span class="es">Clave de depreciaci&oacute;n, vida &uacute;til, fecha de inicio de depreciaci&oacute;n para cada &aacute;rea. <strong>Fecha de inicio</strong> = stored en depreciation areas del master record.</span><span class="en">Depreciation key, useful life, depreciation start date for each area. <strong>Start date</strong> = stored in depreciation areas of master record.</span></span>
+        <span class="kv-k">Time-Dependent tab</span><span class="kv-v"><span class="es">Asignaciones que pueden cambiar con el tiempo: cost center, order, profit center, segment. Cambios con fecha de inicio (intervals).</span><span class="en">Time-based assignments: cost center, order, profit center, segment. Changes with effective date (intervals).</span></span>
+        <span class="kv-k">Origin tab</span><span class="kv-v"><span class="es">Vendor, purchase order, a&ntilde;o de adquisici&oacute;n, activo de origen.</span><span class="en">Vendor, purchase order, year of acquisition, original asset.</span></span>
+      </div>
+      <div class="alert alert-green"><strong><span class="es">Change document:</span><span class="en">Change document:</span></strong> <span class="es">Cada cambio en el master record genera un documento de cambio en el sistema (audit trail).</span><span class="en">Every change to the master record generates a change document in the system (audit trail).</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#128295;</div><span class="es">Screen Layout, LVA y Subnumbers</span><span class="en">Screen Layout, LVA &amp; Subnumbers</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title">Screen Layout</div>
+      <p class="es">Define el comportamiento de los campos del master record para una asset class. Aplicable a master data y depreciation areas por separado. Opciones: Required / Optional / Suppressed / Display Only.</p>
+      <p class="en">Defines field behavior in the master record for an asset class. Applied separately to master data and depreciation areas. Options: Required / Optional / Suppressed / Display Only.</p></div>
+      <div class="sub"><div class="sub-title"><span class="es">Low-Value Assets (LVA)</span><span class="en">Low-Value Assets (LVA)</span></div>
+      <p class="es">Asset classes para activos de bajo valor: vida &uacute;til = 0, la depreciaci&oacute;n se calcula al 100% en el a&ntilde;o de adquisici&oacute;n. Umbral definido por legislaci&oacute;n local (ej: 800 EUR en Alemania). Se pueden gestionar de forma individual o colectiva.</p>
+      <p class="en">Asset classes for low-value assets: useful life = 0, depreciation calculated at 100% in year of acquisition. Threshold defined by local legislation (e.g., €800 in Germany). Can be managed individually or collectively.</p></div>
+      <div class="sub"><div class="sub-title">Subnumbers</div>
+      <div class="kv">
+        <span class="kv-k"><span class="es">Prop&oacute;sito</span><span class="en">Purpose</span></span><span class="kv-v"><span class="es">Gestionar partes de un activo de forma separada (adquisiciones posteriores de edificios, componentes t&eacute;cnicos). N&uacute;mero de activo + subn&uacute;mero.</span><span class="en">Manage parts of an asset separately (subsequent building acquisitions, technical components). Asset number + subnumber.</span></span>
+        <span class="kv-k"><span class="es">Asignaci&oacute;n</span><span class="en">Assignment</span></span><span class="kv-v"><span class="es">Interna (sistema) o externa (usuario, &uacute;til para transferencia de datos heredados).</span><span class="en">Internal (system) or external (user, useful for legacy data transfer).</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Mass Changes y User Fields</span><span class="en">Mass Changes &amp; User Fields</span></div>
+      <p class="es">Mass changes: modificar varios master records simult&aacute;neamente usando un worklist. User fields: campos custom definidos en IMG, disponibles en los master records para informaci&oacute;n adicional.</p>
+      <p class="en">Mass changes: modify multiple master records simultaneously using a worklist. User fields: custom fields defined in IMG, available in master records for additional information.</p></div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Resumen U2</span><span class="en">U2 Summary</span></div>
+  <div class="alert alert-green">
+    <span class="es">&#10003; AS01/AS02/AS03 = crear/cambiar/visualizar. Tabs: General, Depreciation Areas, Time-Dependent, Origin.<br>&#10003; Screen layout: control de campos (Required/Optional/Suppressed). Definido por asset class.<br>&#10003; LVA: vida &uacute;til 0, depreciaci&oacute;n 100% en a&ntilde;o 1. Asset class 5xxx.<br>&#10003; Subnumbers: gestionar componentes de un activo separadamente.<br>&#10003; Cambios en el master record → change document (trazabilidad).</span>
+    <span class="en">&#10003; AS01/AS02/AS03 = create/change/display. Tabs: General, Depreciation Areas, Time-Dependent, Origin.<br>&#10003; Screen layout: field control (Required/Optional/Suppressed). Defined per asset class.<br>&#10003; LVA: useful life 0, 100% depreciation in year 1. Asset class 5xxx.<br>&#10003; Subnumbers: manage asset components separately.<br>&#10003; Master record changes → change document (audit trail).</span>
+  </div>
+</div>
+
+<!-- ═══ U3: ASSET TRANSACTIONS ═══ -->
+<div class="view" id="u3">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u3">U3</span>
+    <div>
+      <h2><span class="es">Asset Transactions</span><span class="en">Asset Transactions</span></h2>
+      <p><span class="es">Acquisitions &middot; Asset Explorer &middot; Retirements &middot; Transfers &middot; AuC &middot; Unplanned Depreciation</span><span class="en">Acquisitions &middot; Asset Explorer &middot; Retirements &middot; Transfers &middot; AuC &middot; Unplanned Depreciation</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Integrated acquisition: capitaliza en GR (si valuated) o en Invoice Verification (si no valuated). ABZOL = non-integrated w/auto offsetting. AW01N = Asset Explorer. Retirement con/sin revenue. Transfer variant 4 = intracompany. AuC class 4000. Unplanned depreciation ABAAL: NO crea FI document (solo depreciation run lo crea).</p>
+    <p class="en">Integrated acquisition: capitalizes at GR (if valuated) or Invoice Verification (if not valuated). ABZOL = non-integrated w/auto offsetting. AW01N = Asset Explorer. Retirement with/without revenue. Transfer variant 4 = intracompany. AuC class 4000. Unplanned depreciation ABAAL: does NOT create FI document (only depreciation run creates it).</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128176;</div><span class="es">Adquisiciones de Activos &mdash; Tipos</span><span class="en">Asset Acquisitions &mdash; Types</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Tipo</span><span class="en">Type</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Transacci&oacute;n</span><span class="en">Transaction</span></th></tr>
+        <tr><td><span class="es">Integrada con MM</span><span class="en">Integrated with MM</span></td><td><span class="es">Flujo completo: PO → GR → Invoice. Capitaliza en GR si <em>valuated</em>; en Invoice Verification si <em>non-valuated</em>. FI document en cada paso.</span><span class="en">Full flow: PO → GR → Invoice. Capitalizes at GR if <em>valuated</em>; at Invoice Verification if <em>non-valuated</em>. FI document at each step.</span></td><td>MIRO / ME21N</td></tr>
+        <tr><td><span class="es">Integrada con AP (F-90)</span><span class="en">Integrated with AP (F-90)</span></td><td><span class="es">Adquisici&oacute;n directa contra cuenta de proveedor (AP). Crea documento FI con partida de proveedor y capitaliza activo.</span><span class="en">Direct acquisition against vendor account (AP). Creates FI document with vendor line item and capitalizes asset.</span></td><td>F-90 / MIRO</td></tr>
+        <tr><td><span class="es">No integrada (auto-offsetting)</span><span class="en">Non-integrated (auto-offsetting)</span></td><td><span class="es">Adquisici&oacute;n sin pr&aacute;ctica de factura. Usa una cuenta de compensaci&oacute;n autom&aacute;tica. No hay partida de proveedor.</span><span class="en">Acquisition without invoice practice. Uses automatic offsetting account. No vendor line item.</span></td><td><strong>ABZOL</strong></td></tr>
+        <tr><td><span class="es">Adquisici&oacute;n en a&ntilde;o anterior</span><span class="en">Prior-year acquisition</span></td><td><span class="es">Capitalizar activos en ejercicios anteriores. Usa tipos de transacci&oacute;n espec&iacute;ficos (PY = previous year).</span><span class="en">Capitalize assets in prior fiscal years. Uses specific transaction types (PY = previous year).</span></td><td>ABZOL</td></tr>
+      </table>
+      <div class="alert alert-blue"><strong>Asset Explorer (AW01N):</strong> <span class="es">Visualizaci&oacute;n completa del activo: valores por ejercicio, transacciones, simulaci&oacute;n de depreciaci&oacute;n, documentos FI enlazados. Fiori: <strong>Manage Fixed Assets</strong> / <strong>Asset Values</strong>.</span><span class="en">Complete asset display: values per fiscal year, transactions, depreciation simulation, linked FI documents. Fiori: <strong>Manage Fixed Assets</strong> / <strong>Asset Values</strong>.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-red">&#128465;&#65039;</div><span class="es">Retiros (Retirements)</span><span class="en">Retirements</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k"><span class="es">Con ingreso (venta)</span><span class="en">With revenue (sale)</span></span><span class="kv-v"><span class="es">Integrado con AR: factura de cliente. Sistema calcula ganancia/p&eacute;rdida = ingreso − net book value. Transacci&oacute;n F-92 o via Fiori.</span><span class="en">Integrated with AR: customer invoice. System calculates gain/loss = revenue − net book value. Transaction F-92 or via Fiori.</span></span>
+        <span class="kv-k"><span class="es">Sin ingreso (baja)</span><span class="en">Without revenue (scrapping)</span></span><span class="kv-v"><strong>ABAVN.</strong> <span class="es">El sistema escribe el valor neto contable contra las cuentas de ganancia/p&eacute;rdida.</span><span class="en">System writes off net book value against gain/loss accounts.</span></span>
+        <span class="kv-k"><span class="es">Retiro masivo</span><span class="en">Mass retirement</span></span><span class="kv-v"><span class="es">Crear lista de activos desde report → crear worklist → seleccionar prop&oacute;sito (sin ingreso / con ingreso) → procesar worklist.</span><span class="en">Create asset list from report → create worklist → select purpose (without/with revenue) → process worklist.</span></span>
+        <span class="kv-k"><span class="es">C&aacute;lculo autom&aacute;tico</span><span class="en">Automatic calculation</span></span><span class="kv-v"><span class="es">Ganancia/p&eacute;rdida = precio venta − APC + depreciaci&oacute;n acumulada. Se contabiliza en las cuentas definidas en account determination.</span><span class="en">Gain/loss = sale price − APC + accumulated depreciation. Posted to accounts defined in account determination.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#8646;</div><span class="es">Transferencias de Activos</span><span class="en">Asset Transfers</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Tipo</span><span class="en">Type</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Transfer Variant</span></th></tr>
+        <tr><td><span class="es">Intracompany (dentro del company code)</span><span class="en">Intracompany (within company code)</span></td><td><span class="es">Activo en clase incorrecta, split, liquidaci&oacute;n de AuC. Transfer variant <strong>4</strong> est&aacute;ndar.</span><span class="en">Asset in wrong class, split, AuC settlement. Transfer variant <strong>4</strong> standard.</span></td><td>4</td></tr>
+        <tr><td><span class="es">Intercompany tipo 02</span><span class="en">Intercompany type 02</span></td><td><span class="es">Entre company codes del mismo company ID (dependientes legalmente). Tratado como intracompany (tipos de transacci&oacute;n 3++, m&eacute;todo gross).</span><span class="en">Between company codes with same company ID (legally dependent). Treated as intracompany (transaction types 3++, gross method).</span></td><td>7 / 8</td></tr>
+        <tr><td><span class="es">Intercompany tipo 01</span><span class="en">Intercompany type 01</span></td><td><span class="es">Entre company codes de companies diferentes (independientes legalmente). Puede haber ingreso por venta.</span><span class="en">Between company codes from different companies (legally independent). May include sale revenue.</span></td><td>1 / 7 / 8</td></tr>
+      </table>
+      <div class="sub"><div class="sub-title"><span class="es">3 M&eacute;todos de Transferencia Intercompany</span><span class="en">3 Intercompany Transfer Methods</span></div>
+      <div class="kv">
+        <span class="kv-k">Gross Method</span><span class="kv-v"><span class="es">Los valores hist&oacute;ricos del activo se transfieren al company code de destino. <strong>No se introduce precio de venta</strong>. M&eacute;todo est&aacute;ndar SAP (80% de los casos).</span><span class="en">Historical asset values are transferred to the target company code. <strong>No sale price entered</strong>. SAP standard method (80% of cases).</span></span>
+        <span class="kv-k">Net Method</span><span class="kv-v"><span class="es">El <strong>valor neto contable</strong> del company code origen se capitaliza en el activo destino. Se debe introducir precio de venta.</span><span class="en">The <strong>net book value</strong> of the source company code is capitalized on the target asset. Sale price must be entered.</span></span>
+        <span class="kv-k">New Value Method</span><span class="kv-v"><span class="es">El sistema capitaliza el <strong>importe del precio de venta</strong> en el activo destino. Si no hay ganancia/p&eacute;rdida, precio venta = valor neto contable.</span><span class="en">The system capitalizes the <strong>sales revenue amount</strong> on the target asset. If no gain/loss, sale price = net book value.</span></span>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#127959;&#65039;</div><span class="es">Assets Under Construction (AuC) y Unplanned Depreciation</span><span class="en">Assets Under Construction (AuC) &amp; Unplanned Depreciation</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title">Assets Under Construction (AuC)</div>
+      <div class="kv">
+        <span class="kv-k">Asset class 4000</span><span class="kv-v"><span class="es">Activos en fase de construcci&oacute;n. Aparecen en balance sheet separados de los activos completados. Settlement al completar.</span><span class="en">Assets in construction phase. Appear on balance sheet separately from completed assets. Settlement upon completion.</span></span>
+        <span class="kv-k"><span class="es">Liquidaci&oacute;n (Settlement)</span><span class="en">Settlement</span></span><span class="kv-v"><span class="es">Transferir valores del AuC a uno o más activos completados. Dos enfoques: resumen (summary) o por partida individual (line item basis). Sistema separa autom&aacute;ticamente transacciones del a&ntilde;o actual vs anterior.</span><span class="en">Transfer AuC values to one or more completed assets. Two approaches: summary or line item basis. System automatically separates current-year vs prior-year transactions.</span></span>
+        <span class="kv-k">Settlement Profile</span><span class="kv-v"><span class="es">SAP standard: <strong>YB00AI</strong>. Asignar al company code en Customizing antes de liquidar.</span><span class="en">SAP standard: <strong>YB00AI</strong>. Assign to company code in Customizing before settling.</span></span>
+        <span class="kv-k">WBS Elements</span><span class="kv-v"><span class="es">Para grandes proyectos: usar Investment Management (IM). WBS elementos permiten agrupar adquisiciones y liquidar al activo final.</span><span class="en">For large projects: use Investment Management (IM). WBS elements group acquisitions and settle to the final asset.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title">Unplanned Depreciation (ABAAL)</div>
+      <div class="kv">
+        <span class="kv-k">Prop&oacute;sito</span><span class="kv-v"><span class="es">Reducción de valor no planificada (ej: da&ntilde;o al activo). Se puede seleccionar las depreciation areas afectadas individualmente.</span><span class="en">Unplanned value reduction (e.g., asset damage). Select affected depreciation areas individually.</span></span>
+        <span class="kv-k"><strong>&#9888;&#65039; <span class="es">Cr&iacute;tico</span><span class="en">Critical</span></strong></span><span class="kv-v"><span class="es">La programaci&oacute;n manual de la depreciaci&oacute;n <strong>NO genera documento FI</strong>. El documento FI se crea &uacute;nicamente cuando se ejecuta el <strong>depreciation posting program</strong>.</span><span class="en">Manual scheduling of depreciation does <strong>NOT create FI document</strong>. The FI document is created only when the <strong>depreciation posting program</strong> runs.</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U4: PERIODIC PROCESSING ═══ -->
+<div class="view" id="u4">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u4">U4</span>
+    <div>
+      <h2><span class="es">Periodic Processing &amp; Valuation</span><span class="en">Periodic Processing &amp; Valuation</span></h2>
+      <p><span class="es">Depreciation Key &middot; Depreciation Run &middot; Year-End Closing &middot; Parallel Accounting &middot; Investment Support</span><span class="en">Depreciation Key &middot; Depreciation Run &middot; Year-End Closing &middot; Parallel Accounting &middot; Investment Support</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Depreciation Key (AFAMA): 5 m&eacute;todos. Depreciation run: Test primero, luego Update. Tipo doc. FI = AF. Year-end closing: cerrar FI-AA ANTES que G/L. Ledger approach (0L / 2L) vs Account approach (misma ledger, distintas cuentas). Investment support: assets side (reduce APC) o liabilities side (reserve). FAA_CMP = year-end closing.</p>
+    <p class="en">Depreciation Key (AFAMA): 5 methods. Depreciation run: Test first, then Update. FI doc type = AF. Year-end closing: close FI-AA BEFORE G/L. Ledger approach (0L / 2L) vs Account approach (same ledger, different accounts). Investment support: assets side (reduce APC) or liabilities side (reserve). FAA_CMP = year-end closing.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128290;</div><span class="es">Depreciation Key &mdash; Tipos y C&aacute;lculo</span><span class="en">Depreciation Key &mdash; Types &amp; Calculation</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title"><span class="es">4 Tipos de depreciaci&oacute;n por depreciation area</span><span class="en">4 Depreciation Types per Depreciation Area</span></div>
+      <div class="kv">
+        <span class="kv-k">Ordinary depreciation</span><span class="kv-v"><span class="es">Reducci&oacute;n planificada de valor por desgaste normal. La m&aacute;s habitual.</span><span class="en">Planned value reduction due to normal wear and tear. Most common.</span></span>
+        <span class="kv-k">Special depreciation</span><span class="kv-v"><span class="es">Tipo fiscal (tax-based). Porcentaje fijo dentro de un per&iacute;odo de concesi&oacute;n fiscal, sin considerar desgaste real.</span><span class="en">Tax-based type. Fixed percentage within a tax concession period, regardless of actual wear.</span></span>
+        <span class="kv-k">Unplanned depreciation</span><span class="kv-v"><span class="es">Circunstancias inusuales (da&ntilde;os). Manual via ABAAL. FI doc solo tras depreciation run.</span><span class="en">Unusual circumstances (damage). Manual via ABAAL. FI doc only after depreciation run.</span></span>
+        <span class="kv-k">Unit-of-production</span><span class="kv-v"><span class="es">Depreciaci&oacute;n variable seg&uacute;n uso estacional (km recorridos, unidades producidas).</span><span class="en">Variable depreciation based on seasonal usage (km driven, units produced).</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Depreciation Key (AFAMA) &mdash; 5 M&eacute;todos de C&aacute;lculo</span><span class="en">Depreciation Key (AFAMA) &mdash; 5 Calculation Methods</span></div>
+      <ul class="lst">
+        <li><strong>Base method:</strong> <span class="es">M&eacute;todo base (lineal, porcentaje fijo).</span><span class="en">Base method (straight-line, fixed percentage).</span></li>
+        <li><strong>Declining-balance method:</strong> <span class="es">Porcentaje del valor neto residual.</span><span class="en">Percentage of net book value.</span></li>
+        <li><strong>Maximum amount method:</strong> <span class="es">L&iacute;mite m&aacute;ximo de depreciaci&oacute;n por periodo.</span><span class="en">Maximum depreciation amount per period.</span></li>
+        <li><strong>Multilevel method:</strong> <span class="es">Tasas de depreciaci&oacute;n cambian a lo largo de la vida &uacute;til.</span><span class="en">Depreciation rates change over useful life.</span></li>
+        <li><strong>Period control method:</strong> <span class="es">Define cu&aacute;ndo empieza/termina la depreciaci&oacute;n dentro de un periodo.</span><span class="en">Defines when depreciation starts/ends within a period.</span></li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#9654;</div><span class="es">Depreciation Run y Cierre de Ejercicio</span><span class="en">Depreciation Run &amp; Year-End Closing</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title">Depreciation Run &mdash; Schedule Asset Accounting Jobs</div>
+      <div class="kv">
+        <span class="kv-k">Acceso Fiori</span><span class="kv-v"><span class="es">General Ledger &rarr; Closing &rarr; <strong>Schedule Asset Accounting Jobs</strong> &rarr; template: <strong>Depreciation Posting Run</strong>.</span><span class="en">General Ledger &rarr; Closing &rarr; <strong>Schedule Asset Accounting Jobs</strong> &rarr; template: <strong>Depreciation Posting Run</strong>.</span></span>
+        <span class="kv-k"><span class="es">Proceso</span><span class="en">Process</span></span><span class="kv-v"><span class="es">1) Ejecutar <strong>Test Run</strong> (detecta errores, cost centers bloqueados, etc.) → 2) Revisar log → 3) Ejecutar <strong>Update Run</strong> (deseleccionar Test Run) → 4) Documentos FI generados.</span><span class="en">1) Run <strong>Test Run</strong> (detects errors, blocked cost centers, etc.) → 2) Review log → 3) Run <strong>Update Run</strong> (deselect Test Run) → 4) FI documents generated.</span></span>
+        <span class="kv-k"><span class="es">Documento FI</span><span class="en">FI document</span></span><span class="kv-v"><span class="es">Tipo <strong>AF</strong>. Publica a &Aacute;reas 01 y 32 (FI) y a CO para &Aacute;rea 20.</span><span class="en">Type <strong>AF</strong>. Posts to Areas 01 and 32 (FI) and to CO for Area 20.</span></span>
+        <span class="kv-k">Recalculate Depreciation</span><span class="kv-v"><span class="es">Recalcular antes de ejecutar si se modificaron par&aacute;metros de depreciaci&oacute;n despu&eacute;s de adquisiciones.</span><span class="en">Recalculate before running if depreciation parameters were modified after acquisitions.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Year-End Closing FI-AA &mdash; FAA_CMP</span><span class="en">FI-AA Year-End Closing &mdash; FAA_CMP</span></div>
+      <div class="kv">
+        <span class="kv-k"><span class="es">Prerequisito</span><span class="en">Prerequisite</span></span><span class="kv-v"><span class="es">Depreciaci&oacute;n completamente contabilizada para todos los per&iacute;odos del ejercicio anterior + G/L Balance Carryforward ejecutado.</span><span class="en">Depreciation fully posted for all periods of previous year + G/L Balance Carryforward executed.</span></span>
+        <span class="kv-k"><span class="es">Qu&eacute; hace</span><span class="en">What it does</span></span><span class="kv-v"><span class="es">Verifica completitud de activos y depreciaci&oacute;n. Actualiza el &uacute;ltimo ejercicio cerrado por depreciation area. <strong>Bloquea</strong> contabilizaciones de FI-AA en ejercicios cerrados.</span><span class="en">Verifies asset completeness and depreciation. Updates last closed fiscal year per depreciation area. <strong>Blocks</strong> FI-AA postings to closed fiscal years.</span></span>
+        <span class="kv-k"><span class="es">&#9888; Orden obligatorio</span><span class="en">&#9888; Mandatory order</span></span><span class="kv-v"><span class="es">Cerrar FI-AA (y todos los subledgers) <strong>ANTES</strong> de cerrar el G/L. Incorrecto = inconsistencias serias en el G/L.</span><span class="en">Close FI-AA (and all subledgers) <strong>BEFORE</strong> closing G/L. Incorrect = serious G/L inconsistencies.</span></span>
+        <span class="kv-k">Fiscal Year Change</span><span class="kv-v"><span class="es">Autom&aacute;tico con G/L Balance Carryforward (FAGLGVTR). Abre nuevos campos de valor anuales para cada activo.</span><span class="en">Automatic with G/L Balance Carryforward (FAGLGVTR). Opens new annual value fields for each asset.</span></span>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-purple">&#9878;</div><span class="es">Parallel Accounting e Investment Support</span><span class="en">Parallel Accounting &amp; Investment Support</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title">Parallel Accounting</div>
+      <table class="tbl-reg">
+        <tr><th></th><th><span class="es">Enfoque Ledger</span><span class="en">Ledger Approach</span></th><th><span class="es">Enfoque de Cuenta</span><span class="en">Account Approach</span></th></tr>
+        <tr><td><span class="es">Descripci&oacute;n</span><span class="en">Description</span></td><td><span class="es">Ledgers separados (0L = local, 2L = IFRS). Depreciation area diferente por ledger.</span><span class="en">Separate ledgers (0L = local, 2L = IFRS). Different depreciation area per ledger.</span></td><td><span class="es">Mismo ledger. Cuentas G/L diferentes para cada norma contable.</span><span class="en">Same ledger. Different G/L accounts per accounting standard.</span></td></tr>
+        <tr><td><span class="es">Recomendado</span><span class="en">Recommended</span></td><td>&#10003; <span class="es">M&aacute;s flexible</span><span class="en">More flexible</span></td><td><span class="es">Simple pero menos flexible</span><span class="en">Simple but less flexible</span></td></tr>
+      </table></div>
+      <div class="sub"><div class="sub-title"><span class="es">Investment Support (Subvenciones)</span><span class="en">Investment Support (Subsidies)</span></div>
+      <div class="kv">
+        <span class="kv-k">Assets side</span><span class="kv-v"><span class="es">Reducci&oacute;n del APC. Se amortiza el importe de subvenci&oacute;n junto con el activo.</span><span class="en">Reduction of APC. Subsidy amount is amortized together with the asset.</span></span>
+        <span class="kv-k">Liabilities side</span><span class="kv-v"><span class="es">Reserva especial en el pasivo. Se deprecia el activo al valor completo. Requiere depreciation area separada con posting indicator "real-time".</span><span class="en">Special reserve on liabilities side. Asset depreciated at full value. Requires separate depreciation area with "real-time" posting indicator.</span></span>
+        <span class="kv-k">Investment support key</span><span class="kv-v"><span class="es">Identifica la medida. Se asigna en el asset master record. Transacci&oacute;n <strong>ABIF</strong> para contabilizaci&oacute;n manual.</span><span class="en">Identifies the measure. Assigned in asset master record. Transaction <strong>ABIF</strong> for manual posting.</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U5: REPORTING ═══ -->
+<div class="view" id="u5">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u5">U5</span>
+    <div>
+      <h2><span class="es">Reporting in Asset Accounting</span><span class="en">Reporting in Asset Accounting</span></h2>
+      <p><span class="es">ALV Reports &middot; Asset Explorer &middot; Fiori Apps &middot; Asset History Sheet &middot; Analytics</span><span class="en">ALV Reports &middot; Asset Explorer &middot; Fiori Apps &middot; Asset History Sheet &middot; Analytics</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">RABEST_ALV01 = Asset Balance (lista). RAGITT_ALV01 = Asset History Sheet. RABEWG_ALV01 = Asset Transactions. Sort variants para agrupaci&oacute;n/totales. Asset Explorer (AW01N) = ver valores por ejercicio. Fiori: Asset Balances app (anal&iacute;tica). CDS views → VDM → Apps Fiori.</p>
+    <p class="en">RABEST_ALV01 = Asset Balance (list). RAGITT_ALV01 = Asset History Sheet. RABEWG_ALV01 = Asset Transactions. Sort variants for grouping/totals. Asset Explorer (AW01N) = view values per fiscal year. Fiori: Asset Balances app (analytical). CDS views → VDM → Fiori Apps.</p>
+  </div>
+
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-blue">&#128202;</div><span class="es">Informes cl&aacute;sicos ALV y Fiori Apps</span><span class="en">Classic ALV Reports &amp; Fiori Apps</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th><span class="es">Informe / App</span><span class="en">Report / App</span></th><th><span class="es">Prop&oacute;sito</span><span class="en">Purpose</span></th></tr>
+        <tr><td>RABEST_ALV01</td><td><span class="es">Asset Balance: lista de activos con valores (APC, depreciation, NBV). Exportable a Excel/ALV.</span><span class="en">Asset Balance: asset list with values (APC, depreciation, NBV). Exportable to Excel/ALV.</span></td></tr>
+        <tr><td>RAGITT_ALV01</td><td><span class="es">Asset History Sheet: informe legal mostrando movimientos de activos (adquisiciones, retiros, transferencias, depreciaci&oacute;n).</span><span class="en">Asset History Sheet: statutory report showing asset movements (acquisitions, retirements, transfers, depreciation).</span></td></tr>
+        <tr><td>RABEWG_ALV01</td><td><span class="es">Asset Transactions: lista de todas las transacciones contabilizadas en activos.</span><span class="en">Asset Transactions: list of all transactions posted to assets.</span></td></tr>
+        <tr><td>AW01N</td><td><strong>Asset Explorer:</strong> <span class="es">Visualizaci&oacute;n individual por activo. Valores por ejercicio, simulaci&oacute;n depreciation, documentos FI enlazados, call asset reports.</span><span class="en">Individual display per asset. Values per fiscal year, depreciation simulation, linked FI docs, call asset reports.</span></td></tr>
+        <tr><td>Asset Balances (Fiori)</td><td><span class="es">App anal&iacute;tica: balances por company code, depreciation area, segment, profit center. Key figure groups (adquisiciones, retiros, depreciaci&oacute;n). Navegaci&oacute;n integrada.</span><span class="en">Analytical app: balances by company code, depreciation area, segment, profit center. Key figure groups (acquisitions, retirements, depreciation). Integrated navigation.</span></td></tr>
+        <tr><td>Manage Fixed Assets (Fiori)</td><td><span class="es">Interfaz moderna para crear/gestionar activos. Vista integrada de valores y transacciones.</span><span class="en">Modern interface for creating/managing assets. Integrated view of values and transactions.</span></td></tr>
+      </table>
+      <div class="kv" style="margin-top:12px">
+        <span class="kv-k">Sort Variants</span><span class="kv-v"><span class="es">Definen criterios de ordenaci&oacute;n y totalizaci&oacute;n en informes ALV. Statistics indicator para desglose detallado por grupo. Compatible con RABEST, RAGITT y RABEWG.</span><span class="en">Define sorting and totaling criteria in ALV reports. Statistics indicator for detailed group breakdown. Compatible with RABEST, RAGITT, and RABEWG.</span></span>
+        <span class="kv-k">Key Figure Groups</span><span class="kv-v"><span class="es">Agrupan c&oacute;digos de indicadores clave (adquisiciones, retiros, transferencias, depreciaci&oacute;n) para personalizaci&oacute;n del reporting. Configurables en Customizing.</span><span class="en">Bundle key figure codes (acquisitions, retirements, transfers, depreciation) for reporting customization. Configurable in Customizing.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-green">&#128200;</div><span class="es">Analytics Architecture &mdash; CDS/VDM</span><span class="en">Analytics Architecture &mdash; CDS/VDM</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">CDS Views</span><span class="kv-v"><span class="es">Core Data Services: lenguaje universal para leer y transformar datos. Base del VDM. Desarrollados en ABAP, ejecutados en SAP HANA.</span><span class="en">Core Data Services: universal language to read and transform data. VDM base. Developed in ABAP, executed on SAP HANA.</span></span>
+        <span class="kv-k">Virtual Data Model (VDM)</span><span class="kv-v"><span class="es">Capa de representaci&oacute;n estructurada sobre las CDS views. Expone datos del &aacute;rea de Asset Accounting a las apps Fiori.</span><span class="en">Structured representation layer over CDS views. Exposes Asset Accounting data to Fiori apps.</span></span>
+        <span class="kv-k">3 tipos de usuario</span><span class="kv-v"><strong>IT user</strong> <span class="es">(desarrolla CDS views)</span><span class="en">(develops CDS views)</span> &middot; <strong>Analytics key user</strong> <span class="es">(crea queries/KPIs)</span><span class="en">(creates queries/KPIs)</span> &middot; <strong>Analytics end user</strong> <span class="es">(consume reports)</span><span class="en">(consumes reports)</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U6: LEGACY DATA TRANSFER ═══ -->
+<div class="view" id="u6">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num u6">U6</span>
+    <div>
+      <h2><span class="es">Legacy Data Transfer</span><span class="en">Legacy Data Transfer</span></h2>
+      <p><span class="es">Migration Cockpit &middot; Transfer Date &middot; Legacy Data Status &middot; Opening Balances</span><span class="en">Migration Cockpit &middot; Transfer Date &middot; Legacy Data Status &middot; Opening Balances</span></p>
+    </div>
+  </div>
+  <div class="exam-tip">
+    <div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Transfer date: normalmente 31 de diciembre del a&ntilde;o anterior. Legacy data transfer status: Ongoing (otros posteos permitidos). Document type: UE (Data Transfer). Migration Cockpit (Migrate Your Data): cargar master records + saldos de apertura. Configurar en SPRO antes de la transferencia.</p>
+    <p class="en">Transfer date: usually December 31 of prior year. Legacy data transfer status: Ongoing (other postings allowed). Document type: UE (Data Transfer). Migration Cockpit (Migrate Your Data): load master records + opening balances. Configure in SPRO before transfer.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="ci ci-amber">&#128230;</div><span class="es">Proceso de Transferencia de Datos Heredados</span><span class="en">Legacy Data Transfer Process</span></div>
+      <span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Herramienta</span><span class="kv-v"><span class="es">SAP S/4HANA Migration Cockpit &rarr; App <strong>Migrate Your Data</strong>. Mismo cockpit que para migraci&oacute;n general de datos (S4C03 Unit 11).</span><span class="en">SAP S/4HANA Migration Cockpit &rarr; <strong>Migrate Your Data</strong> app. Same cockpit as general data migration (S4C03 Unit 11).</span></span>
+        <span class="kv-k">Transfer Date</span><span class="kv-v"><span class="es">Normalmente 31 de diciembre del a&ntilde;o anterior. Define el punto de corte para valores heredados.</span><span class="en">Usually December 31 of prior year. Defines the cutoff point for legacy values.</span></span>
+        <span class="kv-k">Legacy Data Status</span><span class="kv-v"><span class="es"><strong>Ongoing (Other Postings Allowed)</strong>: permite contabilizaciones de activos mientras se transfieren los datos. Document type: <strong>UE</strong> (Data Transfer).</span><span class="en"><strong>Ongoing (Other Postings Allowed)</strong>: allows asset postings while data is being transferred. Document type: <strong>UE</strong> (Data Transfer).</span></span>
+        <span class="kv-k">Qu&eacute; se transfiere</span><span class="kv-v"><span class="es">1. Asset master records (datos maestros). 2. Opening balances (APC, accumulated depreciation, NBV al transfer date).</span><span class="en">1. Asset master records (master data). 2. Opening balances (APC, accumulated depreciation, NBV at transfer date).</span></span>
+        <span class="kv-k">Configuraci&oacute;n previa</span><span class="kv-v"><span class="es">SPRO &rarr; Financial Accounting &rarr; Asset Accounting &rarr; Asset Data Transfer. Definir par&aacute;metros de transferencia antes de cargar datos.</span><span class="en">SPRO &rarr; Financial Accounting &rarr; Asset Accounting &rarr; Asset Data Transfer. Define transfer parameters before loading data.</span></span>
+      </div>
+      <div class="alert alert-amber"><strong><span class="es">Nota de examen:</span><span class="en">Exam note:</span></strong> <span class="es">El migration cockpit de FI-AA es el mismo que se usa en S4C03. Los migration objects espec&iacute;ficos para activos incluyen Asset Master Records y Fixed Asset Values. Verificar en SAP Help Portal &rarr; Available Migration Objects.</span><span class="en">The FI-AA migration cockpit is the same as used in S4C03. Asset-specific migration objects include Asset Master Records and Fixed Asset Values. Check SAP Help Portal &rarr; Available Migration Objects.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EJERCICIOS ═══ -->
+<div class="view" id="ex">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--orange)">EJ</span>
+    <div>
+      <h2><span class="es">39 Ejercicios + Soluciones</span><span class="en">39 Exercises + Solutions</span></h2>
+      <p><span class="es">Sistema T41 &middot; Company Code TA## &middot; ## = n&uacute;mero de usuario &middot; 11 horas 50 min</span><span class="en">System T41 &middot; Company Code TA## &middot; ## = user number &middot; 11 hours 50 min</span></p>
+    </div>
+  </div>
+
+  <!-- UNIT 1 EXERCISES -->
+  <div class="sec-title"><span class="es">Unidad 1 &mdash; Organizational Structures (EJ 1&ndash;2)</span><span class="en">Unit 1 &mdash; Organizational Structures (EX 1&ndash;2)</span></div>
+
+  <div class="ex-card open">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ1</span>
+      <div class="ex-title">
+        <div><span class="es">Assign a Chart of Depreciation to a Company Code</span><span class="en">Assign a Chart of Depreciation to a Company Code</span></div>
+        <div class="ex-sub"><span class="es">Unidad 1 &middot; SPRO IMG &middot; ~45 min</span><span class="en">Unit 1 &middot; SPRO IMG &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="alert alert-green"><strong><span class="es">Objetivo:</span><span class="en">Objective:</span></strong> <span class="es">Crear un Chart of Depreciation (CoD) propio copi&aacute;ndolo de Z000, asignarlo al company code TA## y abrir los ejercicios fiscales necesarios.</span><span class="en">Create your own Chart of Depreciation (CoD) by copying Z000, assign it to company code TA##, and open the required fiscal years.</span></div>
+      <div class="sec-title">Task 1 &mdash; <span class="es">Crear Chart of Depreciation TA##</span><span class="en">Create Chart of Depreciation TA##</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; SAP Reference IMG &rarr; Financial Accounting &rarr; Asset Accounting &rarr; Organizational Structures &rarr; Copy Reference Chart of Depreciation/Depreciation Areas</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Copiar chart of depreciation <strong>Z000</strong> como <strong>TA##</strong>. Cambiar descripci&oacute;n a "Chart of Depreciation Group ##".</span><span class="en">Copy chart of depreciation <strong>Z000</strong> as <strong>TA##</strong>. Change description to "Chart of Depreciation Group ##".</span></div></div>
+      <div class="sec-title">Task 2 &mdash; <span class="es">Asignar CoD al Company Code</span><span class="en">Assign CoD to Company Code</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Asset Accounting &rarr; Organizational Structures &rarr; Assign Chart of Depreciation to Company Code</span><span class="es">Asignar <strong>TA##</strong> (CoD) al company code <strong>TA##</strong>.</span><span class="en">Assign <strong>TA##</strong> (CoD) to company code <strong>TA##</strong>.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Abrir el ejercicio fiscal <strong>actual (CY)</strong> en el company code TA##.</span><span class="en">Open the <strong>current fiscal year (CY)</strong> in company code TA##.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Abrir el <strong>ejercicio anterior (PY)</strong> para <strong>todas las depreciation areas y todos los ledgers</strong> del company code TA##.</span><span class="en">Open the <strong>previous year (PY)</strong> for <strong>all depreciation areas and all ledgers</strong> in company code TA##.</span></div></div>
+      <div class="alert alert-amber"><strong>Hint:</strong> <span class="es">En formaci&oacute;n, usar Z000 como template (copia del 0DE alem&aacute;n). En producci&oacute;n, copiar de la muestra de pa&iacute;s correspondiente (0DE, 0US, 0GB).</span><span class="en">In training, use Z000 as template (copy of German 0DE). In production, copy from the corresponding country sample (0DE, 0US, 0GB).</span></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ2</span>
+      <div class="ex-title">
+        <div><span class="es">Define Depreciation Areas and the Update of the General Ledger</span><span class="en">Define Depreciation Areas and the Update of the General Ledger</span></div>
+        <div class="ex-sub"><span class="es">Unidad 1 &middot; SPRO IMG &middot; ~30 min</span><span class="en">Unit 1 &middot; SPRO IMG &middot; ~30 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Depreciation &rarr; Valuation Methods &rarr; Define Depreciation Areas</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Revisar los posting indicators de las &aacute;reas existentes en TA##. Verificar: &Aacute;rea 01 (posting indicator 1 = real-time), &Aacute;rea 20 (0 = no G/L), &Aacute;rea 32 (6 = reporting only).</span><span class="en">Review posting indicators of existing areas in TA##. Verify: Area 01 (posting indicator 1 = real-time), Area 20 (0 = no G/L), Area 32 (6 = reporting only).</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Confirmar que cada &aacute;rea que publica al G/L tiene un <strong>accounting principle</strong> asignado.</span><span class="en">Confirm that each area posting to G/L has an <strong>accounting principle</strong> assigned.</span></div></div>
+    </div>
+  </div>
+
+  <!-- UNIT 2 EXERCISES -->
+  <div class="sec-title"><span class="es">Unidad 2 &mdash; Master Data (EJ 3&ndash;12)</span><span class="en">Unit 2 &mdash; Master Data (EX 3&ndash;12)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ3&ndash;4</span>
+      <div class="ex-title">
+        <div><span class="es">Number Assignment (EJ3) &amp; Account Determination (EJ4)</span><span class="en">Number Assignment (EX3) &amp; Account Determination (EX4)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 2 &middot; SPRO &middot; ~45 min</span><span class="en">Unit 2 &middot; SPRO &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ3 &mdash; <span class="es">Number Assignment (copiar de company code 1010)</span><span class="en">Number Assignment (copy from company code 1010)</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Organizational Structures &rarr; Asset Classes &rarr; Define Number Range Interval</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">En la pantalla "Edit Intervals: Asset Number", introducir company code <strong>1010</strong> &rarr; Intervals &rarr; <strong>Copy Subobject</strong>.</span><span class="en">In the "Edit Intervals: Asset Number" screen, enter company code <strong>1010</strong> &rarr; Intervals &rarr; <strong>Copy Subobject</strong>.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Di&aacute;logo "Copy: Company Code": From = <strong>1010</strong>, To = <strong>TA##</strong> &rarr; Continue &rarr; confirmar mensaje &rarr; verificar rangos copiados en TA##.</span><span class="en">"Copy: Company Code" dialog: From = <strong>1010</strong>, To = <strong>TA##</strong> &rarr; Continue &rarr; confirm message &rarr; verify copied ranges in TA##.</span></div></div>
+      <div class="alert alert-green"><strong><span class="es">Resultado:</span><span class="en">Result:</span></strong> <span class="es">Mensaje: "No.CoCode 1010 was copied to TA##". Los rangos de n&uacute;meros de la clase est&aacute;ndar quedan disponibles en TA##.</span><span class="en">Message: "No.CoCode 1010 was copied to TA##". Standard class number ranges are available in TA##.</span></div></div>
+      <div class="sub"><div class="sub-title">EJ4 &mdash; Account Determination (OAOA + Assign G/L Accounts)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Organizational Structures &rarr; Asset Classes &rarr; Define Asset Classes (OAOA)</span><span class="es"> T-code para overview de todas las asset classes.</span><span class="en"> T-code for overview of all asset classes.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Clase <strong>3000</strong> (Fixtures Fittings): number range interval = <strong>03</strong>.</span><span class="en">Class <strong>3000</strong> (Fixtures Fittings): number range interval = <strong>03</strong>.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Clase <strong>2000</strong> (Machinery and Equipment): account determination key = <strong>160020</strong>.</span><span class="en">Class <strong>2000</strong> (Machinery and Equipment): account determination key = <strong>160020</strong>.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Integration with General Ledger Accounting &rarr; Assign G/L Accounts</span><span class="es"> → chart YCOA → Account Determination → <strong>160020</strong> → Balance Sheet Accounts.</span><span class="en"> → chart YCOA → Account Determination → <strong>160020</strong> → Balance Sheet Accounts.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">APC balance sheet account (areas 01 y 32, chart YCOA) = <strong>16002000</strong> (Machinery &amp; Equipment).</span><span class="en">APC balance sheet account (areas 01 and 32, chart YCOA) = <strong>16002000</strong> (Machinery &amp; Equipment).</span></div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-body"><span class="es">Depreciation expense account para &aacute;rea 20 (cost accounting) = <strong>64050000</strong> (Estimated depreciation).</span><span class="en">Depreciation expense account for area 20 (cost accounting) = <strong>64050000</strong> (Estimated depreciation).</span></div></div>
+      <div class="alert alert-amber"><strong>Training values:</strong> <span class="es">160020, 16002000 y 64050000 son valores espec&iacute;ficos del sistema de formaci&oacute;n (chart YCOA). En producci&oacute;n, los valores var&iacute;an seg&uacute;n el chart of accounts del cliente.</span><span class="en">160020, 16002000 and 64050000 are training system-specific values (chart YCOA). In production, values vary per customer's chart of accounts.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ5&ndash;6</span>
+      <div class="ex-title">
+        <div><span class="es">Screen Layout Master Data (EJ5) &amp; Depreciation Areas (EJ6)</span><span class="en">Screen Layout Master Data (EX5) &amp; Depreciation Areas (EX6)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 2 &middot; SPRO &middot; ~45 min</span><span class="en">Unit 2 &middot; SPRO &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ5 &mdash; Screen Layout Master Data (Y200)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Master Data &rarr; Screen Layout &rarr; Define Screen Layout for Asset Master Data</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Asset class <strong>2000</strong> (Machinery and Equipment) usa screen layout rule <strong>Y200</strong> (General machines).</span><span class="en">Asset class <strong>2000</strong> (Machinery and Equipment) uses screen layout rule <strong>Y200</strong> (General machines).</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Verificar en Y200: field group 1-General Data &rarr; <strong>Description 1 = Required</strong>. Field group 3-Time-Dependent &rarr; <strong>Cost Center = Required</strong>.</span><span class="en">Verify in Y200: field group 1-General Data &rarr; <strong>Description 1 = Required</strong>. Field group 3-Time-Dependent &rarr; <strong>Cost Center = Required</strong>.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Verificar si Description 1 se <strong>copia del asset de referencia</strong>: campo "Copy" = <strong>NO activado</strong>. Description 1 NO se copia al crear con referencia.</span><span class="en">Check if Description 1 is <strong>copied from reference asset</strong>: "Copy" field = <strong>NOT checked</strong>. Description 1 is NOT copied when creating with reference.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ6 &mdash; Screen Layout Depreciation Areas (OAYZ / AO21)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; General Valuation &rarr; Determine the Depreciation Areas in the Asset Class (OAYZ)</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Seleccionar asset class <strong>2000</strong> &rarr; dialog structure: Depreciation areas. Depreciation key predeterminada: <strong>LINK</strong> para la mayor&iacute;a de &aacute;reas; <strong>LINA</strong> en &aacute;reas 20 y 15. Screen layout rule: <strong>2000</strong> en todas las &aacute;reas.</span><span class="en">Select asset class <strong>2000</strong> &rarr; dialog structure: Depreciation areas. Default depreciation key: <strong>LINK</strong> for most areas; <strong>LINA</strong> in areas 20 and 15. Screen layout rule: <strong>2000</strong> in all areas.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Master Data &rarr; Screen Layout &rarr; Define Screen Layout for Asset Depreciation Areas (AO21)</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Screen layout rule <strong>2000</strong> (Depr. on asset sub-no. level): campo Depreciation Key = <strong>Required entry field</strong>.</span><span class="en">Screen layout rule <strong>2000</strong> (Depr. on asset sub-no. level): Depreciation Key field = <strong>Required entry field</strong>.</span></div></div></div>
+      <div class="alert alert-amber"><strong>Hint:</strong> <span class="es">Clave: LINK = estándar para book/tax. LINA = para cost accounting (área 20) y local tax (área 15).</span><span class="en">Key: LINK = standard for book/tax. LINA = for cost accounting (area 20) and local tax (area 15).</span></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ7&ndash;9</span>
+      <div class="ex-title">
+        <div><span class="es">Copy Asset Classes (EJ7) &middot; Display Asset Class 4000 (EJ8) &middot; LVA (EJ9)</span><span class="en">Copy Asset Classes (EX7) &middot; Display Asset Class 4000 (EX8) &middot; LVA (EX9)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 2 &middot; SPRO &middot; ~60 min</span><span class="en">Unit 2 &middot; SPRO &middot; ~60 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ7 &mdash; <span class="es">Crear asset class MA## copiando clase 2000</span><span class="en">Create asset class MA## by copying class 2000</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Organizational Structures &rarr; Asset Classes &rarr; Define Asset Classes (OAOA)</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Seleccionar clase <strong>2000</strong> (Machinery and Equipment) &rarr; Edit &rarr; <strong>Copy As</strong>.</span><span class="en">Select class <strong>2000</strong> (Machinery and Equipment) &rarr; Edit &rarr; <strong>Copy As</strong>.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Sobrescribir "2000" con <strong>MA##</strong>. Description: <strong>"Special Machines Group ##"</strong>. Short text: <strong>"Special Machines ##"</strong> &rarr; Enter &rarr; Save.</span><span class="en">Overwrite "2000" with <strong>MA##</strong>. Description: <strong>"Special Machines Group ##"</strong>. Short text: <strong>"Special Machines ##"</strong> &rarr; Enter &rarr; Save.</span></div></div>
+      <div class="alert alert-amber"><strong>Hint:</strong> <span class="es">Copiar una clase existente genera un asset class COMPLETO (master data + depreciation data). Crear sin referencia solo genera la master data section.</span><span class="en">Copying an existing class generates a COMPLETE asset class (master data + depreciation data). Creating without reference only generates the master data section.</span></div></div>
+      <div class="sub"><div class="sub-title">EJ8 &mdash; <span class="es">Display Asset Class 4000 (line-item basis settlement)</span><span class="en">Display Asset Class 4000 (line-item basis settlement)</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Organizational Structures &rarr; Asset Classes &rarr; Define Asset Classes (OAOA)</span><span class="es"> → double-click clase 4000.</span><span class="en"> → double-click class 4000.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Campo "Status of AuC": la clase 4000 NO usa summary settlement sino <strong>line-item basis settlement</strong>. Diferencia clave respecto a otras clases est&aacute;ndar.</span><span class="en">"Status of AuC" field: class 4000 does NOT use summary settlement but <strong>line-item basis settlement</strong>. Key difference from other standard classes.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ9 &mdash; LVA &mdash; <span class="es">Definir m&aacute;ximo €800 en &aacute;rea 15 (OAY2)</span><span class="en">Define max €800 in area 15 (OAY2)</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; General Valuation &rarr; Amount Specifications &rarr; Specify Max. Amount for Low-Value Assets + Asset Classes</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Company code TA##, depreciation area <strong>15</strong>: m&aacute;ximo LVA = <strong>€800</strong>.</span><span class="en">Company code TA##, depreciation area <strong>15</strong>: max LVA = <strong>€800</strong>.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">Specify LVA Asset Classes (OAY2)</span><span class="es"> → class 5000 → "Low-val. asset check" → &aacute;rea 15 verifica contra valor m&aacute;ximo.</span><span class="en"> → class 5000 → "Low-val. asset check" → area 15 checks against max amount.</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ10&ndash;12</span>
+      <div class="ex-title">
+        <div><span class="es">Create Asset Master Records (EJ10) &middot; Change (EJ11) &middot; User Fields &amp; Mass Changes (EJ12)</span><span class="en">Create Asset Master Records (EX10) &middot; Change (EX11) &middot; User Fields &amp; Mass Changes (EX12)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 2 &middot; AS01 / AS02 / Fiori &middot; ~90 min</span><span class="en">Unit 2 &middot; AS01 / AS02 / Fiori &middot; ~90 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ10 &mdash; Create Asset Master Records (AS01)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Primero: cambiar par&aacute;metros de usuario para que TA## sea el company code por defecto.</span><span class="en">First: change user parameters to set TA## as default company code.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">AS01 &rarr; Fiori: Create Asset</span><span class="es"> Activos a crear (anotar los n&uacute;meros asignados):</span><span class="en"> Assets to create (note assigned numbers):</span></div></div>
+      <table style="margin:8px 0 8px 32px; width:calc(100% - 32px); font-size:11.5px">
+        <tr><th>Asset Class</th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th>Cost Center</th></tr>
+        <tr><td>3100 (Vehicles)</td><td>Forklift 1 Group ## · Forklift 2 Group ## (con referencia)</td><td>TA##1300</td></tr>
+        <tr><td>3000 (Fixtures)</td><td>Photocopier ##</td><td>TA##1400</td></tr>
+        <tr><td>3200 (Computers)</td><td>PC 01 a PC 05 (5 registros similares, inv. 0001–0005)</td><td>TA##1100</td></tr>
+        <tr><td>1100 (Buildings)</td><td>2 registros</td><td>TA##1100</td></tr>
+        <tr><td>2000 (Machines)</td><td>Machine 01 a Machine 10 (inv. 01–10)</td><td>TA##1100</td></tr>
+        <tr><td>3000 (Fixtures)</td><td>One 3D Printer</td><td>TA##1100</td></tr>
+        <tr><td>3100 (Vehicles)</td><td>Company Car ## (1) y Company Car ## (2)</td><td>TA##1100</td></tr>
+        <tr><td>4000 (AuC)</td><td>AuC Group ##</td><td>TA##1100</td></tr>
+        <tr><td>MA## (Special)</td><td>Special Machine 01 a Special Machine 03</td><td>TA##1100</td></tr>
+        <tr><td>5000 (LVA)</td><td>Coffee Machine</td><td>TA##1100</td></tr>
+      </table>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Tambi&eacute;n crear: <strong>Car 3000 Group ##</strong> en clase <strong>3000</strong> con cost center TA##1300 (ejercicio de error intencional &rarr; para transferir a clase correcta en EJ18).</span><span class="en">Also create: <strong>Car 3000 Group ##</strong> in class <strong>3000</strong> with cost center TA##1300 (intentional error exercise &rarr; to transfer to correct class in EX18).</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Verificar con: Fiori <strong>Directory of Unposted Assets</strong> (S_ALR_87012056) &rarr; Company Code TA##, Sort Variant 0013.</span><span class="en">Verify with: Fiori <strong>Directory of Unposted Assets</strong> (S_ALR_87012056) &rarr; Company Code TA##, Sort Variant 0013.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ11 &mdash; Change Asset Master Records (AS02)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">AS02 &rarr; introducir n&uacute;mero de activo &rarr; Enter</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Modificar datos time-dependent: cambiar cost center con fecha de inicio efectiva (crear nuevo intervalo). Sistema genera change document autom&aacute;ticamente.</span><span class="en">Modify time-dependent data: change cost center with effective start date (create new interval). System automatically generates change document.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ12 &mdash; User Fields &amp; Mass Changes</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; Asset Accounting &rarr; Master Data &rarr; Define User Fields for Asset Master Records</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Mass changes: seleccionar assets via report → crear worklist → modificar campos de forma masiva (ej: cambiar cost center a todos los assets de una clase).</span><span class="en">Mass changes: select assets via report → create worklist → modify fields in bulk (e.g., change cost center for all assets in a class).</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- UNIT 3 EXERCISES -->
+  <div class="sec-title"><span class="es">Unidad 3 &mdash; Asset Transactions (EJ 13&ndash;22)</span><span class="en">Unit 3 &mdash; Asset Transactions (EX 13&ndash;22)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ13</span>
+      <div class="ex-title">
+        <div><span class="es">Post an Integrated Asset Acquisition &amp; Asset Explorer (AW01N)</span><span class="en">Post an Integrated Asset Acquisition &amp; Asset Explorer (AW01N)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; F-90 / AW01N &middot; ~45 min</span><span class="en">Unit 3 &middot; F-90 / AW01N &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="alert alert-green"><strong><span class="es">Objetivo:</span><span class="en">Objective:</span></strong> <span class="es">Contabilizar la adquisici&oacute;n de un activo integrada con Accounts Payable y analizar los valores en el Asset Explorer.</span><span class="en">Post an asset acquisition integrated with Accounts Payable and analyze values in the Asset Explorer.</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Ir a la app <strong>Post Acquisition</strong> (F-90) o Fiori: <strong>Acquire Assets from Vendor</strong>.</span><span class="en">Go to <strong>Post Acquisition</strong> app (F-90) or Fiori: <strong>Acquire Assets from Vendor</strong>.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Introducir datos: Company Code TA##, Document Date (fecha actual), Posting Date, Asset Value Date. Vendor (proveedor). Amount (importe de adquisici&oacute;n). Asset number (tu activo Company Car S4F17-##).</span><span class="en">Enter data: Company Code TA##, Document Date (current date), Posting Date, Asset Value Date. Vendor. Amount (acquisition amount). Asset number (your Company Car S4F17-##).</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Simulate &rarr; Post.</strong> <span class="es">Anotar n&uacute;mero de documento FI.</span><span class="en">Note FI document number.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">AW01N &rarr; Company Code TA## &rarr; Asset number &rarr; Enter</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Analizar en Asset Explorer: tab <strong>Posted Values</strong> (valores actuales), tab <strong>Planned Values</strong> (depreciaci&oacute;n simulada), tab <strong>Comparisons</strong>. Double-click en transacci&oacute;n → ver documento FI.</span><span class="en">Analyze in Asset Explorer: <strong>Posted Values</strong> tab (current values), <strong>Planned Values</strong> tab (simulated depreciation), <strong>Comparisons</strong> tab. Double-click on transaction → view FI document.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ14</span>
+      <div class="ex-title">
+        <div><span class="es">Analyze Asset Value in SAP Fiori App &ldquo;Manage Fixed Assets&rdquo;</span><span class="en">Analyze Asset Value in SAP Fiori App &ldquo;Manage Fixed Assets&rdquo;</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; Fiori &middot; ~20 min</span><span class="en">Unit 3 &middot; Fiori &middot; ~20 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Fiori Launchpad &rarr; tile <strong>Manage Fixed Assets</strong>.</span><span class="en">Fiori Launchpad &rarr; <strong>Manage Fixed Assets</strong> tile.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Filtrar por Company Code TA## &rarr; buscar el activo Company Car S4F17-## &rarr; seleccionar.</span><span class="en">Filter by Company Code TA## &rarr; search for Company Car S4F17-## asset &rarr; select.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Revisar: valores por depreciation area, transacciones, valores planificados de depreciaci&oacute;n. Comparar con lo visto en AW01N.</span><span class="en">Review: values per depreciation area, transactions, planned depreciation values. Compare with AW01N results.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ15</span>
+      <div class="ex-title">
+        <div><span class="es">Non-Integrated Asset Acquisition Postings (ABZOL)</span><span class="en">Non-Integrated Asset Acquisition Postings (ABZOL)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; ABZOL &middot; ~45 min</span><span class="en">Unit 3 &middot; ABZOL &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Fiori: Post Acquisition (Non-Integrated) With Automatic Offsetting Entry &rarr; transacci&oacute;n ABZOL</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Introducir datos:</span><span class="en">Enter data:</span><br>
+        Company Code: <strong>TA##</strong> &middot; Asset: <span class="es">n&uacute;mero de activo</span><span class="en">asset number</span><br>
+        Document Date / Posting Date / Asset Value Date<br>
+        Amount: <span class="es">importe de la adquisici&oacute;n</span><span class="en">acquisition amount</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Simulate &rarr; Post.</strong> <span class="es">Verificar en AW01N los nuevos valores del activo.</span><span class="en">Verify new asset values in AW01N.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Repetir para adquisiciones en a&ntilde;o anterior (PY): usar Document Date/Posting Date/Asset Value Date del a&ntilde;o anterior.</span><span class="en">Repeat for prior-year acquisitions (PY): use prior-year Document Date/Posting Date/Asset Value Date.</span></div></div>
+      <div class="alert alert-amber"><strong>Hint:</strong> <span class="es">Sin integración con vendedor/AP. La cuenta de compensación autom&aacute;tica se usa como contrapartida. Ideal para adquisiciones directas o sin factura de proveedor.</span><span class="en">No integration with vendor/AP. The automatic offsetting account is used as the counterpart. Ideal for direct acquisitions or without vendor invoice.</span></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ16</span>
+      <div class="ex-title">
+        <div><span class="es">Make Postings Integrated with Materials Management (MM) — Opcional</span><span class="en">Make Postings Integrated with Materials Management (MM) — Optional</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; ME21N / MIRO &middot; ~60 min &middot; Opcional</span><span class="en">Unit 3 &middot; ME21N / MIRO &middot; ~60 min &middot; Optional</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Crear Purchase Order (PO) en MM: <strong>ME21N</strong> o Fiori <strong>Create Purchase Order</strong>. Asignar el activo al item del PO (account assignment category = A).</span><span class="en">Create Purchase Order (PO) in MM: <strong>ME21N</strong> or Fiori <strong>Create Purchase Order</strong>. Assign the asset to the PO item (account assignment category = A).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Realizar Goods Receipt (GR): <strong>MIGO</strong>. Si el GR es valuated, el activo se capitaliza en este momento.</span><span class="en">Perform Goods Receipt (GR): <strong>MIGO</strong>. If GR is valuated, the asset is capitalized at this point.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Invoice Verification: <strong>MIRO</strong>. Si GR no es valuated, el activo se capitaliza aqu&iacute;.</span><span class="en">Invoice Verification: <strong>MIRO</strong>. If GR is not valuated, the asset is capitalized here.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ17</span>
+      <div class="ex-title">
+        <div><span class="es">Post Integrated Asset Retirements with Accounts Receivable (AR)</span><span class="en">Post Integrated Asset Retirements with Accounts Receivable (AR)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; F-92 / Fiori &middot; ~45 min</span><span class="en">Unit 3 &middot; F-92 / Fiori &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Fiori: <strong>Post Asset Retirement by Selling</strong> (transacci&oacute;n F-92).</span><span class="en">Fiori: <strong>Post Asset Retirement by Selling</strong> (transaction F-92).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Datos: Company Code TA##, Customer (cliente), Document Date/Posting Date. Asset number (activo a retirar), Price (precio de venta), Asset Value Date.</span><span class="en">Data: Company Code TA##, Customer, Document Date/Posting Date. Asset number (asset to retire), Price (sale price), Asset Value Date.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Simulate &rarr; Post.</strong> <span class="es">Verificar: sistema calcula ganancia/p&eacute;rdida = precio venta − valor neto contable. Ver resultado en AW01N.</span><span class="en">Verify: system calculates gain/loss = sale price − net book value. View result in AW01N.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ18&ndash;19</span>
+      <div class="ex-title">
+        <div><span class="es">Transfer Assets Within Company Code (EJ18) &amp; Intercompany Gross Method (EJ19)</span><span class="en">Transfer Assets Within Company Code (EX18) &amp; Intercompany Gross Method (EX19)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; ABUMN / ABT1L &middot; ~90 min</span><span class="en">Unit 3 &middot; ABUMN / ABT1L &middot; ~90 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ18 &mdash; Intracompany Transfer (ABUMN)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Fiori: <strong>Transfer Asset Within Company Code</strong> (ABUMN). Source asset → Target asset (nuevo o existente). Transfer variant 4 = est&aacute;ndar para intracompany.</span><span class="en">Fiori: <strong>Transfer Asset Within Company Code</strong> (ABUMN). Source asset → Target asset (new or existing). Transfer variant 4 = standard for intracompany.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Casos de uso: activo en clase incorrecta, split, liquidaci&oacute;n de AuC. Verificar en AW01N de ambos activos.</span><span class="en">Use cases: asset in wrong class, split, AuC settlement. Verify in AW01N of both assets.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ19 &mdash; Intercompany Transfer Gross Method (ABT1L)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Fiori: <strong>Transfer Asset to Another Company Code</strong> (ABT1L). Source: Company Code TA## / Asset. Target: Company Code TAAA (empresa destino).</span><span class="en">Fiori: <strong>Transfer Asset to Another Company Code</strong> (ABT1L). Source: Company Code TA## / Asset. Target: Company Code TAAA (target company).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">M&eacute;todo gross: los valores hist&oacute;ricos se transfieren autom&aacute;ticamente. No se introduce precio de venta. Asset value date = 1 de enero del a&ntilde;o actual.</span><span class="en">Gross method: historical values automatically transferred. No sale price entered. Asset value date = January 1 of current year.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Post → verificar cross-company number. Mostrar asset en company code TAAA con AW01N.</span><span class="en">Post → verify cross-company number. Display asset in company code TAAA with AW01N.</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ20</span>
+      <div class="ex-title">
+        <div><span class="es">Settle a WBS Element to an Asset Under Construction (AuC)</span><span class="en">Settle a WBS Element to an Asset Under Construction (AuC)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; CJ20N / AIAB / AIBU &middot; ~60 min</span><span class="en">Unit 3 &middot; CJ20N / AIAB / AIBU &middot; ~60 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Revisar el WBS element asignado al activo AuC en el master record (tab Origin o Time-Dependent).</span><span class="en">Review the WBS element assigned to the AuC asset in the master record (Origin or Time-Dependent tab).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Contabilizar costes al WBS element (simulando adquisiciones del proyecto).</span><span class="en">Post costs to the WBS element (simulating project acquisitions).</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">Fiori: Define Distribution Rules For AuC (AIAB)</span><span class="es"> → definir reglas de distribuci&oacute;n para cada l&iacute;nea hacia los activos finales (Machine ##).</span><span class="en"> → define distribution rules for each line to final assets (Machine ##).</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">Fiori: Settle Assets Under Construction (AIBU)</span><span class="es"> → ejecutar Test Run → luego Update Run. Verificar que el AuC queda con Net Book Value = 0.</span><span class="en"> → run Test Run → then Update Run. Verify AuC has Net Book Value = 0.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ21</span>
+      <div class="ex-title">
+        <div><span class="es">Create and Post to AuC and Settle It to Completed Assets — Opcional</span><span class="en">Create and Post to AuC and Settle It to Completed Assets — Optional</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; ABZOL / AIAB / AIBU &middot; ~90 min &middot; Opcional</span><span class="en">Unit 3 &middot; ABZOL / AIAB / AIBU &middot; ~90 min &middot; Optional</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Asignar settlement profile <strong>YB00AI</strong> al company code TA## en Customizing.</span><span class="en">Assign settlement profile <strong>YB00AI</strong> to company code TA## in Customizing.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Contabilizar 3 adquisiciones al AuC (clase 4000) con ABZOL:</span><span class="en">Post 3 acquisitions to AuC (class 4000) with ABZOL:</span><br>
+        Jan 1, PY: <strong>10,000</strong> &middot; Oct 1, PY: <strong>60,000</strong> &middot; Feb 1, CY: <strong>35,000</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Definir reglas de distribuci&oacute;n (AIAB): 60,000 al 100% → Machine 07. El resto: 70% → Machine 08, 30% → Machine 09.</span><span class="en">Define distribution rules (AIAB): 60,000 at 100% → Machine 07. Remainder: 70% → Machine 08, 30% → Machine 09.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Liquidar (AIBU): Test Run → Update Run → verificar AuC = 0. Layout SAP est&aacute;ndar 3SAP en line item list.</span><span class="en">Settle (AIBU): Test Run → Update Run → verify AuC = 0. SAP standard layout 3SAP in line item list.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ22</span>
+      <div class="ex-title">
+        <div><span class="es">Post Unplanned Depreciation (ABAAL)</span><span class="en">Post Unplanned Depreciation (ABAAL)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 3 &middot; ABAAL &middot; ~30 min</span><span class="en">Unit 3 &middot; ABAAL &middot; ~30 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Fiori: <strong>Post Depreciation Manually Unplanned and Planned</strong> (ABAAL). Company Code TA##. Seleccionar el segundo Forklift ## (a&ntilde;o anterior).</span><span class="en">Fiori: <strong>Post Depreciation Manually Unplanned and Planned</strong> (ABAAL). Company Code TA##. Select the second Forklift ## (prior year).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Introducir importes: importe en &Aacute;rea 01 (book) mayor que en &Aacute;rea 20 (cost accounting). Asset value date = fecha actual.</span><span class="en">Enter amounts: amount in Area 01 (book) higher than in Area 20 (cost accounting). Asset value date = current date.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Post.</strong> <span class="es">Verificar en AW01N: al hacer doble click en la transacci&oacute;n, <strong>NO hay documento FI</strong> (solo se crea cuando se ejecute el depreciation run).</span><span class="en">Verify in AW01N: double-clicking the transaction shows <strong>NO FI document</strong> (only created when depreciation run executes).</span></div></div>
+      <div class="alert alert-red"><strong>&#9888;&#65039; <span class="es">Cr&iacute;tico:</span><span class="en">Critical:</span></strong> <span class="es">Unplanned depreciation programada manualmente NO genera documento FI. El FI doc se genera &uacute;nicamente cuando se ejecuta el <strong>Depreciation Posting Program</strong>.</span><span class="en">Manually scheduled unplanned depreciation does NOT generate an FI document. The FI doc is only generated when the <strong>Depreciation Posting Program</strong> runs.</span></div>
+    </div>
+  </div>
+
+  <!-- UNIT 4 EXERCISES -->
+  <div class="sec-title"><span class="es">Unidad 4 &mdash; Periodic Processing &amp; Valuation (EJ 23&ndash;33)</span><span class="en">Unit 4 &mdash; Periodic Processing &amp; Valuation (EX 23&ndash;33)</span></div>
+  <div class="alert alert-blue" style="margin-bottom:12px">
+    <span class="es"><strong>EJ23</strong> Analyze Depreciation Areas &middot; <strong>EJ24</strong> Maintain Depreciation Keys (AFAMA) &middot; <strong>EJ25</strong> Time-Dependent Depreciation Parameters &middot; <strong>EJ26</strong> Cost-Accounting Depreciation Area &middot; <strong>EJ29</strong> Investment Support (liabilities side) &middot; <strong>EJ30</strong> Parallel Accounting &middot; <strong>EJ31</strong> Ledger Approach &middot; <strong>EJ32</strong> Account Approach &middot; <strong>EJ33</strong> Unilateral Asset Postings</span>
+    <span class="en"><strong>EX23</strong> Analyze Depreciation Areas &middot; <strong>EX24</strong> Maintain Depreciation Keys (AFAMA) &middot; <strong>EX25</strong> Time-Dependent Depreciation Parameters &middot; <strong>EX26</strong> Cost-Accounting Depreciation Area &middot; <strong>EX29</strong> Investment Support (liabilities side) &middot; <strong>EX30</strong> Parallel Accounting &middot; <strong>EX31</strong> Ledger Approach &middot; <strong>EX32</strong> Account Approach &middot; <strong>EX33</strong> Unilateral Asset Postings</span>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ27</span>
+      <div class="ex-title">
+        <div><span class="es">Execute and Analyze the Depreciation Run</span><span class="en">Execute and Analyze the Depreciation Run</span></div>
+        <div class="ex-sub"><span class="es">Unidad 4 &middot; Schedule Asset Accounting Jobs &middot; ~60 min</span><span class="en">Unit 4 &middot; Schedule Asset Accounting Jobs &middot; ~60 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Verificar prerequisito: objetos de imputaci&oacute;n CO activos en Customizing. Cost Center (KOSTL) e Internal Order (CAUFN) deben estar activos.</span><span class="en">Verify prerequisite: CO account assignment objects active in Customizing. Cost Center (KOSTL) and Internal Order (CAUFN) must be active.</span><span class="step-path">Asset Accounting &rarr; Integration with GL &rarr; Additional Account Assignment Objects &rarr; Activate Account Assignment Objects</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Fiori Launchpad → General Ledger → Closing → <strong>Schedule Asset Accounting Jobs</strong> → Create.</span><span class="en">Fiori Launchpad → General Ledger → Closing → <strong>Schedule Asset Accounting Jobs</strong> → Create.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Job Template: <strong>Depreciation Posting Run</strong>. Job Name: Depreciation Posting ## Test.</span><span class="en">Job Template: <strong>Depreciation Posting Run</strong>. Job Name: Depreciation Posting ## Test.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Step 2: Start Immediately. Step 3: Company Code TA##, Fiscal Year: <strong>Previous year</strong>, Posting Period: <strong>01</strong>, <strong>Test Run: SELECT</strong>, Detailed Log: SELECT → Schedule → Go.</span><span class="en">Step 2: Start Immediately. Step 3: Company Code TA##, Fiscal Year: <strong>Previous year</strong>, Posting Period: <strong>01</strong>, <strong>Test Run: SELECT</strong>, Detailed Log: SELECT → Schedule → Go.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Revisar spool output del test run. Verificar errores. Si OK → Copy del test run → cambiar Posting Period a <strong>12</strong> → Schedule nuevo test para todo el a&ntilde;o.</span><span class="en">Review test run spool output. Check for errors. If OK → Copy test run → change Posting Period to <strong>12</strong> → Schedule new test for full year.</span></div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-body"><span class="es">Update Run: Copy del test run → Job Name: Depreciation Posting ## UPDATE &lt;PY&gt; → <strong>Test Run: DESELECT</strong> → Schedule → Go → revisar resultado.</span><span class="en">Update Run: Copy test run → Job Name: Depreciation Posting ## UPDATE &lt;PY&gt; → <strong>Test Run: DESELECT</strong> → Schedule → Go → review result.</span></div></div>
+      <div class="step"><div class="step-num">7</div><div class="step-body"><span class="es">Verificar documentos FI: Manage Journal Entries → Company Code TA##, Journal Entry Type: <strong>AF</strong>, Fiscal Year: PY.</span><span class="en">Verify FI documents: Manage Journal Entries → Company Code TA##, Journal Entry Type: <strong>AF</strong>, Fiscal Year: PY.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ28</span>
+      <div class="ex-title">
+        <div><span class="es">Execute Year-End Closing in Asset Accounting (FAA_CMP)</span><span class="en">Execute Year-End Closing in Asset Accounting (FAA_CMP)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 4 &middot; FAA_CMP / Schedule Asset Accounting Jobs &middot; ~45 min</span><span class="en">Unit 4 &middot; FAA_CMP / Schedule Asset Accounting Jobs &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="alert alert-amber"><strong>Prerequisito:</strong> <span class="es">Depreciaci&oacute;n completamente contabilizada para todos los per&iacute;odos del a&ntilde;o anterior y G/L Balance Carryforward ejecutado.</span><span class="en">Depreciation fully posted for all periods of previous year and G/L Balance Carryforward executed.</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Verificar que el ejercicio anterior a&uacute;n no est&aacute; cerrado: Periodic Activities tile → <strong>Execute/Undo Year-End Closing</strong> (FAA_CMP) → double-click TA## → ver columna Closed Fiscal Year (debe ser CY-2, no CY-1).</span><span class="en">Verify prior year is not yet closed: Periodic Activities tile → <strong>Execute/Undo Year-End Closing</strong> (FAA_CMP) → double-click TA## → view Closed Fiscal Year column (should be CY-2, not CY-1).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Ejecutar year-end closing: <strong>Schedule Asset Accounting Jobs</strong> → template <strong>Year-End Closing Asset Accounting</strong> → Company Code TA## → Schedule.</span><span class="en">Execute year-end closing: <strong>Schedule Asset Accounting Jobs</strong> → template <strong>Year-End Closing Asset Accounting</strong> → Company Code TA## → Schedule.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Configurar Legacy Data Transfer Status: Transfer Date = Dec 31, PY. Status = <strong>Ongoing (Other Postings Allowed)</strong>. Document Type = <strong>UE</strong>.</span><span class="en">Set Legacy Data Transfer Status: Transfer Date = Dec 31, PY. Status = <strong>Ongoing (Other Postings Allowed)</strong>. Document Type = <strong>UE</strong>.</span></div></div>
+    </div>
+  </div>
+
+  <!-- UNIT 5 EXERCISES -->
+  <div class="sec-title"><span class="es">Unidad 5 &mdash; Reporting (EJ 34&ndash;38)</span><span class="en">Unit 5 &mdash; Reporting (EX 34&ndash;38)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ34&ndash;38</span>
+      <div class="ex-title">
+        <div><span class="es">Asset Portfolio (34) &middot; Asset Balance Fiori (35) &middot; Depreciation Forecast (36) &middot; Asset History Sheet (37) &middot; Analysis for MS Office (38)</span><span class="en">Asset Portfolio (34) &middot; Asset Balance Fiori (35) &middot; Depreciation Forecast (36) &middot; Asset History Sheet (37) &middot; Analysis for MS Office (38)</span></div>
+        <div class="ex-sub"><span class="es">Unidad 5 &middot; RABEST / Fiori / RAGITT &middot; ~90 min</span><span class="en">Unit 5 &middot; RABEST / Fiori / RAGITT &middot; ~90 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="kv">
+        <span class="kv-k">EJ34 &mdash; Asset Portfolio</span><span class="kv-v"><span class="step-path">RABEST_ALV01: Accounting &rarr; FI &rarr; Fixed Assets &rarr; Info System &rarr; Asset Balances</span><span class="es"> Filtro: Company Code TA##, Dep. Area 01. Sort variant para agrupar por asset class.</span><span class="en"> Filter: Company Code TA##, Dep. Area 01. Sort variant to group by asset class.</span></span>
+        <span class="kv-k">EJ35 &mdash; Fiori App</span><span class="kv-v"><span class="es">Fiori: <strong>Asset Balances</strong>. Filtros: Company Code TA##, Depreciation Area, Segment, Profit Center. Explorar key figure groups. Navegar a activos individuales desde el informe.</span><span class="en">Fiori: <strong>Asset Balances</strong>. Filters: Company Code TA##, Depreciation Area, Segment, Profit Center. Explore key figure groups. Navigate to individual assets from the report.</span></span>
+        <span class="kv-k">EJ36 &mdash; Depreciation Forecast</span><span class="kv-v"><span class="es">Fiori: <strong>Depreciation Lists</strong>. Datos: Fiscal Year=PY, To Period=12, Variant=Ordinary Depreciation, Company Code=TA##, Ledger=0L, Dep. Area=32.</span><span class="en">Fiori: <strong>Depreciation Lists</strong>. Data: Fiscal Year=PY, To Period=12, Variant=Ordinary Depreciation, Company Code=TA##, Ledger=0L, Dep. Area=32.</span></span>
+        <span class="kv-k">EJ37 &mdash; Asset History Sheet</span><span class="kv-v"><span class="step-path">RAGITT_ALV01: Fixed Assets &rarr; Info System &rarr; Asset History Sheet</span><span class="es"> Informe legal de movimientos: adquisiciones, retiros, transfers, depreciaci&oacute;n, NBV.</span><span class="en"> Statutory movement report: acquisitions, retirements, transfers, depreciation, NBV.</span></span>
+        <span class="kv-k">EJ38 &mdash; MS Office</span><span class="kv-v"><span class="es">Export desde informe ALV a Excel para an&aacute;lisis adicional. SAP Analysis for Microsoft Office (Add-in de Excel) para an&aacute;lisis avanzado.</span><span class="en">Export from ALV report to Excel for additional analysis. SAP Analysis for Microsoft Office (Excel Add-in) for advanced analysis.</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIT 6 EXERCISE -->
+  <div class="sec-title"><span class="es">Unidad 6 &mdash; Legacy Data Transfer (EJ 39)</span><span class="en">Unit 6 &mdash; Legacy Data Transfer (EX 39)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)">
+      <span class="ex-num">EJ39</span>
+      <div class="ex-title">
+        <div><span class="es">Use the Migration Cockpit for Asset Legacy Data</span><span class="en">Use the Migration Cockpit for Asset Legacy Data</span></div>
+        <div class="ex-sub"><span class="es">Unidad 6 &middot; Migrate Your Data &middot; ~45 min</span><span class="en">Unit 6 &middot; Migrate Your Data &middot; ~45 min</span></div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Verificar configuraci&oacute;n previa: SPRO → Asset Accounting → Asset Data Transfer → configurar par&aacute;metros de transferencia.</span><span class="en">Verify prerequisites: SPRO → Asset Accounting → Asset Data Transfer → configure transfer parameters.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Fiori: Migrate Your Data &rarr; Create &rarr; Staging Tables &rarr; Local SAP S/4HANA DB Schema</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Seleccionar migration objects: <strong>Asset Master Records</strong> y <strong>Fixed Asset Values</strong>. Download template XML → rellenar en Excel (Paste Values Only) → Upload.</span><span class="en">Select migration objects: <strong>Asset Master Records</strong> and <strong>Fixed Asset Values</strong>. Download XML template → fill in Excel (Paste Values Only) → Upload.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Prepare → Mapping Tasks → Simulate → Migrate.</strong></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Establecer Legacy Data Transfer Status: Transfer Date = <strong>Dec 31, PY</strong>. Status = <strong>Ongoing (Other Postings Allowed)</strong>. Document Type = <strong>UE</strong>.</span><span class="en">Set Legacy Data Transfer Status: Transfer Date = <strong>Dec 31, PY</strong>. Status = <strong>Ongoing (Other Postings Allowed)</strong>. Document Type = <strong>UE</strong>.</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ QUICK REFERENCE ═══ -->
+<div class="view" id="qr">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--purple)">QR</span>
+    <div><h2>Quick Reference &mdash; S4F17</h2><p><span class="es">Transacciones, apps Fiori y recursos clave</span><span class="en">Transactions, Fiori apps, and key resources</span></p></div>
+  </div>
+  <div class="sec-title"><span class="es">Transacciones SAP GUI</span><span class="en">SAP GUI Transactions</span></div>
+  <table>
+    <tr><th>T-Code</th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">&Aacute;rea</span><span class="en">Area</span></th></tr>
+    <tr><td>AS01</td><td><span class="es">Crear activo. Fiori: Create Asset.</span><span class="en">Create asset. Fiori: Create Asset.</span></td><td>Master</td></tr>
+    <tr><td>AS02</td><td><span class="es">Modificar activo. Fiori: Change Asset.</span><span class="en">Change asset. Fiori: Change Asset.</span></td><td>Master</td></tr>
+    <tr><td>AS03</td><td><span class="es">Visualizar activo. Fiori: Display Asset.</span><span class="en">Display asset. Fiori: Display Asset.</span></td><td>Master</td></tr>
+    <tr><td>AW01N</td><td><span class="es">Asset Explorer: valores del activo por ejercicio, transacciones, depreciaci&oacute;n simulada. Fiori: Asset Values.</span><span class="en">Asset Explorer: asset values per fiscal year, transactions, simulated depreciation. Fiori: Asset Values.</span></td><td>Reporting</td></tr>
+    <tr><td>ABZOL</td><td><span class="es">Adquisici&oacute;n no integrada con cuenta de compensaci&oacute;n autom&aacute;tica.</span><span class="en">Non-integrated acquisition with automatic offsetting entry.</span></td><td>Transactions</td></tr>
+    <tr><td>F-90</td><td><span class="es">Adquisici&oacute;n integrada con Accounts Payable (AP).</span><span class="en">Integrated acquisition with Accounts Payable (AP).</span></td><td>Transactions</td></tr>
+    <tr><td>ABAVN</td><td><span class="es">Retiro por baja (sin ingreso). Scrap retirement.</span><span class="en">Retirement by scrapping (without revenue).</span></td><td>Transactions</td></tr>
+    <tr><td>F-92</td><td><span class="es">Retiro integrado con AR (con ingreso por venta).</span><span class="en">Integrated retirement with AR (with sale revenue).</span></td><td>Transactions</td></tr>
+    <tr><td>ABUMN</td><td><span class="es">Transferencia dentro del mismo company code (intracompany). Transfer variant 4.</span><span class="en">Transfer within the same company code (intracompany). Transfer variant 4.</span></td><td>Transactions</td></tr>
+    <tr><td>ABT1L</td><td><span class="es">Transferencia intercompany (entre company codes).</span><span class="en">Intercompany transfer (between company codes).</span></td><td>Transactions</td></tr>
+    <tr><td>ABAAL</td><td><span class="es">Contabilizar depreciaci&oacute;n no planificada manualmente. NO crea FI doc hasta el depreciation run.</span><span class="en">Post unplanned depreciation manually. Does NOT create FI doc until depreciation run.</span></td><td>Transactions</td></tr>
+    <tr><td>ABIF</td><td><span class="es">Contabilizaci&oacute;n manual de investment support measures.</span><span class="en">Manual posting of investment support measures.</span></td><td>Periodic</td></tr>
+    <tr><td>AIAB</td><td><span class="es">Definir reglas de distribuci&oacute;n para AuC (liquidaci&oacute;n).</span><span class="en">Define distribution rules for AuC (settlement).</span></td><td>Transactions</td></tr>
+    <tr><td>AIBU</td><td><span class="es">Liquidar Assets Under Construction a activos completados.</span><span class="en">Settle Assets Under Construction to completed assets.</span></td><td>Transactions</td></tr>
+    <tr><td>AFAMA</td><td><span class="es">Mantener Depreciation Keys. Configura los 5 m&eacute;todos de c&aacute;lculo.</span><span class="en">Maintain Depreciation Keys. Configures the 5 calculation methods.</span></td><td>Customizing</td></tr>
+    <tr><td>FAA_CMP</td><td><span class="es">Year-End Closing de FI-AA. Verificar y actualizar &uacute;ltimo ejercicio cerrado. Bloquea posteos futuros.</span><span class="en">FI-AA Year-End Closing. Verify and update last closed fiscal year. Blocks future postings.</span></td><td>Periodic</td></tr>
+    <tr><td>RABEST_ALV01</td><td>Asset Balance report (ALV). <span class="es">Lista de activos con valores.</span><span class="en">Asset list with values.</span></td><td>Reporting</td></tr>
+    <tr><td>RAGITT_ALV01</td><td>Asset History Sheet (ALV). <span class="es">Informe legal de movimientos.</span><span class="en">Statutory movement report.</span></td><td>Reporting</td></tr>
+    <tr><td>RABEWG_ALV01</td><td>Asset Transactions report (ALV).</td><td>Reporting</td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:20px"><span class="es">Apps Fiori Clave</span><span class="en">Key Fiori Apps</span></div>
+  <table>
+    <tr><th><span class="es">App</span><span class="en">App</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th></tr>
+    <tr><td>Asset Values</td><td><span class="es">Equivalente Fiori al Asset Explorer (AW01N). Valores por ejercicio, transacciones, depreciaci&oacute;n planificada.</span><span class="en">Fiori equivalent of Asset Explorer (AW01N). Values per fiscal year, transactions, planned depreciation.</span></td></tr>
+    <tr><td>Manage Fixed Assets</td><td><span class="es">Gesti&oacute;n moderna de activos. Crear, cambiar, visualizar. Vista integrada de valores y transacciones.</span><span class="en">Modern asset management. Create, change, display. Integrated view of values and transactions.</span></td></tr>
+    <tr><td>Asset Balances</td><td><span class="es">App anal&iacute;tica con filtros por company code, dep. area, segment, profit center. Key figure groups.</span><span class="en">Analytical app with filters by company code, dep. area, segment, profit center. Key figure groups.</span></td></tr>
+    <tr><td>Depreciation Lists</td><td><span class="es">Listar y analizar depreciaci&oacute;n planificada por periodo, &aacute;rea, ledger.</span><span class="en">List and analyze planned depreciation by period, area, ledger.</span></td></tr>
+    <tr><td>Schedule Asset Accounting Jobs</td><td><span class="es">Ejecutar depreciation posting run, year-end closing, asset history sheet. Test run primero, luego Update run.</span><span class="en">Execute depreciation posting run, year-end closing, asset history sheet. Test run first, then Update run.</span></td></tr>
+    <tr><td>Execute/Undo Year-End Closing</td><td><span class="es">FAA_CMP en Fiori. Ver y ejecutar el cierre de ejercicio de FI-AA.</span><span class="en">FAA_CMP in Fiori. View and execute FI-AA year-end closing.</span></td></tr>
+    <tr><td>Define Distribution Rules (AIAB)</td><td><span class="es">Definir c&oacute;mo distribuir las l&iacute;neas del AuC a los activos completados.</span><span class="en">Define how to distribute AuC lines to completed assets.</span></td></tr>
+    <tr><td>Post Acquisition (ABZOL)</td><td><span class="es">Adquisici&oacute;n no integrada. Con offsetting entry autom&aacute;tico.</span><span class="en">Non-integrated acquisition. With automatic offsetting entry.</span></td></tr>
+    <tr><td>Post Depreciation Manually (ABAAL)</td><td><span class="es">Contabilizaci&oacute;n manual de depreciaci&oacute;n no planificada.</span><span class="en">Manual posting of unplanned depreciation.</span></td></tr>
+    <tr><td>Manage Journal Entries</td><td><span class="es">Verificar documentos FI del depreciation run (tipo AF).</span><span class="en">Verify FI documents from depreciation run (type AF).</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══ IMG PATHS ═══ -->
+<div class="view" id="img">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--blue)">IMG</span>
+    <div><h2><span class="es">Rutas IMG &mdash; S4F17</span><span class="en">IMG Paths &mdash; S4F17</span></h2><p>SPRO &rarr; SAP Reference IMG &rarr; Financial Accounting &rarr; <strong>Asset Accounting</strong></p></div>
+  </div>
+  <div class="alert alert-green" style="margin-bottom:16px"><strong><span class="es">Ruta base:</span><span class="en">Base path:</span></strong> SPRO &rarr; SAP Reference IMG &rarr; Financial Accounting (FI) &rarr; Asset Accounting (FI-AA)</div>
+  <table>
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Ruta IMG (relativa a FI-AA)</span><span class="en">IMG Path (relative to FI-AA)</span></th></tr>
+    <tr><td><span class="es">Crear/Copiar Chart of Depreciation</span><span class="en">Create/Copy Chart of Depreciation</span></td><td><span class="step-path" style="display:inline">Organizational Structures &rarr; Copy Reference Chart of Depreciation</span></td></tr>
+    <tr><td><span class="es">Asignar CoD al Company Code</span><span class="en">Assign CoD to Company Code</span></td><td><span class="step-path" style="display:inline">Organizational Structures &rarr; Assign Chart of Depreciation to Company Code</span></td></tr>
+    <tr><td><span class="es">Definir Depreciation Areas</span><span class="en">Define Depreciation Areas</span></td><td><span class="step-path" style="display:inline">Depreciation &rarr; Valuation Methods &rarr; Define Depreciation Areas</span></td></tr>
+    <tr><td><span class="es">Asignar cuentas G/L (Account Determination)</span><span class="en">Assign G/L Accounts (Account Determination)</span></td><td><span class="step-path" style="display:inline">Integration with GL Accounting &rarr; Assign G/L Accounts</span></td></tr>
+    <tr><td><span class="es">Definir Asset Classes (OAOA)</span><span class="en">Define Asset Classes (OAOA)</span></td><td><span class="step-path" style="display:inline">Organizational Structures &rarr; Asset Classes &rarr; Define Asset Classes (OAOA)</span></td></tr>
+    <tr><td><span class="es">Screen Layout &mdash; Master Data</span><span class="en">Screen Layout &mdash; Master Data</span></td><td><span class="step-path" style="display:inline">Master Data &rarr; Screen Layout &rarr; Define Screen Layout for Asset Master Data</span></td></tr>
+    <tr><td><span class="es">Screen Layout &mdash; Depreciation Areas</span><span class="en">Screen Layout &mdash; Depreciation Areas</span></td><td><span class="step-path" style="display:inline">Master Data &rarr; Screen Layout &rarr; Define Screen Layout for Asset Depreciation Areas</span></td></tr>
+    <tr><td><span class="es">Number Range Intervals</span><span class="en">Number Range Intervals</span></td><td><span class="step-path" style="display:inline">Organizational Structures &rarr; Asset Classes &rarr; Define Number Range Interval</span></td></tr>
+    <tr><td><span class="es">Determine Dep. Areas in Asset Class (OAYZ)</span><span class="en">Determine Dep. Areas in Asset Class (OAYZ)</span></td><td><span class="step-path" style="display:inline">General Valuation &rarr; Determine the Depreciation Areas in the Asset Class (OAYZ)</span></td></tr>
+    <tr><td><span class="es">Screen Layout Dep. Areas (AO21)</span><span class="en">Screen Layout Dep. Areas (AO21)</span></td><td><span class="step-path" style="display:inline">Master Data &rarr; Screen Layout &rarr; Define Screen Layout for Asset Depreciation Areas (AO21)</span></td></tr>
+    <tr><td><span class="es">LVA — Specify Max. Amount (OAY2)</span><span class="en">LVA — Specify Max. Amount (OAY2)</span></td><td><span class="step-path" style="display:inline">General Valuation &rarr; Amount Specifications &rarr; Specify Max. Amount for Low-Value Assets + Asset Classes</span></td></tr>
+    <tr><td><span class="es">Mantener Depreciation Key</span><span class="en">Maintain Depreciation Key</span></td><td><span class="step-path" style="display:inline">Depreciation &rarr; Valuation Methods &rarr; Depreciation Key &rarr; Maintain Depreciation Key (AFAMA)</span></td></tr>
+    <tr><td><span class="es">Activar Account Assignment Objects</span><span class="en">Activate Account Assignment Objects</span></td><td><span class="step-path" style="display:inline">Integration with GL Accounting &rarr; Additional Account Assignment Objects &rarr; Activate Account Assignment Objects</span></td></tr>
+    <tr><td><span class="es">Transfer Variants (Intercompany)</span><span class="en">Transfer Variants (Intercompany)</span></td><td><span class="step-path" style="display:inline">Transactions &rarr; Intercompany Asset Transfers &rarr; Automatic Intercompany Asset Transfers &rarr; Define Transfer Variants</span></td></tr>
+    <tr><td><span class="es">Settlement Profile (AuC)</span><span class="en">Settlement Profile (AuC)</span></td><td><span class="step-path" style="display:inline">Transactions &rarr; Capitalization of Assets under Construction &rarr; Define/Assign Settlement Profiles</span></td></tr>
+    <tr><td><span class="es">Financial Statement Version para reports</span><span class="en">Financial Statement Version for reports</span></td><td><span class="step-path" style="display:inline">Integration with GL Accounting &rarr; Specify Financial Statement Version for Asset Reports</span></td></tr>
+    <tr><td><span class="es">Asset Data Transfer (Legacy)</span><span class="en">Asset Data Transfer (Legacy)</span></td><td><span class="step-path" style="display:inline">Asset Data Transfer &rarr; (parameters for legacy transfer)</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══ CADENAS ═══ -->
+<div class="view" id="cad">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--amber)">&#9881;</span>
+    <div><h2><span class="es">Cadenas de Configuraci&oacute;n</span><span class="en">Configuration Chains</span></h2><p><span class="es">Orden correcto y errores si falta un paso</span><span class="en">Correct order and errors if a step is missing</span></p></div>
+  </div>
+
+  <!-- CHAIN 1 -->
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title">
+        <div class="chain-badge">1</div>
+        <div>
+          <div><span class="es">Setup completo de FI-AA para un nuevo Company Code</span><span class="en">Complete FI-AA setup for a new Company Code</span></div>
+          <div class="chain-trigger">&#9654; <span class="es">Proceso final: contabilizar la primera adquisici&oacute;n de activo.</span><span class="en">Final process: post the first asset acquisition.</span></div>
+        </div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; CADENA</div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Chart of Depreciation (CoD)</span><span class="en">Create Chart of Depreciation (CoD)</span></div><div class="chain-path">SPRO &rarr; FI-AA &rarr; Org. Structures &rarr; Copy Reference Chart of Depreciation</div><div class="chain-why"><span class="es">Copiar de Z000 (formaci&oacute;n) o 0DE/0US (producci&oacute;n). Sin CoD no puede existir FI-AA.</span><span class="en">Copy from Z000 (training) or 0DE/0US (production). Without CoD, FI-AA cannot exist.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Asignar CoD al Company Code</span><span class="en">Assign CoD to Company Code</span></div><div class="chain-path">SPRO &rarr; FI-AA &rarr; Org. Structures &rarr; Assign Chart of Depreciation to Company Code</div><div class="chain-why"><span class="es">Un company code solo puede tener un CoD asignado.</span><span class="en">A company code can only have one CoD assigned.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Definir Depreciation Areas + Posting Indicators</span><span class="en">Define Depreciation Areas + Posting Indicators</span></div><div class="chain-path">SPRO &rarr; FI-AA &rarr; Depreciation &rarr; Valuation Methods &rarr; Define Depreciation Areas</div><div class="chain-why"><span class="es">Configurar c&oacute;mo publica cada &aacute;rea: 0, 1, 2 o 6.</span><span class="en">Configure how each area posts: 0, 1, 2, or 6.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Definir Asset Classes con Account Determination</span><span class="en">Define Asset Classes with Account Determination</span></div><div class="chain-path">SPRO &rarr; FI-AA &rarr; Master Data &rarr; Define Asset Classes</div><div class="chain-why"><span class="es">Sin asset class no se pueden crear master records de activos.</span><span class="en">Without asset class, asset master records cannot be created.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><span class="es">Asignar cuentas G/L (Account Determination)</span><span class="en">Assign G/L Accounts (Account Determination)</span></div><div class="chain-path">SPRO &rarr; FI-AA &rarr; Integration with GL &rarr; Assign G/L Accounts</div><div class="chain-why"><span class="es">Sin cuentas G/L asignadas, la adquisici&oacute;n falla al intentar publicar.</span><span class="en">Without G/L accounts assigned, acquisition fails when trying to post.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">6</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Asset Master Record (AS01)</span><span class="en">Create Asset Master Record (AS01)</span></div><div class="chain-path">AS01 &rarr; asset class + company code + datos del activo</div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Contabilizar primera adquisici&oacute;n (F-90 / ABZOL)</span><span class="en">Post first acquisition (F-90 / ABZOL)</span></strong></div></div></div>
+      </div>
+      <div class="chain-meta">
+        <div><div class="chain-meta-label">&#9888;&#65039; <span class="es">Si falta paso 5</span><span class="en">If step 5 missing</span></div><ul class="chain-errors"><li><span class="es">Error al contabilizar: "No G/L account assigned for account determination key XX in chart of accounts YY".</span><span class="en">Posting error: "No G/L account assigned for account determination key XX in chart of accounts YY".</span></li></ul></div>
+        <div><div class="chain-meta-label">&#9888;&#65039; <span class="es">Si falta paso 2</span><span class="en">If step 2 missing</span></div><ul class="chain-errors"><li><span class="es">Company code no tiene FI-AA configurado. No se pueden crear activos.</span><span class="en">Company code has no FI-AA configured. Assets cannot be created.</span></li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAIN 2 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title">
+        <div class="chain-badge">2</div>
+        <div>
+          <div><span class="es">Depreciation Run mensual/anual</span><span class="en">Monthly/Annual Depreciation Run</span></div>
+          <div class="chain-trigger">&#9654; <span class="es">Proceso final: documentos FI de depreciaci&oacute;n contabilizados en G/L.</span><span class="en">Final process: depreciation FI documents posted to G/L.</span></div>
+        </div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; CADENA</div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Verificar Account Assignment Objects (CO) activos</span><span class="en">Verify active CO Account Assignment Objects</span></div><div class="chain-path">SPRO &rarr; FI-AA &rarr; Integration with GL &rarr; Additional Account Assignment Objects &rarr; Activate</div><div class="chain-why"><span class="es">Cost Center (KOSTL) e Internal Order (CAUFN) deben estar activos o el run falla.</span><span class="en">Cost Center (KOSTL) and Internal Order (CAUFN) must be active or the run fails.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Ejecutar Recalculate Depreciation (si se modificaron par&aacute;metros)</span><span class="en">Run Recalculate Depreciation (if parameters were modified)</span></div><div class="chain-path">Schedule Asset Accounting Jobs &rarr; Recalculate Depreciation</div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><strong>Test Run</strong> (Depreciation Posting Run)</div><div class="chain-path">Schedule Asset Accounting Jobs &rarr; Depreciation Posting Run &rarr; Test Run = ON</div><div class="chain-why"><span class="es">Detectar errores (cost centers bloqueados, cuentas G/L faltantes) ANTES del update.</span><span class="en">Detect errors (blocked cost centers, missing G/L accounts) BEFORE the update.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Revisar log del Test Run</span><span class="en">Review Test Run log</span></div><div class="chain-why"><span class="es">Si hay errores: corregir en Customizing y volver al paso 3.</span><span class="en">If errors: correct in Customizing and return to step 3.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><strong>Update Run</strong> (Test Run = OFF)</div><div class="chain-path">Copy del Test Run &rarr; Test Run: DESELECT &rarr; Schedule</div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Documentos FI tipo AF generados. Verificar en Manage Journal Entries.</span><span class="en">FI documents type AF generated. Verify in Manage Journal Entries.</span></strong></div></div></div>
+      </div>
+      <div class="chain-meta">
+        <div><div class="chain-meta-label">FI Doc Type</div><div><span class="dep-tag">AF</span></div></div>
+        <div><div class="chain-meta-label">&#9888;&#65039; <span class="es">Si falta paso 3</span><span class="en">If step 3 missing</span></div><ul class="chain-errors"><li><span class="es">Riesgo de errores no detectados que corrompen datos contables en producci&oacute;n.</span><span class="en">Risk of undetected errors corrupting accounting data in production.</span></li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAIN 3 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title">
+        <div class="chain-badge">3</div>
+        <div>
+          <div><span class="es">Cierre de ejercicio FI-AA + G/L</span><span class="en">FI-AA + G/L Fiscal Year Closing</span></div>
+          <div class="chain-trigger">&#9654; <span class="es">Proceso final: ejercicio cerrado en todos los subledgers y G/L.</span><span class="en">Final process: fiscal year closed in all subledgers and G/L.</span></div>
+        </div>
+      </div><span class="chevron">&#8250;</span>
+    </div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">ORDEN OBLIGATORIO</span><span class="en">MANDATORY ORDER</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Depreciation run completo para el ejercicio (todos los periodos)</span><span class="en">Complete depreciation run for the fiscal year (all periods)</span></div><div class="chain-why"><span class="es">Prerequisito obligatorio del year-end closing de FI-AA.</span><span class="en">Mandatory prerequisite for FI-AA year-end closing.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Year-End Closing FI-AA</span><span class="en">FI-AA Year-End Closing</span></div><div class="chain-path">FAA_CMP &rarr; o Schedule Asset Accounting Jobs &rarr; Year-End Closing</div><div class="chain-why"><span class="es">Cierra el ejercicio en FI-AA. Bloquea contabilizaciones en ejercicios cerrados. Actualiza "Last Closed Fiscal Year".</span><span class="en">Closes fiscal year in FI-AA. Blocks postings to closed years. Updates "Last Closed Fiscal Year".</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Cerrar otros subledgers (AP, AR, MM)</span><span class="en">Close other subledgers (AP, AR, MM)</span></div><div class="chain-why"><span class="es">Todos los subledgers deben cerrarse antes del G/L.</span><span class="en">All subledgers must be closed before G/L.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><strong>G/L Balance Carryforward (FAGLGVTR)</strong></div><div class="chain-why"><span class="es">Tambi&eacute;n ejecuta el fiscal year change de FI-AA (abre nuevos campos de valor anuales).</span><span class="en">Also executes FI-AA fiscal year change (opens new annual value fields).</span></div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Ejercicio cerrado en FI-AA y G/L. Nuevo ejercicio disponible.</span><span class="en">Fiscal year closed in FI-AA and G/L. New fiscal year available.</span></strong></div></div></div>
+      </div>
+      <div class="chain-meta">
+        <div><div class="chain-meta-label">&#9888;&#65039; Error cr&iacute;tico</div><ul class="chain-errors"><li><span class="es">Cerrar G/L ANTES que FI-AA = inconsistencias graves. Principio contable fundamental.</span><span class="en">Closing G/L BEFORE FI-AA = serious inconsistencies. Fundamental accounting principle.</span></li></ul></div>
+        <div><div class="chain-meta-label"><span class="es">Verifica en</span><span class="en">Verify in</span></div><div><span class="dep-tag">FAA_CMP</span> <span class="dep-tag">Clsd.FY column</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPARATIVAS ═══ -->
+<div class="view" id="cmp">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--teal)">&#9889;</span>
+    <div><h2><span class="es">Comparativas Cr&iacute;ticas &mdash; S4F17</span><span class="en">Critical Comparisons &mdash; S4F17</span></h2><p><span class="es">Las diferencias m&aacute;s preguntadas en el examen</span><span class="en">The most examined differences</span></p></div>
+  </div>
+
+  <div class="sec-title"><span class="es">Posting Indicators de Depreciation Areas</span><span class="en">Depreciation Area Posting Indicators</span></div>
+  <table class="tbl-reg">
+    <tr><th><span class="es">Indicator</span><span class="en">Indicator</span></th><th><span class="es">Publica a G/L</span><span class="en">Posts to G/L</span></th><th><span class="es">Cu&aacute;ndo</span><span class="en">When</span></th><th><span class="es">Ejemplo</span><span class="en">Example</span></th></tr>
+    <tr><td>0</td><td>&#10007;</td><td>Nunca / Never</td><td><span class="es">&Aacute;rea 20 (Cost Accounting, solo CO)</span><span class="en">Area 20 (Cost Accounting, CO only)</span></td></tr>
+    <tr><td>1</td><td>&#10003; Real-time</td><td><span class="es">Con cada transacci&oacute;n de activo</span><span class="en">With each asset transaction</span></td><td><span class="es">&Aacute;rea 01 (Book depreciation)</span><span class="en">Area 01 (Book depreciation)</span></td></tr>
+    <tr><td>2</td><td>&#10003; Peri&oacute;dico</td><td><span class="es">Solo en depreciation run</span><span class="en">Only in depreciation run</span></td><td><span class="es">&Aacute;rea de depreciaci&oacute;n peri&oacute;dica</span><span class="en">Periodic depreciation area</span></td></tr>
+    <tr><td>6</td><td>&#10007;</td><td><span class="es">Solo reporting (valores derivados)</span><span class="en">Reporting only (derived values)</span></td><td><span class="es">&Aacute;rea 32 (derivada de otra &aacute;rea)</span><span class="en">Area 32 (derived from another area)</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px"><span class="es">M&eacute;todos de Transferencia Intercompany</span><span class="en">Intercompany Transfer Methods</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Gross Method</th><th>Net Method</th><th>New Value Method</th></tr>
+    <tr><td><span class="es">Precio de venta</span><span class="en">Sale price</span></td><td><span class="es">No se introduce</span><span class="en">Not entered</span></td><td><span class="es">S&iacute; (= NBV si sin G/L)</span><span class="en">Yes (= NBV if no gain)</span></td><td><span class="es">S&iacute; (= importe capitalizado)</span><span class="en">Yes (= capitalized amount)</span></td></tr>
+    <tr><td><span class="es">Valores en destino</span><span class="en">Target values</span></td><td><span class="es">Valores hist&oacute;ricos completos</span><span class="en">Full historical values</span></td><td><strong>NBV</strong> <span class="es">del origen</span><span class="en">from source</span></td><td><span class="es">Precio de venta</span><span class="en">Sale price</span></td></tr>
+    <tr><td><span class="es">Uso est&aacute;ndar SAP</span><span class="en">SAP standard use</span></td><td>&#10003; <span class="es">80% de casos</span><span class="en">80% of cases</span></td><td><span class="es">Menos com&uacute;n</span><span class="en">Less common</span></td><td><span class="es">Caso espec&iacute;fico</span><span class="en">Specific case</span></td></tr>
+    <tr><td>Transfer Variant</td><td>7 / 8</td><td>Var&iacute;a / Varies</td><td>Var&iacute;a / Varies</td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px">Ledger Approach vs Account Approach (<span class="es">Contabilidad Paralela</span><span class="en">Parallel Accounting</span>)</div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Ledger Approach</th><th>Account Approach</th></tr>
+    <tr><td>Ledgers</td><td><span class="es">Separados (0L = local, 2L = IFRS)</span><span class="en">Separate (0L = local, 2L = IFRS)</span></td><td><span class="es">Un solo ledger (0L)</span><span class="en">Single ledger (0L)</span></td></tr>
+    <tr><td><span class="es">Cuentas G/L</span><span class="en">G/L accounts</span></td><td><span class="es">Mismas cuentas, ledgers distintos</span><span class="en">Same accounts, different ledgers</span></td><td><span class="es">Cuentas distintas por norma</span><span class="en">Different accounts per standard</span></td></tr>
+    <tr><td><span class="es">Depreciation area</span></td><td><span class="es">Una area por ledger</span><span class="en">One area per ledger</span></td><td><span class="es">Una area por norma contable</span><span class="en">One area per accounting standard</span></td></tr>
+    <tr><td><span class="es">Recomendaci&oacute;n SAP</span><span class="en">SAP recommendation</span></td><td>&#10003; <span class="es">M&aacute;s flexible</span><span class="en">More flexible</span></td><td><span class="es">M&aacute;s simple</span><span class="en">Simpler</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px">Investment Support &mdash; <span class="es">Assets Side vs Liabilities Side</span><span class="en">Assets Side vs Liabilities Side</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Assets Side</th><th>Liabilities Side</th></tr>
+    <tr><td><span class="es">Contabilizaci&oacute;n subvenci&oacute;n</span><span class="en">Subsidy posting</span></td><td><span class="es">Reduce el APC del activo</span><span class="en">Reduces the asset's APC</span></td><td><span class="es">Reserva en el pasivo (special reserve)</span><span class="en">Reserve on liabilities side (special reserve)</span></td></tr>
+    <tr><td><span class="es">Depreciaci&oacute;n</span><span class="en">Depreciation</span></td><td><span class="es">Sobre APC reducido</span><span class="en">On reduced APC</span></td><td><span class="es">Sobre APC completo + depreciaci&oacute;n del special reserve</span><span class="en">On full APC + special reserve depreciation</span></td></tr>
+    <tr><td><span class="es">Depreciation area extra</span><span class="en">Extra depreciation area</span></td><td>No</td><td><span class="es">S&iacute;, con posting indicator real-time (1)</span><span class="en">Yes, with real-time posting indicator (1)</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px"><span class="es">Adquisici&oacute;n Integrada vs No Integrada</span><span class="en">Integrated vs Non-Integrated Acquisition</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th><span class="es">Integrada con AP (F-90) / MM</span><span class="en">Integrated with AP (F-90) / MM</span></th><th><span class="es">No integrada (ABZOL)</span><span class="en">Non-integrated (ABZOL)</span></th></tr>
+    <tr><td><span class="es">Proveedor (vendor)</span><span class="en">Vendor</span></td><td>&#10003;</td><td>&#10007;</td></tr>
+    <tr><td><span class="es">Cuenta compensaci&oacute;n autom&aacute;tica</span><span class="en">Automatic offsetting account</span></td><td>&#10007;</td><td>&#10003;</td></tr>
+    <tr><td><span class="es">Partida de proveedor en FI</span><span class="en">Vendor line item in FI</span></td><td>&#10003;</td><td>&#10007;</td></tr>
+    <tr><td><span class="es">Casos de uso</span><span class="en">Use cases</span></td><td><span class="es">Compra normal con factura</span><span class="en">Normal purchase with invoice</span></td><td><span class="es">Sin factura, transferencias internas, adquisiciones del a&ntilde;o anterior</span><span class="en">No invoice, internal transfers, prior-year acquisitions</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══ EXAMEN ═══ -->
+<div class="view" id="exam">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F17 Certification Guide 2026</div>
+  <div class="mod-header">
+    <span class="mod-num" style="background:var(--red)">&#127919;</span>
+    <div><h2><span class="es">Escenarios de Examen 2026 &mdash; S4F17</span><span class="en">Exam Scenarios 2026 &mdash; S4F17</span></h2><p>System-Based + Scenario-Based &middot; C_TS4FI_2023</p></div>
+  </div>
+  <div class="alert alert-green" style="margin-bottom:18px">
+    <strong>System-Based:</strong> <span class="es">Navegar y ejecutar en el sistema. Memorizar: SPRO paths, AS01/AW01N, ABZOL, FAA_CMP, Schedule Asset Accounting Jobs.</span><span class="en">Navigate and execute in the system. Memorize: SPRO paths, AS01/AW01N, ABZOL, FAA_CMP, Schedule Asset Accounting Jobs.</span>
+    <br><strong>Scenario-Based:</strong> <span class="es">Razonar la mejor soluci&oacute;n y por qu&eacute; no las alternativas.</span><span class="en">Reason the best solution and why not the alternatives.</span>
+  </div>
+
+  <div class="sec-title">System-Based <span class="es">Escenarios</span><span class="en">Scenarios</span></div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--green-light),#eff6ff);border-color:var(--green-mid);">
+    <div class="s-label" style="color:var(--green)">&#128187; System-Based 1</div>
+    <div class="s-q"><span class="es">&#10067; Crear un Chart of Depreciation para el company code TA## copiando Z000.</span><span class="en">&#10067; Create a Chart of Depreciation for company code TA## by copying Z000.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">SPRO &rarr; FI-AA &rarr; Organizational Structures &rarr; Copy Reference Chart of Depreciation/Depreciation Areas</span>
+    <span class="es">Copiar Z000 como TA##. Cambiar descripci&oacute;n. Asignar a company code TA##. Abrir ejercicio fiscal actual y anterior.</span><span class="en">Copy Z000 as TA##. Change description. Assign to company code TA##. Open current and previous fiscal years.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--green-light),#eff6ff);border-color:var(--green-mid);">
+    <div class="s-label" style="color:var(--green)">&#128187; System-Based 2</div>
+    <div class="s-q"><span class="es">&#10067; Crear un asset master record para una m&aacute;quina en la clase 3xxx y verificar los valores despu&eacute;s de la primera adquisici&oacute;n.</span><span class="en">&#10067; Create an asset master record for a machine in class 3xxx and verify values after the first acquisition.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">AS01 &rarr; Asset class 3xxx, Company Code TA## &rarr; General tab (descripci&oacute;n) &rarr; Dep. Areas tab (depreciation key, vida &uacute;til) &rarr; Time-Dependent (cost center) &rarr; Save</span>
+    <span class="es">Luego: ABZOL (adquisici&oacute;n no integrada) &rarr; Post &rarr; verificar en AW01N: valores APC y depreciaci&oacute;n simulada.</span><span class="en">Then: ABZOL (non-integrated acquisition) &rarr; Post &rarr; verify in AW01N: APC values and simulated depreciation.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--green-light),#eff6ff);border-color:var(--green-mid);">
+    <div class="s-label" style="color:var(--green)">&#128187; System-Based 3</div>
+    <div class="s-q"><span class="es">&#10067; Ejecutar el depreciation run para el company code TA## para el periodo 12 del a&ntilde;o anterior.</span><span class="en">&#10067; Execute the depreciation run for company code TA## for period 12 of the previous year.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">Schedule Asset Accounting Jobs &rarr; Create &rarr; Depreciation Posting Run &rarr; Start Immediately &rarr; Company Code TA##, FY: PY, Period: 12, Test Run: ON &rarr; Schedule &rarr; Go &rarr; revisar log &rarr; Copy &rarr; Test Run: OFF &rarr; Schedule</span>
+    <span class="es">Verificar documentos FI tipo <strong>AF</strong> en Manage Journal Entries.</span><span class="en">Verify FI documents type <strong>AF</strong> in Manage Journal Entries.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--green-light),#eff6ff);border-color:var(--green-mid);">
+    <div class="s-label" style="color:var(--green)">&#128187; System-Based 4</div>
+    <div class="s-q"><span class="es">&#10067; Liquidar un Asset Under Construction (AuC) a activos completados.</span><span class="en">&#10067; Settle an Asset Under Construction (AuC) to completed assets.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">AIAB (Define Distribution Rules) &rarr; seleccionar AuC &rarr; definir % a cada activo destino &rarr; AIBU (Settle) &rarr; Test Run &rarr; Update Run &rarr; AW01N del AuC: NBV = 0</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--green-light),#eff6ff);border-color:var(--green-mid);">
+    <div class="s-label" style="color:var(--green)">&#128187; System-Based 5</div>
+    <div class="s-q"><span class="es">&#10067; Ejecutar el year-end closing de FI-AA para el a&ntilde;o anterior.</span><span class="en">&#10067; Execute the FI-AA year-end closing for the previous year.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">FAA_CMP &rarr; verificar que CY-1 no aparece en Closed FY &rarr; Schedule Asset Accounting Jobs &rarr; Year-End Closing &rarr; Company Code TA## &rarr; Schedule</span>
+    <span class="es">Prerequisito: depreciation run completo para todos los per&iacute;odos de CY-1.</span><span class="en">Prerequisite: complete depreciation run for all periods of CY-1.</span></div>
+  </div>
+
+  <div class="sec-title" style="margin-top:20px">Scenario-Based <span class="es">Escenarios</span><span class="en">Scenarios</span></div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 1</div>
+    <div class="s-q"><span class="es">&#10067; Una empresa quiere valorar sus activos seg&uacute;n IFRS y seg&uacute;n normativa local al mismo tiempo. &iquest;C&oacute;mo lo configuras en FI-AA y qu&eacute; enfoque recomiendas?</span><span class="en">&#10067; A company wants to value assets under IFRS and local standards simultaneously. How do you configure this in FI-AA and which approach do you recommend?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">Configurar <strong>Parallel Accounting</strong> con el <strong>Ledger Approach</strong> (recomendado por SAP): Ledger 0L para norma local + Ledger 2L para IFRS. Cada ledger tiene su depreciation area asignada con el accounting principle correspondiente. El Account Approach es m&aacute;s simple pero menos flexible. Con el Ledger Approach, los informes financieros se pueden separar completamente por norma contable.</span><span class="en">Configure <strong>Parallel Accounting</strong> with the <strong>Ledger Approach</strong> (SAP recommended): Ledger 0L for local standard + Ledger 2L for IFRS. Each ledger has its depreciation area assigned with the corresponding accounting principle. Account Approach is simpler but less flexible. With Ledger Approach, financial reports can be fully separated by accounting standard.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 2</div>
+    <div class="s-q"><span class="es">&#10067; El controller de activos contabiliz&oacute; depreciaci&oacute;n no planificada (ABAAL) para un activo da&ntilde;ado pero no encuentra ning&uacute;n documento FI al consultar el activo en AW01N. &iquest;Es un error del sistema?</span><span class="en">&#10067; The asset controller posted unplanned depreciation (ABAAL) for a damaged asset but finds no FI document when checking the asset in AW01N. Is this a system error?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">No es un error. La programaci&oacute;n manual de depreciaci&oacute;n no planificada con ABAAL <strong>NO genera un documento FI</strong>. El documento FI se genera &uacute;nicamente cuando se ejecuta el <strong>Depreciation Posting Program</strong> (depreciation run). Hasta entonces, los valores planeados son visibles en la pesta&ntilde;a "Planned Values" del Asset Explorer pero sin documento FI enlazado.</span><span class="en">Not a system error. Manual scheduling of unplanned depreciation with ABAAL does <strong>NOT generate an FI document</strong>. The FI document is only generated when the <strong>Depreciation Posting Program</strong> (depreciation run) is executed. Until then, planned values are visible in the "Planned Values" tab of Asset Explorer but with no linked FI document.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 3</div>
+    <div class="s-q"><span class="es">&#10067; Se intenta cerrar el G/L antes de haber ejecutado el year-end closing de FI-AA. &iquest;Qu&eacute; consecuencias tiene y c&oacute;mo se deber&iacute;a proceder correctamente?</span><span class="en">&#10067; Attempting to close the G/L before executing the FI-AA year-end closing. What are the consequences and how should you proceed correctly?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">Cerrar el G/L antes que FI-AA puede provocar <strong>inconsistencias graves en el G/L</strong>. El orden correcto es: (1) Ejecutar depreciation run completo → (2) Year-End Closing FI-AA (FAA_CMP) → (3) Cerrar todos los dem&aacute;s subledgers (AP, AR, MM) → (4) G/L Balance Carryforward (FAGLGVTR). Este es un principio contable fundamental en SAP S/4HANA.</span><span class="en">Closing G/L before FI-AA can cause <strong>serious G/L inconsistencies</strong>. The correct order is: (1) Run complete depreciation run → (2) FI-AA Year-End Closing (FAA_CMP) → (3) Close all other subledgers (AP, AR, MM) → (4) G/L Balance Carryforward (FAGLGVTR). This is a fundamental accounting principle in SAP S/4HANA.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 4</div>
+    <div class="s-q"><span class="es">&#10067; Una empresa transfiere un activo entre dos de sus company codes que comparten el mismo Company ID. &iquest;Qu&eacute; tipo de transferencia corresponde y qu&eacute; m&eacute;todo recomienda SAP por defecto?</span><span class="en">&#10067; A company transfers an asset between two of its company codes that share the same Company ID. What type of transfer applies and what method does SAP recommend by default?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">Relationship type <strong>02</strong> (mismo Company ID = dependientes legalmente). SAP trata este caso como transferencia <strong>intracompany</strong> con el m&eacute;todo <strong>Gross</strong> (tipos de transacci&oacute;n 3++, transfer variants 7 o 8). Los valores hist&oacute;ricos se transfieren autom&aacute;ticamente sin necesidad de introducir precio de venta. El 80% de las transferencias intercompany usa el m&eacute;todo gross.</span><span class="en">Relationship type <strong>02</strong> (same Company ID = legally dependent). SAP treats this as an <strong>intracompany</strong> transfer with the <strong>Gross</strong> method (transaction types 3++, transfer variants 7 or 8). Historical values are automatically transferred without entering a sale price. 80% of intercompany transfers use the gross method.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 5</div>
+    <div class="s-q"><span class="es">&#10067; El controller quiere que un activo se aplique autom&aacute;ticamente un 100% de depreciaci&oacute;n en el mismo a&ntilde;o de adquisici&oacute;n por su bajo valor. &iquest;C&oacute;mo se configura esto en FI-AA?</span><span class="en">&#10067; The controller wants an asset to automatically apply 100% depreciation in the year of acquisition due to its low value. How is this configured in FI-AA?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">Usar una <strong>asset class para Low-Value Assets (LVA)</strong> (clase 5xxx). En esta clase: vida &uacute;til = 0, la depreciation key asigna el 100% en el primer a&ntilde;o. El umbral m&iacute;nimo se define por legislaci&oacute;n local (ej: 800 EUR en Alemania). Al crear el activo en esta clase, el sistema deprecia el 100% en el ejercicio de adquisici&oacute;n autom&aacute;ticamente en el siguiente depreciation run.</span><span class="en">Use a <strong>Low-Value Assets (LVA) asset class</strong> (class 5xxx). In this class: useful life = 0, the depreciation key assigns 100% in the first year. The minimum threshold is defined by local legislation (e.g., €800 in Germany). When creating the asset in this class, the system depreciates 100% in the acquisition fiscal year automatically in the next depreciation run.</span></div>
+  </div>
+</div>
+
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-sig">
+      <div>
+        <div class="vrf">Valentina RF</div>
+        <div class="vrf-sub"><span class="es">Gu&iacute;a de Estudio SAP FI &middot; C_TS4FI_2023</span><span class="en">SAP FI Study Guide &middot; C_TS4FI_2023</span></div>
+      </div>
+    </div>
+    <div class="footer-meta">S4F17 &middot; Asset Accounting in SAP S/4HANA &middot; Course Version 26 &middot; 39 Exercises &middot; 11h 50min &middot; 2026</div>
+  </div>
+</footer>
+<script>
+function showView(id,btn){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  if(btn)btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggle(hdr){hdr.parentElement.classList.toggle('open');}
+function toggleEx(hdr){hdr.parentElement.classList.toggle('open');}
+function toggleLang(){
+  var body=document.body;
+  var isEs=body.classList.contains('lang-es');
+  body.classList.toggle('lang-es',!isEs);
+  body.classList.toggle('lang-en',isEs);
+  document.getElementById('langLabel').textContent=isEs?'ES':'EN';
+}
+var MODULE_LABELS={u1:'U1',u2:'U2',u3:'U3',u4:'U4',u5:'U5',u6:'U6',ex:'EJ',qr:'QR',img:'IMG',cad:'CAD',cmp:'CMP',exam:'EXAM'};
+var MODULE_COLORS={u1:'#166534',u2:'#15803d',u3:'#0f766e',u4:'#1d4ed8',u5:'#7c3aed',u6:'#b45309',ex:'#c2410c',qr:'#7c3aed',img:'#1d4ed8',cad:'#b45309',cmp:'#0f766e',exam:'#b91c1c'};
+var searchIndex=[];
+function buildIndex(){
+  document.querySelectorAll('.view').forEach(function(view){
+    var vid=view.id;
+    view.querySelectorAll('.card,.ex-card,.scenario-sb,tr').forEach(function(card){
+      var raw=(card.innerText||card.textContent||'').replace(/\s+/g,' ').trim();
+      if(raw.length<10)return;
+      var title='';
+      var h=card.querySelector('.card-title,.ex-title,.s-q,th');
+      if(h)title=(h.innerText||h.textContent||'').replace(/\s+/g,' ').trim().slice(0,70);
+      if(!title)title=raw.slice(0,60);
+      searchIndex.push({vid:vid,title:title,text:raw});
+    });
+  });
+}
+var lastQuery='',selectedIdx=-1,currentResults=[];
+function doSearch(q){
+  q=q.trim();
+  var clearBtn=document.getElementById('searchClear');
+  var countEl=document.getElementById('searchCount');
+  var resEl=document.getElementById('searchResults');
+  clearBtn.style.display=q.length>0?'block':'none';
+  removeHighlights();
+  if(q.length<2){resEl.style.display='none';countEl.textContent='';lastQuery='';currentResults=[];return;}
+  lastQuery=q;
+  var words=q.toLowerCase().split(/\s+/).filter(function(w){return w.length>0;});
+  var scored=[];
+  var seenVidTitle={};
+  searchIndex.forEach(function(entry){
+    var tl=entry.text.toLowerCase();
+    var allMatch=words.every(function(w){return tl.indexOf(w)!==-1;});
+    if(!allMatch)return;
+    var score=0;
+    words.forEach(function(w){
+      if(entry.title.toLowerCase().indexOf(w)!==-1)score+=10;
+      var count=0,pos=0;
+      while((pos=tl.indexOf(w,pos))!==-1){count++;pos++;}
+      score+=count;
+    });
+    var key=entry.vid+'::'+entry.title.slice(0,40);
+    if(!seenVidTitle[key]||seenVidTitle[key].score<score)seenVidTitle[key]={score:score,entry:entry};
+  });
+  currentResults=Object.values(seenVidTitle).sort(function(a,b){return b.score-a.score;}).slice(0,12).map(function(x){return x.entry;});
+  selectedIdx=-1;
+  renderResults(words);
+}
+function renderResults(words){
+  var resEl=document.getElementById('searchResults');
+  var countEl=document.getElementById('searchCount');
+  if(currentResults.length===0){
+    resEl.innerHTML='<div class="sr-empty">Sin resultados para &ldquo;'+escHtml(lastQuery)+'&rdquo;</div>';
+    resEl.style.display='block';countEl.textContent='0';return;
+  }
+  countEl.textContent=currentResults.length+(currentResults.length===12?'+':'');
+  var html='';
+  currentResults.forEach(function(entry,i){
+    var modLabel=MODULE_LABELS[entry.vid]||entry.vid.toUpperCase();
+    var modColor=MODULE_COLORS[entry.vid]||'#64748b';
+    var snippet=getSnippet(entry.text,words,90);
+    html+='<div class="sr-item" data-idx="'+i+'" onclick="goResult('+i+')">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">'
+      +'<span class="sr-mod" style="background:'+modColor+'">'+modLabel+'</span>'
+      +'<span class="sr-title">'+highlightWords(escHtml(entry.title),words)+'</span></div>'
+      +'<div class="sr-snippet">'+snippet+'</div></div>';
+  });
+  resEl.innerHTML=html;resEl.style.display='block';
+}
+function getSnippet(text,words,maxLen){
+  var tl=text.toLowerCase();var best=0;
+  words.forEach(function(w){var pos=tl.indexOf(w);if(pos!==-1)best=pos;});
+  var start=Math.max(0,best-30);
+  return highlightWords(escHtml((start>0?'…':'')+text.slice(start,start+maxLen)+(start+maxLen<text.length?'…':'')),words);
+}
+function highlightWords(html,words){
+  words.forEach(function(w){if(w.length<2)return;html=html.replace(new RegExp('('+escRe(w)+')','gi'),'<mark>$1</mark>');});
+  return html;
+}
+function goResult(idx){
+  if(idx<0||idx>=currentResults.length)return;
+  var entry=currentResults[idx];
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  var targetView=document.getElementById(entry.vid);
+  if(targetView)targetView.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').indexOf("'"+entry.vid+"'")!==-1)b.classList.add('active');
+  });
+  document.querySelectorAll('#'+entry.vid+' .card,#'+entry.vid+' .ex-card').forEach(function(card){
+    var raw=(card.innerText||card.textContent||'').toLowerCase();
+    var words=lastQuery.toLowerCase().split(/\s+/);
+    if(words.every(function(w){return raw.indexOf(w)!==-1;}))card.classList.add('open');
+  });
+  removeHighlights();
+  highlightInView(entry.vid,lastQuery.split(/\s+/));
+  document.getElementById('searchResults').style.display='none';
+  setTimeout(function(){
+    var first=document.querySelector('#'+entry.vid+' mark.hl');
+    if(first)first.scrollIntoView({behavior:'smooth',block:'center'});
+    else window.scrollTo(0,0);
+  },80);
+}
+function highlightInView(vid,words){
+  var view=document.getElementById(vid);if(!view)return;
+  var walker=document.createTreeWalker(view,NodeFilter.SHOW_TEXT,null,false);
+  var nodes=[];var node;
+  while(node=walker.nextNode())nodes.push(node);
+  nodes.forEach(function(node){
+    var val=node.nodeValue;if(!val||val.trim().length<2)return;
+    var lval=val.toLowerCase();
+    var needsMark=words.some(function(w){return w.length>1&&lval.indexOf(w.toLowerCase())!==-1;});
+    if(!needsMark)return;
+    var frag=document.createDocumentFragment();
+    var re=new RegExp('('+words.map(escRe).join('|')+')','gi');
+    val.split(re).forEach(function(part){
+      if(re.test(part)){var mark=document.createElement('mark');mark.className='hl';mark.textContent=part;frag.appendChild(mark);}
+      else frag.appendChild(document.createTextNode(part));
+    });
+    if(frag.childNodes.length>0&&node.parentNode)node.parentNode.replaceChild(frag,node);
+  });
+}
+function removeHighlights(){
+  document.querySelectorAll('mark.hl').forEach(function(m){
+    var p=m.parentNode;if(p){p.replaceChild(document.createTextNode(m.textContent),m);p.normalize();}
+  });
+}
+function clearSearch(){
+  var inp=document.getElementById('globalSearch');inp.value='';
+  document.getElementById('searchResults').style.display='none';
+  document.getElementById('searchClear').style.display='none';
+  document.getElementById('searchCount').textContent='';
+  removeHighlights();lastQuery='';currentResults=[];inp.focus();
+}
+function searchKeyNav(e){
+  var resEl=document.getElementById('searchResults');
+  if(resEl.style.display==='none')return;
+  var items=resEl.querySelectorAll('.sr-item');
+  if(e.key==='ArrowDown'){e.preventDefault();selectedIdx=Math.min(selectedIdx+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();selectedIdx=Math.max(selectedIdx-1,-1);}
+  else if(e.key==='Enter'){e.preventDefault();if(selectedIdx>=0)goResult(selectedIdx);else if(currentResults.length>0)goResult(0);return;}
+  else if(e.key==='Escape'){resEl.style.display='none';return;}
+  else{return;}
+  items.forEach(function(it,i){it.style.background=i===selectedIdx?'var(--green-light)':'';});
+  if(selectedIdx>=0&&items[selectedIdx])items[selectedIdx].scrollIntoView({block:'nearest'});
+}
+document.addEventListener('click',function(e){
+  if(!document.getElementById('searchWrap').contains(e.target)){
+    var r=document.getElementById('searchResults');if(r)r.style.display='none';
+  }
+});
+function initTabFade(){
+  ['tabRow1','tabRow2'].forEach(function(rowId){
+    var row=document.getElementById(rowId);if(!row)return;
+    function updateFade(){row.classList.toggle('at-end',row.scrollLeft+row.clientWidth>=row.scrollWidth-4);}
+    row.addEventListener('scroll',updateFade);updateFade();
+  });
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+window.addEventListener('load',function(){initTabFade();setTimeout(buildIndex,200);});
+</script>
+<script src="assistant.js"></script>
+</body>
+</html>

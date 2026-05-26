@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S4F15 &middot; Financial Closing SAP S/4HANA | Valentina RF</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root {
+  --bg:#fff; --bg2:#eef2ff; --ind:#4338ca; --ind-dark:#3730a3; --ind-light:#eef2ff; --ind-mid:#c7d2fe;
+  --blue:#1d4ed8; --blue-light:#eff6ff; --blue-mid:#bfdbfe;
+  --amber:#b45309; --amber-light:#fffbeb; --amber-mid:#fde68a;
+  --red:#b91c1c; --red-light:#fef2f2;
+  --green:#15803d; --green-light:#f0fdf4; --green-mid:#bbf7d0;
+  --teal:#0f766e; --teal-light:#f0fdfa;
+  --purple:#7c3aed; --purple-light:#f5f3ff;
+  --orange:#c2410c; --orange-light:#fff7ed;
+  --text:#0f172a; --text2:#334155; --muted:#64748b; --muted2:#94a3b8;
+  --border:#e2e8f0; --border2:#cbd5e1;
+  --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg2);color:var(--text);font-size:14px;line-height:1.65;}
+body.lang-en .es{display:none!important;} body.lang-es .en{display:none!important;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;box-shadow:var(--shadow);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:12px 20px 0;}
+.topbar-row1{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.topbar-badge{background:var(--ind);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.05em;white-space:nowrap;}
+.topbar-row1 h1{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em;flex:1;}
+.lang-btn{display:flex;align-items:center;gap:6px;background:var(--ind);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s;box-shadow:var(--shadow);white-space:nowrap;}
+.lang-btn:hover{background:var(--ind-dark);transform:translateY(-1px);box-shadow:var(--shadow-md);}
+.signature-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;white-space:nowrap;letter-spacing:.04em;}
+.search-row{display:flex;align-items:center;gap:8px;padding:8px 0 6px;border-top:1px solid var(--border);}
+.search-wrap{flex:1;position:relative;max-width:480px;}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted2);pointer-events:none;width:15px;height:15px;}
+#globalSearch{width:100%;padding:7px 12px 7px 34px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter',sans-serif;font-size:12.5px;color:var(--text);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;}
+#globalSearch:focus{border-color:var(--ind);box-shadow:0 0 0 3px rgba(67,56,202,.12);}
+#searchClear{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:16px;padding:0 4px;display:none;line-height:1;}
+#searchClear:hover{color:var(--red);}
+#searchCount{font-size:11px;color:var(--muted);white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+#searchResults{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border2);border-radius:10px;box-shadow:var(--shadow-md);max-height:360px;overflow-y:auto;z-index:500;}
+.sr-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+.sr-item:last-child{border-bottom:none;} .sr-item:hover{background:var(--ind-light);}
+.sr-mod{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#fff;padding:2px 6px;border-radius:4px;margin-right:7px;text-transform:uppercase;}
+.sr-title{font-size:13px;font-weight:600;color:var(--text);}
+.sr-snippet{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-empty{padding:16px 14px;text-align:center;font-size:12.5px;color:var(--muted);}
+mark.hl{background:#fef08a;color:var(--text);border-radius:2px;padding:0 2px;}
+
+.tabs-wrap{border-top:1px solid var(--border);}
+.tab-row{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;position:relative;}
+.tab-row::-webkit-scrollbar{display:none;} .tab-row-1{border-bottom:1px solid var(--border);}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab-btn:hover{color:var(--ind);border-bottom-color:var(--ind-mid);}
+.tab-btn.active{color:var(--ind);border-bottom-color:var(--ind);font-weight:700;}
+.tab-num{background:var(--ind-light);color:var(--ind);font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;}
+.tab-btn.active .tab-num{background:var(--ind);color:#fff;}
+.tab-row-fade{position:relative;}
+.tab-row-fade::after{content:'›';position:absolute;right:0;top:0;bottom:0;width:28px;background:linear-gradient(to right,transparent,#fff 70%);display:flex;align-items:center;justify-content:flex-end;padding-right:4px;color:var(--muted2);font-size:16px;pointer-events:none;transition:opacity .2s;}
+.tab-row-fade.at-end::after{opacity:0;}
+main{max-width:1100px;margin:0 auto;padding:24px 20px 80px;}
+.view{display:none;} .view.active{display:block;}
+.mod-header{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow);}
+.mod-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:var(--ind);padding:3px 9px;border-radius:5px;white-space:nowrap;margin-top:3px;letter-spacing:.04em;}
+.mod-header h2{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.mod-header p{font-size:12px;color:var(--muted);margin-top:3px;}
+.exam-tip{background:linear-gradient(135deg,var(--ind-light),#eff6ff);border:1px solid var(--ind-mid);border-radius:10px;padding:13px 17px;margin-bottom:16px;font-size:13px;}
+.exam-tip .label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ind);margin-bottom:4px;}
+.exam-tip p{color:var(--text2);margin:0;}
+.scenario-sb{background:linear-gradient(135deg,var(--purple-light),#faf5ff);border:1px solid #ddd6fe;border-radius:10px;padding:15px 17px;margin:12px 0;}
+.scenario-sb .s-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:8px;}
+.scenario-sb .s-q{font-weight:600;font-size:13px;color:var(--text);margin-bottom:7px;}
+.scenario-sb .s-a{font-size:12.5px;color:var(--text2);line-height:1.65;}
+.scenario-sb .s-a strong{color:var(--purple);}
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;box-shadow:var(--shadow);transition:box-shadow .15s;}
+.card:hover{box-shadow:var(--shadow-md);}
+.card-header{padding:12px 15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;gap:10px;}
+.card-header:hover{background:var(--bg2);}
+.card-title{font-weight:600;font-size:13px;color:var(--text);display:flex;align-items:center;gap:9px;}
+.ci{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.ci-ind{background:var(--ind-light);} .ci-green{background:var(--green-light);} .ci-amber{background:var(--amber-light);} .ci-red{background:var(--red-light);} .ci-purple{background:var(--purple-light);} .ci-blue{background:var(--blue-light);} .ci-teal{background:var(--teal-light);}
+.chevron{color:var(--muted2);font-size:14px;transition:transform .2s;flex-shrink:0;}
+.card.open .chevron{transform:rotate(90deg);}
+.card-body{display:none;padding:0 15px 15px;border-top:1px solid var(--border);}
+.card.open .card-body{display:block;}
+.card-body p{color:var(--text2);font-size:13px;margin-top:10px;line-height:1.65;}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin-top:10px;font-size:12.5px;}
+.kv-k{color:var(--ind);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;padding-top:1px;font-weight:600;}
+.kv-v{color:var(--text2);}
+.alert{margin-top:11px;padding:9px 13px;border-radius:7px;font-size:12px;border-left:3px solid;line-height:1.6;}
+.alert-ind{background:var(--ind-light);border-color:var(--ind);color:var(--text2);}
+.alert-green{background:var(--green-light);border-color:var(--green);color:var(--text2);}
+.alert-amber{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+.alert-red{background:var(--red-light);border-color:var(--red);color:var(--red);}
+.alert-purple{background:var(--purple-light);border-color:var(--purple);color:var(--purple);}
+.alert-teal{background:var(--teal-light);border-color:var(--teal);color:var(--teal);}
+.alert-blue{background:var(--blue-light);border-color:var(--blue);color:var(--text2);}
+.alert strong{font-weight:700;}
+.lst{margin-top:9px;padding-left:0;list-style:none;}
+.lst li{font-size:12.5px;color:var(--text2);padding:4px 0 4px 15px;position:relative;border-bottom:1px solid var(--border);}
+.lst li:last-child{border-bottom:none;}
+.lst li::before{content:'›';position:absolute;left:0;color:var(--ind);font-weight:700;font-size:14px;}
+.sub{margin-top:13px;}
+.sub-title{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--amber);margin-bottom:7px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
+@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+.mini-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.mini-card .mt{font-size:11.5px;font-weight:700;color:var(--ind);margin-bottom:4px;}
+.mini-card p{font-size:12px;color:var(--text2);margin:0;}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:11px;}
+th{background:var(--bg2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:7px 11px;text-align:left;border-bottom:2px solid var(--border2);}
+td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+td:first-child{font-family:'JetBrains Mono',monospace;color:var(--ind);font-size:11px;font-weight:600;}
+tr:last-child td{border-bottom:none;} tr:hover td{background:var(--bg2);}
+.tbl-reg td:first-child{font-family:'Inter',sans-serif;color:var(--text);font-size:12px;font-weight:600;}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 9px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border2);}
+.ex-card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:9px;box-shadow:var(--shadow);}
+.ex-header{padding:13px 17px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;user-select:none;}
+.ex-header:hover{background:var(--bg2);}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;background:var(--ind);color:#fff;padding:3px 7px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+.ex-title{font-weight:600;font-size:13px;color:var(--text);flex:1;}
+.ex-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.ex-body{display:none;padding:0 17px 15px;border-top:1px solid var(--border);}
+.ex-card.open .ex-body{display:block;} .ex-card.open .chevron{transform:rotate(90deg);}
+.step{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.step:last-child{border-bottom:none;}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;background:var(--ind-light);color:var(--ind);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-body{color:var(--text2);flex:1;} .step-body strong{color:var(--text);}
+.step-path{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:5px 9px;margin-top:5px;color:var(--ind);display:block;word-break:break-all;}
+/* CHAIN */
+.chain-badge{width:32px;height:32px;border-radius:8px;background:var(--amber);color:#fff;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chain-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--amber);margin:12px 0 8px;}
+.chain-steps{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--border2);margin-left:14px;}
+.chain-step{display:flex;gap:12px;padding:8px 0 8px 16px;position:relative;border-bottom:1px dashed var(--border);}
+.chain-step:last-child{border-bottom:none;}
+.chain-step::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ind);border:2px solid #fff;box-shadow:0 0 0 2px var(--ind);}
+.chain-final{display:flex;gap:12px;padding:10px 0 4px 16px;position:relative;}
+.chain-final::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 0 0 2px var(--green);}
+.chain-num{width:22px;height:22px;border-radius:50%;background:var(--ind-light);color:var(--ind);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.chain-body{flex:1;}
+.chain-title{font-size:12.5px;font-weight:600;color:var(--text);}
+.chain-path{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:3px 7px;margin:3px 0;color:var(--ind);display:inline-block;word-break:break-all;}
+.chain-why{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.chain-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.chain-meta-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;}
+.dep-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;padding:2px 7px;background:var(--ind-light);color:var(--ind);border-radius:4px;margin:2px 3px 2px 0;}
+.chain-errors{margin:0;padding-left:14px;font-size:11.5px;color:var(--muted);line-height:1.6;}
+.chain-trigger{font-size:11px;color:var(--muted);margin-top:2px;}
+.page-brand{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);}
+.page-brand span{font-weight:700;color:var(--ind);}
+footer{background:#fff;border-top:1px solid var(--border);padding:20px;text-align:center;margin-top:40px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-sig{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--ind-light),#eff6ff);border:1px solid var(--ind-mid);border-radius:10px;padding:10px 20px;margin-bottom:8px;}
+.footer-sig .vrf{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--ind);letter-spacing:.05em;}
+.footer-sig .vrf-sub{font-size:11px;color:var(--muted);}
+.footer-meta{font-size:11px;color:var(--muted2);}
+@media(max-width:700px){.topbar-row1 p{display:none;} .mod-header{flex-direction:column;gap:7px;}}
+.u1{background:#4338ca!important;} .u2{background:#3730a3!important;} .u3{background:#15803d!important;}
+.u4{background:#0f766e!important;} .u5{background:#b45309!important;} .u6{background:#1d4ed8!important;}
+.u7{background:#7c3aed!important;} .u8{background:#b91c1c!important;} .u9{background:#0369a1!important;}
+</style>
+</head>
+<body class="lang-es">
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-row1">
+      <span class="topbar-badge">S4F15</span>
+      <h1><span class="es">Financial Closing en SAP S/4HANA &mdash; S4F15</span><span class="en">Financial Closing in SAP S/4HANA &mdash; S4F15</span></h1>
+      <span class="signature-tag">&#9670; Valentina RF</span>
+      <button class="lang-btn" onclick="toggleLang()" id="langBtn"><span id="langLabel">EN</span></button>
+    </div>
+    <div class="search-row">
+      <div class="search-wrap" id="searchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" autocomplete="off"
+          placeholder="&#128269; Buscar... FSV, FAGL_FCV, Accruals, FCC, ICMR, GR/IR, Extension Ledger..."
+          oninput="doSearch(this.value)" onkeydown="searchKeyNav(event)">
+        <div id="searchResults"></div>
+      </div>
+      <button id="searchClear" onclick="clearSearch()" title="Limpiar">&#10005;</button>
+      <span id="searchCount"></span>
+    </div>
+    <div class="tabs-wrap">
+      <div class="tab-row tab-row-1 tab-row-fade" id="tabRow1">
+        <button class="tab-btn active" onclick="showView('u1',this)"><span class="tab-num">U1</span><span class="es">FC Overview</span><span class="en">FC Overview</span></button>
+        <button class="tab-btn" onclick="showView('u2',this)"><span class="tab-num">U2</span><span class="es">Fin. Statements</span><span class="en">Fin. Statements</span></button>
+        <button class="tab-btn" onclick="showView('u3',this)"><span class="tab-num">U3</span><span class="es">Assets &amp; MM</span><span class="en">Assets &amp; MM</span></button>
+        <button class="tab-btn" onclick="showView('u4',this)"><span class="tab-num">U4</span><span class="es">AR &amp; AP</span><span class="en">AR &amp; AP</span></button>
+        <button class="tab-btn" onclick="showView('u5',this)"><span class="tab-num">U5</span><span class="es">P&amp;L / Accruals</span><span class="en">P&amp;L / Accruals</span></button>
+        <button class="tab-btn" onclick="showView('u6',this)"><span class="tab-num">U6</span><span class="es">Ledger Groups</span><span class="en">Ledger Groups</span></button>
+        <button class="tab-btn" onclick="showView('u7',this)"><span class="tab-num">U7</span><span class="es">Technical</span><span class="en">Technical</span></button>
+        <button class="tab-btn" onclick="showView('u8',this)"><span class="tab-num">U8</span>FCC</button>
+        <button class="tab-btn" onclick="showView('u9',this)"><span class="tab-num">U9</span>ICMR</button>
+      </div>
+      <div class="tab-row tab-row-2 tab-row-fade" id="tabRow2">
+        <button class="tab-btn" onclick="showView('ex',this)"><span class="tab-num" style="background:var(--orange);color:#fff;">EJ</span><span class="es">21 Ejercicios</span><span class="en">21 Exercises</span></button>
+        <button class="tab-btn" onclick="showView('qr',this)"><span class="tab-num" style="background:var(--purple);color:#fff;">QR</span>Quick Ref</button>
+        <button class="tab-btn" onclick="showView('img',this)"><span class="tab-num" style="background:var(--blue);color:#fff;">IMG</span><span class="es">Rutas IMG</span><span class="en">IMG Paths</span></button>
+        <button class="tab-btn" onclick="showView('cad',this)"><span class="tab-num" style="background:var(--amber);color:#fff;">&#9881;</span><span class="es">Cadenas</span><span class="en">Chains</span></button>
+        <button class="tab-btn" onclick="showView('cmp',this)"><span class="tab-num" style="background:var(--teal);color:#fff;">&#9889;</span><span class="es">Comparativas</span><span class="en">Comparisons</span></button>
+        <button class="tab-btn" onclick="showView('exam',this)"><span class="tab-num" style="background:var(--red);color:#fff;">&#127919;</span><span class="es">Examen</span><span class="en">Exam</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+<main>
+<!-- ═══ U1 ═══ -->
+<div class="view active" id="u1">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u1">U1</span><div><h2><span class="es">Financial Closing Overview</span><span class="en">Financial Closing Overview</span></h2><p><span class="es">Proceso de Cierre Peri&oacute;dico &middot; Preclosing &middot; Cierre Anual &middot; SAP Note 619969</span><span class="en">Periodic Closing Process &middot; Preclosing &middot; Year-End &middot; SAP Note 619969</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Orden: subledgers ANTES que G/L (SAP Note 619969). FI-AA es el subledger m&aacute;s cr&iacute;tico. FCV se ejecuta ANTES de crear estados financieros. Balance Carryforward (FAGLGVTR) = primera actividad del nuevo ejercicio. Balance Confirmations = inicio del ejercicio. Preclosing: &uacute;ltimo d&iacute;a del mes anterior.</p>
+    <p class="en">Order: subledgers BEFORE G/L (SAP Note 619969). FI-AA is the most critical subledger. FCV runs BEFORE creating financial statements. Balance Carryforward (FAGLGVTR) = first activity of new fiscal year. Balance Confirmations = start of fiscal year. Preclosing: last day of previous month.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-ind">&#128197;</div><span class="es">Proceso de Cierre Peri&oacute;dico &mdash; Actividades</span><span class="en">Periodic Closing Process &mdash; Activities</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title"><span class="es">Actividades de Precierre (último día del mes anterior)</span><span class="en">Preclosing Activities (last day of previous month)</span></div>
+      <div class="kv">
+        <span class="kv-k">Technical</span><span class="kv-v"><span class="es">Abrir nuevo período en FI. Cerrar período anterior en MM. Cerrar subledgers en FI. Preliminary close del G/L.</span><span class="en">Open new period in FI. Close previous period in MM. Close FI subledgers. Preliminary close of G/L.</span></span>
+        <span class="kv-k">FI</span><span class="kv-v"><span class="es">Procesar PO accruals. Asientos manuales de acumulaci&oacute;n/diferimiento. Entradas recurrentes. Bad debt expenses en AR.</span><span class="en">Process PO accruals. Manual accrual/deferral entries. Recurring entries. Bad debt expenses in AR.</span></span>
+        <span class="kv-k">MM</span><span class="kv-v"><span class="es">Mantener cuenta GR/IR. Revaluaciones de material.</span><span class="en">Maintain GR/IR clearing account. Material revaluations.</span></span>
+        <span class="kv-k">HR</span><span class="kv-v"><span class="es">Contabilizar gastos de n&oacute;mina.</span><span class="en">Post payroll expenses.</span></span>
+        <span class="kv-k">SD</span><span class="kv-v"><span class="es">Contabilizar salidas de mercanc&iacute;a para entregas a clientes.</span><span class="en">Post goods issues for customer deliveries.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Actividades de Cierre Gerencial</span><span class="en">Managerial Closing Activities</span></div>
+      <ul class="lst">
+        <li><span class="es">Realizar asignaciones y reclasificaciones de CO.</span><span class="en">Perform CO allocations and repostings.</span></li>
+        <li><span class="es">Bloquear el período contable anterior.</span><span class="en">Lock the old accounting period.</span></li>
+        <li><span class="es">Reabrir el G/L para asientos de ajuste.</span><span class="en">Reopen G/L for adjustment postings.</span></li>
+      </ul></div>
+      <div class="sub"><div class="sub-title"><span class="es">Actividades para Informes Externos</span><span class="en">External Reporting Activities</span></div>
+      <ul class="lst">
+        <li><strong>FI:</strong> <span class="es">Valorar partidas abiertas en moneda extranjera (FCV — <strong>ANTES</strong> de estados financieros).</span><span class="en">Value open items in foreign currency (FCV — <strong>BEFORE</strong> financial statements).</span></li>
+        <li><strong>Technical:</strong> <span class="es">Cerrar el per&iacute;odo anterior.</span><span class="en">Close the previous period.</span></li>
+        <li><strong>FI/CO:</strong> <span class="es">Informes fiscales, Asset History Sheet, informes gerenciales.</span><span class="en">Tax reports, Asset History Sheet, managerial reports.</span></li>
+      </ul></div>
+      <div class="alert alert-red"><strong>SAP Note 619969:</strong> <span class="es">Todos los subledgers deben cerrarse SIEMPRE antes del G/L en cada ejercicio. Incumplirlo causa inconsistencias con los saldos del G/L. Especialmente cr&iacute;tico: <strong>FI-AA antes que FI-GL</strong>.</span><span class="en">All subledgers must ALWAYS be closed before the G/L in each fiscal year. Non-compliance causes inconsistencies with G/L balances. Especially critical: <strong>FI-AA before FI-GL</strong>.</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-amber">&#128197;</div><span class="es">Actividades Adicionales de Cierre de A&ntilde;o</span><span class="en">Additional Year-End Closing Activities</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="mini-card"><div class="mt">MM</div><p><span class="es">Inventario f&iacute;sico. LIFO/FIFO valuation. Determinaci&oacute;n de valor m&iacute;nimo (Lowest Value).</span><span class="en">Physical inventory. LIFO/FIFO valuation. Lowest value determination.</span></p></div>
+        <div class="mini-card"><div class="mt">FI-AA</div><p><span class="es">Valoraciones de activos. Investment support. Year-End Closing program.</span><span class="en">Asset valuations. Investment support. Year-End Closing program.</span></p></div>
+        <div class="mini-card"><div class="mt">CO / PP</div><p><span class="es">Actualizar estimaciones de costes de producto (puede ser m&aacute;s frecuente).</span><span class="en">Update product cost estimates (may be done more frequently).</span></p></div>
+        <div class="mini-card"><div class="mt">FI</div><p><span class="es">Balance confirmations para clientes y proveedores. Balance carryforward (FAGLGVTR) como actividad de precierre del nuevo ejercicio.</span><span class="en">Balance confirmations for customers and vendors. Balance carryforward (FAGLGVTR) as preclosing activity of new fiscal year.</span></p></div>
+      </div>
+    </div>
+  </div>
+  <div class="sec-title"><span class="es">Resumen U1</span><span class="en">U1 Summary</span></div>
+  <div class="alert alert-ind"><span class="es">&#10003; Preclosing: &uacute;ltimo d&iacute;a del mes anterior. Managerial closing: CO allocations + bloqueo per&iacute;odo.<br>&#10003; FCV ejecutar ANTES de crear estados financieros.<br>&#10003; SAP Note 619969: subledgers (FI-AA especialmente) ANTES que G/L.<br>&#10003; Cierre de a&ntilde;o adicionales: Physical Inventory, LIFO/FIFO, Balance Confirmations, FAGLGVTR.</span>
+  <span class="en">&#10003; Preclosing: last day of previous month. Managerial closing: CO allocations + period lock.<br>&#10003; FCV runs BEFORE creating financial statements.<br>&#10003; SAP Note 619969: subledgers (FI-AA especially) BEFORE G/L.<br>&#10003; Year-end additions: Physical Inventory, LIFO/FIFO, Balance Confirmations, FAGLGVTR.</span></div>
+</div>
+
+<!-- ═══ U2 ═══ -->
+<div class="view" id="u2">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u2">U2</span><div><h2><span class="es">Financial Statements</span><span class="en">Financial Statements</span></h2><p><span class="es">FSV &middot; Manage Global Hierarchies &middot; Balance Sheet/IS &middot; Reporting Tools</span><span class="en">FSV &middot; Manage Global Hierarchies &middot; Balance Sheet/IS &middot; Reporting Tools</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Manage Global Hierarchies reemplaza OB58 en S/4HANA. FSV: Import → Create → Edit → Save → <strong>Activate</strong> (obligatorio). Sin Activate: estado Draft, no aparece en reportes. Trial Balance en Analysis for Excel: <strong>2CCFITRIALBALQ0001</strong>. Multidimensional: drill-down por profit center/segmento.</p>
+    <p class="en">Manage Global Hierarchies replaces OB58 in S/4HANA. FSV: Import → Create → Edit → Save → <strong>Activate</strong> (mandatory). Without Activate: Draft state, doesn't appear in reports. Trial Balance in Analysis for Excel: <strong>2CCFITRIALBALQ0001</strong>. Multidimensional: drill-down by profit center/segment.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-ind">&#128200;</div><span class="es">Financial Statement Version (FSV) &mdash; Manage Global Hierarchies</span><span class="en">Financial Statement Version (FSV) &mdash; Manage Global Hierarchies</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Manage Global Hierarchies</span><span class="kv-v"><span class="es">App Fiori moderna para gestionar FSVs. <strong>Reemplaza la transacci&oacute;n OB58</strong>. Ubicaci&oacute;n: General Ledger &rarr; Reporting.</span><span class="en">Modern Fiori app for managing FSVs. <strong>Replaces transaction OB58</strong>. Location: General Ledger &rarr; Reporting.</span></span>
+        <span class="kv-k">OB58</span><span class="kv-v"><span class="es">Transacci&oacute;n cl&aacute;sica "Maintain Financial Statement Versions". A&uacute;n disponible pero reemplazada por Manage Global Hierarchies.</span><span class="en">Classic transaction "Maintain Financial Statement Versions". Still available but replaced by Manage Global Hierarchies.</span></span>
+        <span class="kv-k">Crear FSV FS##</span><span class="kv-v"><span class="es">1. Import Hierarchy → Source: Maintain FSV → ID: 1010. 2. Hierarchy ID: FS##, CoA: YCOA, Valid From: 1 Jan prev year → Create. 3. Edit (nodos, cuentas). 4. Save. 5. <strong>Activate</strong> (obligatorio).</span><span class="en">1. Import Hierarchy → Source: Maintain FSV → ID: 1010. 2. Hierarchy ID: FS##, CoA: YCOA, Valid From: 1 Jan prev year → Create. 3. Edit (nodes, accounts). 4. Save. 5. <strong>Activate</strong> (mandatory).</span></span>
+        <span class="kv-k">Activate</span><span class="kv-v"><span class="es">Publica la FSV para uso en reportes. Sin Activate: status = Draft, <strong>no aparece en selecci&oacute;n de BS/IS</strong>. Verificar: Status = Active.</span><span class="en">Publishes the FSV for use in reports. Without Activate: status = Draft, <strong>not available in BS/IS selection</strong>. Verify: Status = Active.</span></span>
+        <span class="kv-k"><span class="es">Operaciones en nodos</span><span class="en">Node operations</span></span><span class="kv-v"><span class="es">Agregar subnodo: bot&oacute;n + (Add). Mover cuenta: <strong>Cut (Ctrl+X)</strong> en nodo origen + <strong>Paste (Ctrl+P)</strong> en nodo destino. Sort: ordenar subnodos ascendente.</span><span class="en">Add subnode: + button (Add). Move account: <strong>Cut (Ctrl+X)</strong> on source node + <strong>Paste (Ctrl+P)</strong> on target node. Sort: sort subnodes ascending.</span></span>
+        <span class="kv-k">FSV ej: subnodos</span><span class="kv-v"><span class="es">3160000 (Personnel expenses) → subnodos: 3160010 (Payroll expenses) + 3160020 (Training and Education expenses). Cuenta 61400000 reasignada de 3180000 a 3160020.</span><span class="en">3160000 (Personnel expenses) → subnodes: 3160010 (Payroll expenses) + 3160020 (Training and Education expenses). Account 61400000 reassigned from 3180000 to 3160020.</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-amber">&#128202;</div><span class="es">Herramientas de Reporting de FI</span><span class="en">FI Reporting Tools</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Herramienta</span><span class="en">Tool</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Ventaja clave</span><span class="en">Key advantage</span></th></tr>
+        <tr><td>Balance Sheet / Income Statement</td><td><span class="es">Reporte est&aacute;ndar por per&iacute;odo y versi&oacute;n FSV.</span><span class="en">Standard report by period and FSV version.</span></td><td><span class="es">Simple, drill-down a documentos.</span><span class="en">Simple, drill-down to documents.</span></td></tr>
+        <tr><td>BS/IS Multidimensional</td><td><span class="es">Drill-down por profit center, segmento, CO area.</span><span class="en">Drill-down by profit center, segment, CO area.</span></td><td><span class="es">Filtros avanzados, an&aacute;lisis m&uacute;ltiples dimensiones.</span><span class="en">Advanced filters, multi-dimension analysis.</span></td></tr>
+        <tr><td>Analysis for Microsoft Excel</td><td><span class="es">OLAP. Technical name: <strong>2CCFITRIALBALQ0001</strong> (Trial Balance). Drag-and-drop de dimensiones.</span><span class="en">OLAP. Technical name: <strong>2CCFITRIALBALQ0001</strong> (Trial Balance). Drag-and-drop dimensions.</span></td><td><span class="es">Poder anal&iacute;tico de Excel con datos SAP en tiempo real.</span><span class="en">Excel analytical power with real-time SAP data.</span></td></tr>
+        <tr><td>Audit Journal</td><td><span class="es">Compact document journal para documentaci&oacute;n de auditor&iacute;a.</span><span class="en">Compact document journal for audit documentation.</span></td><td><span class="es">Rastro completo de documentos para auditores.</span><span class="en">Complete document trail for auditors.</span></td></tr>
+      </table>
+      <div class="kv" style="margin-top:12px">
+        <span class="kv-k"><span class="es">Parámetros estándar BS/IS</span><span class="en">Standard BS/IS parameters</span></span><span class="kv-v">Company Code TA## &middot; Ledger 0L &middot; Statement Version FS## &middot; Statement Type Normal (Actual-Actual) &middot; Currency EUR</span>
+        <span class="kv-k"><span class="es">Valores por defecto usuario</span><span class="en">User default values</span></span><span class="kv-v">User Settings &rarr; Profile Settings: Display Currency EUR &middot; Company Code TA## &middot; Fin. Statement Vers. FS## &middot; CO Area A000</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U3 ═══ -->
+<div class="view" id="u3">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u3">U3</span><div><h2><span class="es">Fixed and Current Assets</span><span class="en">Fixed and Current Assets</span></h2><p><span class="es">FI-AA Closing &middot; GR/IR Account &middot; Stock Valuation &middot; Physical Inventory</span><span class="en">FI-AA Closing &middot; GR/IR Account &middot; Stock Valuation &middot; Physical Inventory</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Schedule Asset Accounting Jobs = app para depreciation run. Year-End Closing: verifica amortizaciones completas + activos sin errores. Asset History Sheet = informe m&aacute;s importante del cierre FI-AA. GR/IR: cuenta compensaci&oacute;n para diferencias entradas/facturas. MRN9DELTA = delta run valoraci&oacute;n de existencias.</p>
+    <p class="en">Schedule Asset Accounting Jobs = app for depreciation run. Year-End Closing: verifies complete depreciation + error-free assets. Asset History Sheet = most important FI-AA closing report. GR/IR: clearing account for receipt/invoice differences. MRN9DELTA = stock valuation delta run.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-green">&#128200;</div><span class="es">Cierre de FI-AA en el Cierre Peri&oacute;dico</span><span class="en">FI-AA Closing in the Periodic Close</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Schedule Asset Accounting Jobs</span><span class="kv-v"><span class="es">App Fiori para ejecutar el Depreciation Posting Run. Registra: amortizaci&oacute;n ordinaria, especial fiscal, no planificada, inter&eacute;s imputado, revaluaci&oacute;n. <strong>Test Run primero</strong>, luego Update Run.</span><span class="en">Fiori app for executing the Depreciation Posting Run. Records: ordinary depreciation, tax special, unplanned, imputed interest, revaluation. <strong>Test Run first</strong>, then Update Run.</span></span>
+        <span class="kv-k">Year-End Closing Program</span><span class="kv-v"><span class="es">Verifica amortizaciones completamente registradas y activos sin errores. Actualiza el &uacute;ltimo ejercicio cerrado por depreciation area. <strong>Bloquea</strong> ejercicios cerrados.</span><span class="en">Verifies depreciation fully posted and assets error-free. Updates last closed fiscal year per depreciation area. <strong>Blocks</strong> closed fiscal years.</span></span>
+        <span class="kv-k">Asset History Sheet</span><span class="kv-v"><span class="es">Informe m&aacute;s importante del cierre de FI-AA. Contiene: valores contables inicio, adquisiciones, retiros, reclasificaciones, amortizaci&oacute;n, valores contables fin del ejercicio.</span><span class="en">Most important FI-AA closing report. Contains: opening book values, acquisitions, retirements, reclassifications, depreciation, closing book values.</span></span>
+        <span class="kv-k"><span class="es">Regla crítica</span><span class="en">Critical rule</span></span><span class="kv-v"><span class="es">No se puede cambiar el ejercicio en FI-AA antes del &uacute;ltimo per&iacute;odo del ejercicio antiguo. FI-AA ANTES que G/L (SAP Note 619969).</span><span class="en">Cannot change the fiscal year in FI-AA before the last period of the old fiscal year. FI-AA BEFORE G/L (SAP Note 619969).</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-amber">&#128230;</div><span class="es">Cuenta GR/IR y Valoraci&oacute;n de Existencias</span><span class="en">GR/IR Account &amp; Stock Valuation</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title"><span class="es">Cuenta de Compensaci&oacute;n GR/IR</span><span class="en">GR/IR Clearing Account</span></div>
+      <div class="kv">
+        <span class="kv-k"><span class="es">Propósito</span><span class="en">Purpose</span></span><span class="kv-v"><span class="es">Compensar diferencias entre entradas de mercanc&iacute;a (GR) y facturas de proveedor (IR). Al cierre: si GR &gt; IR → acumulaci&oacute;n (obligaci&oacute;n pendiente). Si IR &gt; GR → activo prepagado.</span><span class="en">Clear differences between goods receipts (GR) and vendor invoices (IR). At closing: if GR &gt; IR → accrual (pending liability). If IR &gt; GR → prepaid asset.</span></span>
+        <span class="kv-k">Analyze GR/IR</span><span class="kv-v"><span class="es">App Fiori: Analyze GR/IR Clearing Account. Crea batch input session para compensar. Reversi&oacute;n autom&aacute;tica el primer d&iacute;a del mes siguiente. G/L: 21120000 (GR/IR). Adjustment: 21122000. Target: 24020000.</span><span class="en">Fiori app: Analyze GR/IR Clearing Account. Creates batch input session to clear. Automatic reversal on first day of next month. G/L: 21120000 (GR/IR). Adjustment: 21122000. Target: 24020000.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Valoraci&oacute;n de Existencias (MM)</span><span class="en">Stock Valuation (MM)</span></div>
+      <table class="tbl-reg">
+        <tr><th><span class="es">Grupo</span><span class="en">Group</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Transacci&oacute;n</span><span class="en">Transaction</span></th></tr>
+        <tr><td>RSC (Raw materials)</td><td><span class="es">Moving average price. Balance Sheet Valuation = Lower of Cost or Market.</span><span class="en">Moving average price. Balance Sheet Valuation = Lower of Cost or Market.</span></td><td>MRN9DELTA</td></tr>
+        <tr><td>WIP</td><td><span class="es">Standard price. Valoraci&oacute;n de trabajos en curso.</span><span class="en">Standard price. Work in progress valuation.</span></td><td>MRN9</td></tr>
+        <tr><td>Finished Goods</td><td><span class="es">Costes est&aacute;ndar actualizados.</span><span class="en">Updated standard costs.</span></td><td>MRN9</td></tr>
+        <tr><td>Delta Run</td><td><span class="es">Valoraci&oacute;n diferencial entre valoraciones peri&oacute;dicas.</span><span class="en">Differential valuation between periodic valuations.</span></td><td>MRN9DELTA</td></tr>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U4 ═══ -->
+<div class="view" id="u4">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u4">U4</span><div><h2><span class="es">Receivables and Payables</span><span class="en">Receivables and Payables</span></h2><p><span class="es">Balance Confirmations &middot; FCV &middot; Flat-Rate Value Adjustment &middot; Regrouping</span><span class="en">Balance Confirmations &middot; FCV &middot; Flat-Rate Value Adjustment &middot; Regrouping</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">FCV ANTES de estados financieros. FAGL_FCV: reversi&oacute;n autom&aacute;tica el 1er d&iacute;a del mes siguiente. Delta Logic: sin reversi&oacute;n autom&aacute;tica. Valuation Key AB para flat-rate adjustment. FAGL_CL_REGROUP: cuentas de ajuste (no reconciliaci&oacute;n directa). Procedimientos BC: balance confirmation / notification / request.</p>
+    <p class="en">FCV BEFORE financial statements. FAGL_FCV: automatic reversal on 1st day of next month. Delta Logic: no automatic reversal. Valuation Key AB for flat-rate adjustment. FAGL_CL_REGROUP: adjustment accounts (no direct reconciliation). BC procedures: balance confirmation / notification / request.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-teal">&#128181;</div><span class="es">Foreign Currency Valuation (FAGL_FCV)</span><span class="en">Foreign Currency Valuation (FAGL_FCV)</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">FAGL_FCV</span><span class="kv-v"><span class="es">Programa (app Fiori: Perform Foreign Currency Valuation). Valora partidas abiertas Y cuentas de balance en moneda extranjera. Ejecutar <strong>ANTES</strong> de crear estados financieros.</span><span class="en">Program (Fiori: Perform Foreign Currency Valuation). Values open items AND balance sheet accounts in foreign currency. Run <strong>BEFORE</strong> creating financial statements.</span></span>
+        <span class="kv-k"><span class="es">Reversión automática</span><span class="en">Automatic reversal</span></span><span class="kv-v"><span class="es">El documento generado se <strong>revierte autom&aacute;ticamente el primer d&iacute;a del mes siguiente</strong> (si Delta Logic est&aacute; inactiva).</span><span class="en">The generated document <strong>automatically reverses on the first day of the following month</strong> (if Delta Logic is inactive).</span></span>
+        <span class="kv-k">Delta Logic</span><span class="kv-v"><span class="es">Si est&aacute; activa: solo se contabilizan diferencias incrementales (delta). <strong>Sin reversi&oacute;n autom&aacute;tica</strong>. Configuraci&oacute;n: SPRO → FA → GL → Periodic Processing → Valuate → Activate Delta Logic.</span><span class="en">If active: only incremental differences (delta) are posted. <strong>No automatic reversal</strong>. Config: SPRO → FA → GL → Periodic Processing → Valuate → Activate Delta Logic.</span></span>
+        <span class="kv-k">Valuation Area IF</span><span class="kv-v"><span class="es">En ejercicios: &aacute;rea de valoraci&oacute;n IFRS. M&eacute;todo IFRS = "Always Valuate". Sin Delta Logic en ej. 7.</span><span class="en">In exercises: IFRS valuation area. Method IFRS = "Always Valuate". No Delta Logic in EX 7.</span></span>
+        <span class="kv-k"><span class="es">Cuentas FCV (ej)</span><span class="en">FCV accounts (ex)</span></span><span class="kv-v">AR reconciliation: <strong>12100000</strong> y <strong>12102000</strong> (Balance Sheet) &middot; Loss from FCV: <strong>72040000</strong> (P&amp;L)</span>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">Configuración Áreas de Valoración (IMG)</span><span class="en">Valuation Area Configuration (IMG)</span></div>
+      <div class="kv">
+        <span class="kv-k"><span class="es">Define Valuation Methods</span></span><span class="kv-v">FA → GL → Periodic Processing → Valuate → Define Valuation Methods (Always Valuate / Only Devalue...)</span>
+        <span class="kv-k"><span class="es">Define Valuation Areas</span></span><span class="kv-v">FA → GL → Periodic Processing → Valuate → Define Valuation Areas</span>
+        <span class="kv-k">Prepare Auto Postings</span><span class="kv-v">FA → GL → Periodic Processing → Valuate → Foreign Currency Valuation → Prepare Automatic Postings for FCV</span>
+      </div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-amber">&#128231;</div><span class="es">Balance Confirmations, Value Adjustment y Regrouping</span><span class="en">Balance Confirmations, Value Adjustment &amp; Regrouping</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title">Balance Confirmations</div>
+      <div class="kv">
+        <span class="kv-k">Programas</span><span class="kv-v">SAPF130D (clientes) &middot; SAPF130K (proveedores). App Fiori: Create Balance Confirmations For Customers</span>
+        <span class="kv-k"><span class="es">3 Procedimientos</span><span class="en">3 Procedures</span></span><span class="kv-v"><strong>Balance confirmation</strong> &middot; <strong>Balance notification</strong> &middot; <strong>Balance request</strong></span>
+        <span class="kv-k"><span class="es">Configuración ejercicio</span><span class="en">Exercise config</span></span><span class="kv-v">Sort Variant: K2 (account number) &middot; Line Item Sorting: P1 (doc date) &middot; Printer: <strong>LP01</strong></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Flat-Rate Individual Value Adjustment</span><span class="en">Flat-Rate Individual Value Adjustment</span></div>
+      <div class="kv">
+        <span class="kv-k">Valuation Key <strong>AB</strong></span><span class="kv-v"><span class="es">Asignar al master del cliente en BP (Account Management tab). Define porcentaje de ajuste por d&iacute;as de vencimiento.</span><span class="en">Assign to customer BP master (Account Management tab). Defines adjustment percentage by overdue days.</span></span>
+        <span class="kv-k">SAPF107V</span><span class="kv-v">App: <strong>Perform Further Valuations</strong>. <span class="es">Genera propuesta de ajuste por d&iacute;as de vencimiento → transferir al G/L.</span><span class="en">Generates adjustment proposal by overdue days → transfer to G/L.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title">Regrouping (FAGL_CL_REGROUP)</div>
+      <div class="kv">
+        <span class="kv-k"><span class="es">Propósito</span><span class="en">Purpose</span></span><span class="kv-v"><span class="es">Reagrupar cuentas a cobrar/pagar seg&uacute;n vida residual. Separar saldos deudores de proveedores en secci&oacute;n de activos del balance.</span><span class="en">Regroup receivables/payables by remaining life. Separate vendor debit balances in the assets section of the balance sheet.</span></span>
+        <span class="kv-k"><span class="es">Cuentas de ajuste</span><span class="en">Adjustment accounts</span></span><span class="kv-v"><span class="es"><strong>No se puede contabilizar directamente</strong> en cuentas de reconciliaci&oacute;n → se usan cuentas de ajuste. Sort Method: <strong>SAP</strong> + Valuation Area: <strong>IF</strong>.</span><span class="en"><strong>Cannot post directly</strong> to reconciliation accounts → use adjustment accounts. Sort Method: <strong>SAP</strong> + Valuation Area: <strong>IF</strong>.</span></span>
+        <span class="kv-k"><span class="es">Reversi&oacute;n</span><span class="en">Reversal</span></span><span class="kv-v"><span class="es">Primer d&iacute;a del mes siguiente (la reagrupaci&oacute;n es solo para el cierre, no para operaciones diarias).</span><span class="en">First day of next month (regrouping is only for closing, not for daily operations).</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U5 ═══ -->
+<div class="view" id="u5">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u5">U5</span><div><h2><span class="es">Profit and Loss &mdash; Accruals &amp; Deferrals</span><span class="en">Profit and Loss &mdash; Accruals &amp; Deferrals</span></h2><p><span class="es">Cost of Sales Accounting &middot; Functional Area &middot; Accruals Management &middot; PO Accruals</span><span class="en">Cost of Sales Accounting &middot; Functional Area &middot; Accruals Management &middot; PO Accruals</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">CoS Accounting requiere Functional Area. Derivaci&oacute;n: Manual &gt; Sustituci&oacute;n &gt; Master cuenta &gt; Master objeto CO. Reversal Reason 05 = Accrual. Template STANDARD_5 para accruals manuales. POAC: activar Online Transfer Variant 0001. Factura proveedor reduce PO accrual autom&aacute;ticamente (online).</p>
+    <p class="en">CoS Accounting requires Functional Area. Derivation: Manual &gt; Substitution &gt; Account master &gt; CO object master. Reversal Reason 05 = Accrual. Template STANDARD_5 for manual accruals. POAC: activate Online Transfer Variant 0001. Vendor invoice reduces PO accrual automatically (online).</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-amber">&#128202;</div><span class="es">Cost of Sales Accounting vs Period Accounting</span><span class="en">Cost of Sales Accounting vs Period Accounting</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th></th><th>Period Accounting</th><th>Cost of Sales Accounting</th></tr>
+        <tr><td><span class="es">Resultado operativo</span><span class="en">Operating result</span></td><td colspan="2"><span class="es">Igual en ambos m&eacute;todos</span><span class="en">Same in both methods</span></td></tr>
+        <tr><td><span class="es">Agrupación costes</span><span class="en">Cost grouping</span></td><td><span class="es">Por tipo de gasto (nómina, materiales...)</span><span class="en">By cost type (payroll, materials...)</span></td><td><span class="es">Por función (producción, ventas, admin.)</span><span class="en">By function (production, sales, admin.)</span></td></tr>
+        <tr><td><span class="es">Base ingresos</span><span class="en">Revenue base</span></td><td><span class="es">Ingresos − cambio en inventario</span><span class="en">Revenue − inventory change</span></td><td><span class="es">Ingresos de ventas del período</span><span class="en">Period sales revenue</span></td></tr>
+        <tr><td><span class="es">Objeto adicional</span><span class="en">Additional object</span></td><td>No</td><td><strong><span class="es">Sí: Functional Area</span><span class="en">Yes: Functional Area</span></strong></td></tr>
+        <tr><td><span class="es">Tabla universal</span><span class="en">Universal table</span></td><td colspan="2">ACDOCA (Universal Journal)</td></tr>
+      </table>
+      <div class="sub"><div class="sub-title"><span class="es">Functional Area — Derivación (prioridad)</span><span class="en">Functional Area — Derivation (priority)</span></div>
+      <ol style="margin:8px 0 0 18px;font-size:12.5px;color:var(--text2);line-height:1.8">
+        <li><span class="es"><strong>Entrada manual</strong> (m&aacute;xima prioridad)</span><span class="en"><strong>Manual entry</strong> (highest priority)</span></li>
+        <li><span class="es">Sustitución automática (Substitution rules)</span><span class="en">Automatic substitution (Substitution rules)</span></li>
+        <li><span class="es">Copia del master de la cuenta P&amp;L</span><span class="en">Copy from P&amp;L account master</span></li>
+        <li><span class="es">Copia del master del objeto CO asignado</span><span class="en">Copy from assigned CO object master</span></li>
+      </ol></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-ind">&#128196;</div><span class="es">Accruals &amp; Deferrals &mdash; Manual y Accruals Management</span><span class="en">Accruals &amp; Deferrals &mdash; Manual &amp; Accruals Management</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="sub"><div class="sub-title"><span class="es">Accruals/Deferrals Manuales</span><span class="en">Manual Accruals/Deferrals</span></div>
+      <div class="kv">
+        <span class="kv-k">App Fiori</span><span class="kv-v">Post General Journal Entries &rarr; Template: <strong>STANDARD_5</strong></span>
+        <span class="kv-k">Doc. Type</span><span class="kv-v">SA (G/L account document)</span>
+        <span class="kv-k">Reversal Reason</span><span class="kv-v"><strong>05 (Accrual)</strong> &mdash; <span class="es">genera reversi&oacute;n autom&aacute;tica en la fecha planificada (primer d&iacute;a del mes siguiente).</span><span class="en">generates automatic reversal on the planned date (first day of next month).</span></span>
+        <span class="kv-k">Auto-reverse</span><span class="kv-v">Schedule General Ledger Jobs &rarr; template: <strong>"Post General Journal Entries with Auto-reverse"</strong></span>
+      </div></div>
+      <div class="sub"><div class="sub-title">Accruals Management &mdash; Objetos de Acumulaci&oacute;n</div>
+      <div class="kv">
+        <span class="kv-k">Objeto de acumulaci&oacute;n</span><span class="kv-v"><span class="es">Accrual Object Category (ej: Z_INSURANC) + Accrual Item Type (ej: INSURA) + Accrual/Deferral Method (LINEAR).</span><span class="en">Accrual Object Category (e.g., Z_INSURANC) + Accrual Item Type (e.g., INSURA) + Accrual/Deferral Method (LINEAR).</span></span>
+        <span class="kv-k">Periodic Run (manual)</span><span class="kv-v">Accruals Management → <strong>Start Periodic Run — Manual Accruals</strong> → App Component ACAC</span>
+        <span class="kv-k">Periodic Run (scheduled)</span><span class="kv-v">Schedule Accruals Jobs &rarr; templates: <strong>Propose Period Amounts</strong> · <strong>Periodic Posting Run</strong></span>
+        <span class="kv-k">My Inbox</span><span class="kv-v"><span class="es">Revisar y ajustar propuestas antes de aprobar. Fiori Launchpad.</span><span class="en">Review and adjust proposals before approving. Fiori Launchpad.</span></span>
+        <span class="kv-k">Approve Periodic Accruals</span><span class="kv-v"><span class="es">App G/L Accountants. Aprobaci&oacute;n formal antes del posting run.</span><span class="en">G/L Accountants app. Formal approval before posting run.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title">PO Accruals (POAC)</div>
+      <div class="kv">
+        <span class="kv-k"><span class="es">Activar</span><span class="en">Activate</span></span><span class="kv-v">SPRO → FA → GL → Business Transactions → Accruals Management → Set App Component → POAC → PO Transfer Variant 0001 → <strong>Activate Online Transfer</strong></span>
+        <span class="kv-k"><span class="es">Flujo de aprobación</span><span class="en">Approval flow</span></span><span class="kv-v"><strong>Propose Period Amounts</strong> → My Inbox (revisar/ajustar) → <strong>Approve Periodic Accruals</strong> → <strong>Periodic Posting Run</strong></span>
+        <span class="kv-k"><span class="es">Factura proveedor</span><span class="en">Vendor invoice</span></span><span class="kv-v"><span class="es">Al contabilizar Create Supplier Invoice: reduce el PO accrual <strong>autom&aacute;ticamente online</strong>. No revertir manualmente.</span><span class="en">When posting Create Supplier Invoice: reduces PO accrual <strong>automatically online</strong>. Do not reverse manually.</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U6 ═══ -->
+<div class="view" id="u6">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u6">U6</span><div><h2><span class="es">Ledger Group-Specific Postings</span><span class="en">Ledger Group-Specific Postings</span></h2><p><span class="es">Extension Ledgers &middot; Parallel Accounting &middot; Simulation Run &middot; Ledger Groups</span><span class="en">Extension Ledgers &middot; Parallel Accounting &middot; Simulation Run &middot; Ledger Groups</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Extension Ledger: solo almacena valores delta. "Leading" en blanco. Underlying Ledger: 0L. Simulation Ledger: tipo "Line items with technical numbers/deletion possible". BS con Ledger Z0 muestra total (0L + delta Z0), NO solo el delta. Ledger Group: ejecuta programas una sola vez, actualiza m&uacute;ltiples ledgers.</p>
+    <p class="en">Extension Ledger: stores only delta values. "Leading" blank. Underlying Ledger: 0L. Simulation Ledger: type "Line items with technical numbers/deletion possible". BS with Ledger Z0 shows total (0L + delta Z0), NOT just delta. Ledger Group: runs programs once, updates multiple ledgers.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-blue">&#128012;</div><span class="es">Extension Ledgers y Parallel Accounting</span><span class="en">Extension Ledgers &amp; Parallel Accounting</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <table class="tbl-reg">
+        <tr><th><span class="es">Opci&oacute;n</span><span class="en">Option</span></th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">Ventaja</span><span class="en">Advantage</span></th></tr>
+        <tr><td>Account-based</td><td><span class="es">Diferentes cuentas G/L para diferentes normas contables.</span><span class="en">Different G/L accounts per accounting standard.</span></td><td><span class="es">Simple.</span><span class="en">Simple.</span></td></tr>
+        <tr><td>Ledger solution</td><td><span class="es">Diferentes ledgers por norma contable (0L + 2L).</span><span class="en">Different ledgers per accounting standard (0L + 2L).</span></td><td><span class="es">Separaci&oacute;n completa.</span><span class="en">Complete separation.</span></td></tr>
+        <tr><td><strong>Extension Ledger</strong></td><td><span class="es">Solo valores delta. Apunta a un ledger subyacente (0L). Minimal footprint. Zero reconciliation.</span><span class="en">Only delta values. Points to an underlying ledger (0L). Minimal footprint. Zero reconciliation.</span></td><td><span class="es">Eficiencia de datos.</span><span class="en">Data efficiency.</span></td></tr>
+      </table>
+      <div class="kv" style="margin-top:12px">
+        <span class="kv-k">Ledger Group 0L</span><span class="kv-v"><span class="es">Leading Ledger. Todos los documentos van aqu&iacute; por defecto.</span><span class="en">Leading Ledger. All documents go here by default.</span></span>
+        <span class="kv-k">Ledger Group Z0</span><span class="kv-v"><span class="es">Extension Ledger sobre 0L. Solo almacena delta respecto a 0L.</span><span class="en">Extension Ledger over 0L. Only stores delta relative to 0L.</span></span>
+        <span class="kv-k">Simulation Ledger</span><span class="kv-v"><span class="es">Extension Ledger tipo: <strong>"Line items with technical numbers / deletion possible"</strong>. Permite eliminar datos de simulaci&oacute;n.</span><span class="en">Extension Ledger type: <strong>"Line items with technical numbers / deletion possible"</strong>. Allows deleting simulation data.</span></span>
+        <span class="kv-k">Leading = blank</span><span class="kv-v"><span class="es">El campo "Leading" debe dejarse en blanco para Extension Ledger. Underlying Ledger: <strong>0L</strong>.</span><span class="en">The "Leading" field must be left blank for Extension Ledger. Underlying Ledger: <strong>0L</strong>.</span></span>
+        <span class="kv-k">BS con Z0</span><span class="kv-v"><span class="es">Muestra el <strong>total acumulado (0L + delta Z0)</strong>, NO solo el delta. Es acumulativo.</span><span class="en">Shows the <strong>accumulated total (0L + delta Z0)</strong>, NOT just the delta. It is cumulative.</span></span>
+      </div>
+      <div class="sub"><div class="sub-title">Simulation Run vs Update Run (FCV)</div>
+      <table class="tbl-reg">
+        <tr><th><span class="es">Tipo</span><span class="en">Type</span></th><th><span class="es">Resultado</span><span class="en">Result</span></th></tr>
+        <tr><td>Test Run</td><td><span class="es">Solo visualizaci&oacute;n. No actualiza base de datos.</span><span class="en">Display only. Does not update database.</span></td></tr>
+        <tr><td>Update Run</td><td><span class="es">Actualiza DB. Genera documento FI + reversi&oacute;n autom&aacute;tica.</span><span class="en">Updates DB. Generates FI document + automatic reversal.</span></td></tr>
+        <tr><td>Simulation Run</td><td><span class="es">Contabiliza en Extension Ledger espec&iacute;fico (delta). <strong>No afecta leading ledger 0L</strong>.</span><span class="en">Posts to specific Extension Ledger (delta). <strong>Does not affect leading ledger 0L</strong>.</span></td></tr>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U7 ═══ -->
+<div class="view" id="u7">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u7">U7</span><div><h2><span class="es">Technical Closing Activities</span><span class="en">Technical Closing Activities</span></h2><p><span class="es">Balance Carryforward &middot; Posting Periods &middot; Balance Audit Trail &middot; Document Splitting</span><span class="en">Balance Carryforward &middot; Posting Periods &middot; Balance Audit Trail &middot; Document Splitting</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">FAGLGVTR: BS accounts → mismo saldo; P&amp;L → Retained Earnings account. Balance Audit Trail ANTES de archivar documentos. Interval 3 en Posting Period: para contabilizaciones CO → FI. Document Splitting: solo vista G/L, no subledgers.</p>
+    <p class="en">FAGLGVTR: BS accounts → same balance; P&amp;L → Retained Earnings account. Balance Audit Trail BEFORE archiving documents. Interval 3 in Posting Period: for CO → FI postings. Document Splitting: G/L view only, not subledgers.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-purple">&#128196;</div><span class="es">Balance Carryforward, Posting Periods y Balance Audit Trail</span><span class="en">Balance Carryforward, Posting Periods &amp; Balance Audit Trail</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">FAGLGVTR</span><span class="kv-v"><span class="es">Balance Carryforward. Primera actividad de precierre del nuevo ejercicio. Comportamiento: cuentas BS → mismo saldo; cuentas P&amp;L → se consolidan en la <strong>Retained Earnings account</strong>. FI-AA: con todos los valores del activo.</span><span class="en">Balance Carryforward. First preclosing activity of new fiscal year. Behavior: BS accounts → same balance; P&amp;L accounts → consolidated into <strong>Retained Earnings account</strong>. FI-AA: with all asset values.</span></span>
+        <span class="kv-k">Retained Earnings Account</span><span class="kv-v"><span class="es">Configurar en IMG: FA → GL → Master Data → G/L Accounts → Preparations → <strong>Define Retained Earnings Account</strong>.</span><span class="en">Configure in IMG: FA → GL → Master Data → G/L Accounts → Preparations → <strong>Define Retained Earnings Account</strong>.</span></span>
+        <span class="kv-k">Posting Period Intervals</span><span class="kv-v"><span class="es">Interval 1 = per&iacute;odos normales de contabilizaci&oacute;n G/L. Interval 2 = per&iacute;odos especiales. <strong>Interval 3</strong> = para contabilizaciones CO → FI en SAP S/4HANA (si vac&iacute;o, aplican 1 y 2). Transacci&oacute;n: FAGL_EHP4_T001B_COFI.</span><span class="en">Interval 1 = normal G/L posting periods. Interval 2 = special periods. <strong>Interval 3</strong> = for CO → FI postings in SAP S/4HANA (if empty, intervals 1 and 2 apply). Transaction: FAGL_EHP4_T001B_COFI.</span></span>
+        <span class="kv-k">Balance Audit Trail</span><span class="kv-v"><span class="es">Documenta saldo al inicio del per&iacute;odo + cambios → saldo al final. Requerido para auditor&iacute;a externa. <strong>Ejecutar ANTES de archivar documentos</strong> (los documentos archivados no son explicables sin él). Apps: Balance Audit Trail Line Items / Open Items.</span><span class="en">Documents opening balance + changes → closing balance. Required for external audit. <strong>Run BEFORE archiving documents</strong> (archived documents cannot be explained without it). Apps: Balance Audit Trail Line Items / Open Items.</span></span>
+        <span class="kv-k">Document Splitting</span><span class="kv-v"><span class="es">Enriquece las l&iacute;neas del documento con caracter&iacute;sticas de divisi&oacute;n (ej: segmento) para balances parciales. <strong>Solo vista G/L, no afecta subledgers</strong>. Hereda caracter&iacute;sticas a todas las l&iacute;neas del documento.</span><span class="en">Enriches document lines with splitting characteristics (e.g., segment) for partial balances. <strong>G/L view only, does not affect subledgers</strong>. Inherits characteristics to all document lines.</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U8 ═══ -->
+<div class="view" id="u8">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u8">U8</span><div><h2><span class="es">Financial Closing Cockpit (FCC)</span><span class="en">Financial Closing Cockpit (FCC)</span></h2><p><span class="es">Templates &middot; Task Groups &middot; Task Lists &middot; Dependencies &middot; Selection Variables</span><span class="en">Templates &middot; Task Groups &middot; Task Lists &middot; Dependencies &middot; Selection Variables</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Template: clave t&eacute;cnica <strong>10 caracteres</strong>. Task Group: reutilizable entre templates, mass changes, m&uacute;ltiples empresas. Task List status <strong>Released</strong> para ejecutarse. Selection Variables tipo D = Dynamic Date. Tarea con predecesor: no ejecutable hasta que la predecesora est&eacute; Completed.</p>
+    <p class="en">Template: technical key <strong>10 characters</strong>. Task Group: reusable across templates, mass changes, multiple companies. Task List status <strong>Released</strong> to execute. Selection Variables type D = Dynamic Date. Task with predecessor: not executable until predecessor is Completed.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-red">&#128203;</div><span class="es">Estructura del FCC &mdash; Template, Task Groups y Task Lists</span><span class="en">FCC Structure &mdash; Template, Task Groups &amp; Task Lists</span></div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Template</span><span class="kv-v"><span class="es">Estructura organizativa del proceso de cierre. Clave t&eacute;cnica de <strong>10 caracteres</strong>. Closing Hierarchy: define la jerarqu&iacute;a organizativa (ej: Controlling Area/Company code). En ej: <strong>T##TEMPL</strong>. Copiar desde 1-FC-MONTH.</span><span class="en">Organizational structure of the closing process. Technical key of <strong>10 characters</strong>. Closing Hierarchy: defines organizational hierarchy (e.g., Controlling Area/Company code). In exercise: <strong>T##TEMPL</strong>. Copy from 1-FC-MONTH.</span></span>
+        <span class="kv-k">Task Group</span><span class="kv-v"><span class="es">Grupo de tareas <strong>reutilizable entre templates</strong>. Ventajas: mass changes, cubre m&uacute;ltiples empresas con las mismas tareas. En ej: <strong>TG_BAL##</strong> (Balance Sheet). Responsible: S4F15-##. Auto Global ID: Select.</span><span class="en">Task group <strong>reusable across templates</strong>. Advantages: mass changes, covers multiple companies with same tasks. In exercise: <strong>TG_BAL##</strong> (Balance Sheet). Responsible: S4F15-##. Auto Global ID: Select.</span></span>
+        <span class="kv-k">Task Types</span><span class="kv-v">Notes &middot; Transactions &middot; <strong>Programs</strong> (con variante, dialog) &middot; <strong>Jobs</strong> (programa + variante, background) &middot; Workflow &middot; External &middot; Remote</span>
+        <span class="kv-k">Task List</span><span class="kv-v"><span class="es">Status <strong>Released</strong> = necesario para poder ejecutarse. Closing Type M = Month-End Closing. Derived from Template + key date/FY/PP.</span><span class="en">Status <strong>Released</strong> = required to be executable. Closing Type M = Month-End Closing. Derived from Template + key date/FY/PP.</span></span>
+        <span class="kv-k">Selection Variables</span><span class="kv-v"><span class="es">Tipo <strong>D</strong>: Dynamic Date Calculation (ej: "Last Day of previous month"). Tipo <strong>T</strong>: desde tabla TVARVC.</span><span class="en">Type <strong>D</strong>: Dynamic Date Calculation (e.g., "Last Day of previous month"). Type <strong>T</strong>: from table TVARVC.</span></span>
+        <span class="kv-k">Dependencies</span><span class="kv-v"><span class="es">Tarea con predecesor: estado "Dependent task(s) found" → no se puede ejecutar hasta que la predecesora est&eacute; Completed. Elegir No para ejecutar el predecesor primero.</span><span class="en">Task with predecessor: status "Dependent task(s) found" → cannot execute until predecessor is Completed. Choose No to run the predecessor first.</span></span>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">Apps Fiori FCC</span><span class="en">FCC Fiori Apps</span></div>
+      <div class="kv">
+        <span class="kv-k">Manage Task Templates</span><span class="kv-v">General Ledger &rarr; Closing</span>
+        <span class="kv-k">Process Closing Tasks (Classic)</span><span class="kv-v">General Ledger &rarr; Closing &mdash; <span class="es">ejecutar tareas online</span><span class="en">execute tasks online</span></span>
+        <span class="kv-k">Task Lists</span><span class="kv-v">General Ledger &rarr; Closing &mdash; <span class="es">gestionar listas de tareas</span><span class="en">manage task lists</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ U9 ═══ -->
+<div class="view" id="u9">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num u9">U9</span><div><h2><span class="es">Intercompany Matching &amp; Reconciliation (ICMR)</span><span class="en">Intercompany Matching &amp; Reconciliation (ICMR)</span></h2><p><span class="es">Trading Partner &middot; Matching Method ZF003 &middot; Reconciliation Cases &middot; Filter String</span><span class="en">Trading Partner &middot; Matching Method ZF003 &middot; Reconciliation Cases &middot; Filter String</span></p></div></div>
+  <div class="exam-tip"><div class="label">&#128204; <span class="es">Claves del Examen</span><span class="en">Exam Keys</span></div>
+    <p class="es">Trading Partner en master de BP: obligatorio en cliente Y proveedor. Matching Method ZF003, Data Source SF_JOURNAL_ENTRIES_03 (ACDOCA). Filter String: RCOMP&lt;='1010' or RCOMP='TA##'. Discrepancias: timing, moneda, Trading Partner incorrecto. Acciones: Assign (manual match) · Add Note · Send Notification · Set to Done.</p>
+    <p class="en">Trading Partner in BP master: mandatory in BOTH customer AND vendor. Matching Method ZF003, Data Source SF_JOURNAL_ENTRIES_03 (ACDOCA). Filter String: RCOMP&lt;='1010' or RCOMP='TA##'. Discrepancies: timing, currency, incorrect Trading Partner. Actions: Assign (manual match) · Add Note · Send Notification · Set to Done.</p>
+  </div>
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)"><div class="card-title"><div class="ci ci-teal">&#8644;</div>Intercompany Matching &amp; Reconciliation</div><span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="kv">
+        <span class="kv-k">Trading Partner</span><span class="kv-v"><span class="es">Campo en master de BP (pestaña Control Data, General Data). <strong>Obligatorio en ambas entidades</strong>: T-AC## → 1010 (cliente en TA##); T-AV## → TA## (proveedor en TA##).</span><span class="en">Field in BP master (Control Data tab, General Data). <strong>Required in both entities</strong>: T-AC## → 1010 (customer in TA##); T-AV## → TA## (vendor in TA##).</span></span>
+        <span class="kv-k">Matching Method ZF003</span><span class="kv-v"><span class="es">Colecci&oacute;n de reglas de matching. Data Source: <strong>SF_JOURNAL_ENTRIES_03</strong> (Intercompany Journal Entries desde ACDOCA).</span><span class="en">Collection of matching rules. Data Source: <strong>SF_JOURNAL_ENTRIES_03</strong> (Intercompany Journal Entries from ACDOCA).</span></span>
+        <span class="kv-k">Reconciliation Case</span><span class="kv-v"><span class="es">Mapeo 1:1 con un Matching Method. Contiene Display Groups para vistas agregadas de AR/AP intercompañ&iacute;a (AR→AP y AP→AR).</span><span class="en">1:1 mapping with a Matching Method. Contains Display Groups for aggregated intercompany AR/AP views (AR→AP and AP→AR).</span></span>
+        <span class="kv-k">Filter String (ej. 21)</span><span class="kv-v"><code>RCOMP&lt;='1010' or RCOMP='TA##'</code> &mdash; <span class="es">selecciona ambas entidades para el matching run.</span><span class="en">selects both entities for the matching run.</span></span>
+        <span class="kv-k">Trigger Follow-Ups</span><span class="kv-v"><span class="es">Activa el procesamiento autom&aacute;tico de seguimiento (workflows, ajustes) para partidas con discrepancias.</span><span class="en">Activates automatic follow-up processing (workflows, adjustments) for discrepancy items.</span></span>
+        <span class="kv-k">ICADOCM</span><span class="kv-v"><span class="es">Tabla SAP que almacena los resultados del matching en ICMR.</span><span class="en">SAP table storing matching results in ICMR.</span></span>
+      </div>
+      <div class="sub"><div class="sub-title"><span class="es">Discrepancias intencionales en EJ21</span><span class="en">Intentional discrepancies in EX21</span></div>
+      <div class="kv">
+        <span class="kv-k">REF2</span><span class="kv-v"><span class="es">Diferencia de <strong>9 EUR</strong> (1000 vs 2009). Discrepancia de importe.</span><span class="en">Difference of <strong>9 EUR</strong> (1000 vs 2009). Amount discrepancy.</span></span>
+        <span class="kv-k">REF3</span><span class="kv-v"><span class="es">Diferencia de <strong>moneda</strong> (EUR vs USD). Mismo importe nominal pero monedas diferentes.</span><span class="en"><strong>Currency</strong> difference (EUR vs USD). Same nominal amount but different currencies.</span></span>
+      </div></div>
+      <div class="sub"><div class="sub-title"><span class="es">Apps ICMR</span><span class="en">ICMR Apps</span></div>
+      <div class="kv">
+        <span class="kv-k">Schedule Matching Runs</span><span class="kv-v">Intercompany Reconciliation</span>
+        <span class="kv-k">Manage Assignments — By Reconciliation Case</span><span class="kv-v"><span class="es">Revisar matched/unmatched por caso.</span><span class="en">Review matched/unmatched by case.</span></span>
+        <span class="kv-k">Reconciliation Status Overview</span><span class="kv-v"><span class="es">Vista consolidada del estado de reconciliaci&oacute;n entre entidades.</span><span class="en">Consolidated view of reconciliation status between entities.</span></span>
+        <span class="kv-k">Reconciliation Balances</span><span class="kv-v"><span class="es">Verificar diferencias YTD y peri&oacute;do entre entidades. YTD y period amounts.</span><span class="en">Verify YTD and period differences between entities.</span></span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EJERCICIOS ═══ -->
+<div class="view" id="ex">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num" style="background:var(--orange)">EJ</span><div><h2><span class="es">21 Ejercicios + Soluciones</span><span class="en">21 Exercises + Solutions</span></h2><p><span class="es">Sistema T41 &middot; TA## / T-AC## / T-AV## &middot; 7 horas</span><span class="en">System T41 &middot; TA## / T-AC## / T-AV## &middot; 7 hours</span></p></div></div>
+
+  <div class="sec-title"><span class="es">Unidad 2 &mdash; Financial Statements (EJ 1&ndash;2)</span><span class="en">Unit 2 &mdash; Financial Statements (EX 1&ndash;2)</span></div>
+
+  <div class="ex-card open">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ1</span>
+      <div class="ex-title"><div>Create Financial Statements</div><div class="ex-sub"><span class="es">Unidad 2 &middot; Post GL Entries, Manage Global Hierarchies, BS/IS</span><span class="en">Unit 2 &middot; Post GL Entries, Manage Global Hierarchies, BS/IS</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="alert alert-ind"><strong><span class="es">Objetivo:</span><span class="en">Objective:</span></strong> <span class="es">Contabilizar documentos FI, importar FSV 1010 como FS##, modificar nodos, activar y probar con BS/IS report.</span><span class="en">Post FI documents, import FSV 1010 as FS##, modify nodes, activate, and test with BS/IS report.</span></div>
+      <div class="sec-title">Task 1 &mdash; <span class="es">Contabilizar asiento de capital (equity posting)</span><span class="en">Post equity entry</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Post General Journal Entries</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Datos del cabecero:</span><span class="en">Header data:</span><br>
+        Journal Entry Date: <strong>Jan 1, previous year</strong> &middot; Posting Date: Jan 1, PY &middot; Type SA &middot; Company Code <strong>TA##</strong> &middot; Currency EUR &middot; Header Text: Equity posting GR##</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">
+        <span class="es">L&iacute;neas de asiento:</span><span class="en">Journal entry lines:</span>
+        <table style="margin-top:6px;font-size:11.5px"><tr><th>G/L</th><th>D/C</th><th>Amount</th><th>Profit Center</th></tr>
+        <tr><td>11100000</td><td>Debit</td><td>2,500,000</td><td>T-PCA##</td></tr>
+        <tr><td>11100000</td><td>Debit</td><td>2,500,000</td><td>T-PCB##</td></tr>
+        <tr><td>31000000</td><td>Credit</td><td>* (auto)</td><td>&mdash;</td></tr></table></div></div>
+      <div class="sec-title">Task 2 &mdash; <span class="es">Factura de proveedor T-AV##</span><span class="en">Vendor invoice T-AV##</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Payable &rarr; Create Incoming Invoices</span>
+        Vendor: T-AV## &middot; Date: current &middot; Amount: 1100 EUR &middot; Tax: 1I (10%) &middot; Calculate Tax: Select<br>G/L: 61400000 &middot; Amount: 1100 &middot; Cost Center: TA##1100</div></div>
+      <div class="sec-title">Task 3 &mdash; <span class="es">Balance Sheet/Income Statement inicial</span><span class="en">Initial Balance Sheet/IS</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Reporting &rarr; Balance Sheet / Income Statement</span>
+        Company Code TA## &middot; Ledger 0L &middot; Statement Version <strong>1010</strong> &middot; Normal (Actual-Actual) &middot; Current period/year vs previous</div></div>
+      <div class="sec-title">Task 4 &mdash; <span class="es">Crear FSV FS## en Manage Global Hierarchies</span><span class="en">Create FSV FS## in Manage Global Hierarchies</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Reporting &rarr; Manage Global Hierarchies &rarr; Import Hierarchy</span>
+        Source: Maintain Financial Statement Versions &rarr; ID: <strong>1010</strong> &rarr; Ok</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Hierarchy ID: <strong>FS##</strong> &middot; CoA: <strong>YCOA</strong> &middot; Valid From: Jan 1, prev. year &middot; Valid To: 31 Dec 9999 &rarr; <strong>Create</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Edit → Crear subnodos bajo 3160000 (Personnel expenses):</span><span class="en">Edit → Create subnodes under 3160000 (Personnel expenses):</span><br>
+        <strong>3160010</strong> (6.1. Payroll expenses) &middot; <strong>3160020</strong> (6.2. Training and Education expenses)</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Cut cuenta <strong>61400000</strong> del nodo 3180000 (Other Operating Expenses) → Paste en nodo 3160020. Sort subnodos de 3200000 ascendente → Save.</span><span class="en">Cut account <strong>61400000</strong> from node 3180000 (Other Operating Expenses) → Paste in node 3160020. Sort 3200000 subnodes ascending → Save.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><strong>Activate</strong> &rarr; <span class="es">confirmar → verificar Status = Active.</span><span class="en">confirm → verify Status = Active.</span></div></div>
+      <div class="sec-title">Task 5 &mdash; <span class="es">Valores por defecto de usuario + Test FS##</span><span class="en">User defaults + Test FS##</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">User Settings &rarr; Profile Settings:</span><span class="en">User Settings &rarr; Profile Settings:</span> EUR, TA##, FS##, A000 &rarr; Save</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Balance Sheet / Income Statement &rarr; FS## &rarr; Go</span> <span class="es">Verificar nodos 3160010 y 3160020 en el P&amp;L, y cuenta 61400000 bajo 3160020.</span><span class="en">Verify nodes 3160010 and 3160020 in P&amp;L, and account 61400000 under 3160020.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ2</span>
+      <div class="ex-title"><div><span class="es">Execute Financial Accounting Reports</span><span class="en">Execute Financial Accounting Reports</span></div><div class="ex-sub"><span class="es">Unidad 2 &middot; Multidimensional, Analysis for Excel</span><span class="en">Unit 2 &middot; Multidimensional, Analysis for Excel</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Reporting &rarr; Balance Sheet / Income Statement - Multidimensional</span> <span class="es">Filtrar por Profit Center T-PCA## y T-PCB## por separado.</span><span class="en">Filter by Profit Center T-PCA## and T-PCB## separately.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">SAP Fiori &rarr; Analysis for Microsoft Office &rarr; Trial Balance (2CCFITRIALBALQ0001)</span> Company Code TA## &middot; <span class="es">Ejercicio actual. Drag-and-drop dimensiones.</span><span class="en">Current fiscal year. Drag-and-drop dimensions.</span></div></div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Unidad 3 &mdash; Fixed and Current Assets (EJ 3&ndash;5)</span><span class="en">Unit 3 &mdash; Fixed and Current Assets (EX 3&ndash;5)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ3</span>
+      <div class="ex-title"><div><span class="es">Execute and Analyze the Depreciation Run</span><span class="en">Execute and Analyze the Depreciation Run</span></div><div class="ex-sub"><span class="es">Unidad 3 &middot; Schedule Asset Accounting Jobs &middot; ~60 min</span><span class="en">Unit 3 &middot; Schedule Asset Accounting Jobs &middot; ~60 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Closing &rarr; Schedule Asset Accounting Jobs</span> Template: <strong>Depreciation Posting Run</strong></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Company Code: TA## &middot; FY: <strong>Previous Year</strong> &middot; Posting Period: 12 &middot; <strong>Test Run: Select</strong> &rarr; Schedule &rarr; Go &rarr; revisar log</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Update Run: deseleccionar Test Run &rarr; Schedule &rarr; verificar documentos FI tipo AF.</span><span class="en">Update Run: deselect Test Run &rarr; Schedule &rarr; verify FI documents type AF.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">Balance Sheet / Income Statement &rarr; FS## &rarr; Period 12 / PY</span> <span class="es">Verificar amortizaci&oacute;n acumulada en BS y gasto de amortizaci&oacute;n en P&amp;L.</span><span class="en">Verify accumulated depreciation in BS and depreciation expense in P&amp;L.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ4</span>
+      <div class="ex-title"><div><span class="es">Analyze the GR/IR Clearing Account</span><span class="en">Analyze the GR/IR Clearing Account</span></div><div class="ex-sub"><span class="es">Unidad 3 &middot; PO → GR → Analyze GR/IR &middot; ~45 min</span><span class="en">Unit 3 &middot; PO → GR → Analyze GR/IR &middot; ~45 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">BS/IS &rarr; FS## &rarr; Save view "S4F15-##"</span> <span class="es">Verificar inventario (Trading Goods) en BS.</span><span class="en">Verify inventory (Trading Goods) in BS.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Manage Purchase Orders &rarr; T-AV## &middot; TG0011 &middot; Plant TA## &middot; 10 units &middot; Net price 20</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">Post Goods Receipt for Purchasing Document &rarr; storage location 101A plant TA##</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">Analyze GR/IR Clearing Account</span> G/L: 21120000 &middot; Company Code TA## &middot; Key Date: end of current month &middot; Supplier T-AV## &middot; GR/IR clearing: Select &middot; Document type SA &middot; Batch Session: G##-GR_IR<br><span class="es">Test Run primero → luego Create Postings (Update) → procesar batch input session.</span><span class="en">Test Run first → then Create Postings (Update) → process batch input session.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Verificar cuentas de ajuste 21122000 y target 24020000 en BS/IS.</span><span class="en">Verify adjustment accounts 21122000 and target 24020000 in BS/IS.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ5</span>
+      <div class="ex-title"><div><span class="es">Balance Sheet Valuation in Materials Management (MRN9DELTA)</span><span class="en">Balance Sheet Valuation in Materials Management (MRN9DELTA)</span></div><div class="ex-sub"><span class="es">Unidad 3 &middot; PO → GR → MRN9DELTA</span><span class="en">Unit 3 &middot; PO → GR → MRN9DELTA</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Manage Purchase Orders &rarr; T-AV## &middot; TG0011 &middot; 10 units &middot; Net price <strong>15</strong> EUR</span> (precio menor que el anterior de 20 → lowest value determination)</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Post Goods Receipt for Purchasing Document &rarr; storage 101A plant TA##</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">MRN9DELTA (Balance Sheet Valuation) &rarr; Delta Run</span> Material TG0011 &middot; Plant TA## &middot; <span class="es">Valorar a precio m&aacute;s bajo (Lower of Cost or Market). Verificar ajuste de valor en BS.</span><span class="en">Value at lowest price (Lower of Cost or Market). Verify value adjustment in BS.</span></div></div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Unidad 4 &mdash; Receivables and Payables (EJ 6&ndash;9)</span><span class="en">Unit 4 &mdash; Receivables and Payables (EX 6&ndash;9)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ6</span>
+      <div class="ex-title"><div><span class="es">Create a Balance Confirmation</span><span class="en">Create a Balance Confirmation</span></div><div class="ex-sub"><span class="es">Unidad 4 &middot; SAPF130D &middot; ~30 min</span><span class="en">Unit 4 &middot; SAPF130D &middot; ~30 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Receivable &rarr; Create Balance Confirmations For Customers (SAPF130D)</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Company Code TA## &middot; Customer T-AC## &middot; Procedure: <strong>Balance confirmation</strong> &middot; Sort Variant: <strong>K2</strong> &middot; Line Item Sorting: <strong>P1</strong> &middot; Printer: <strong>LP01</strong></div></div>
+      <div class="alert alert-amber"><strong>Hint:</strong> <span class="es">Procedimientos disponibles: balance confirmation, balance notification, balance request. Printer LP01 para form set, reconciliation list, results table y error list.</span><span class="en">Available procedures: balance confirmation, balance notification, balance request. Printer LP01 for form set, reconciliation list, results table and error list.</span></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ7</span>
+      <div class="ex-title"><div><span class="es">Manage the Foreign Currency Valuation of Open Items (FAGL_FCV)</span><span class="en">Manage the Foreign Currency Valuation of Open Items (FAGL_FCV)</span></div><div class="ex-sub"><span class="es">Unidad 4 &middot; Perform Foreign Currency Valuation &middot; ~60 min</span><span class="en">Unit 4 &middot; Perform Foreign Currency Valuation &middot; ~60 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">Verificar que el &aacute;rea IF no tiene Delta Logic activa (campos en blanco):</span><span class="en">Verify area IF has no active Delta Logic (blank fields):</span>
+        <span class="step-path">SPRO &rarr; FA &rarr; GL &rarr; Periodic Processing &rarr; Valuate &rarr; Activate Delta Logic</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Crear factura cliente en USD:</span><span class="en">Create customer invoice in USD:</span>
+        <span class="step-path">Accounts Receivable &rarr; Create Outgoing Invoices</span>
+        Customer T-AC## &middot; Date: 15th prev month &middot; Amount: <strong>10,000 USD</strong> &middot; Exchange rate: <strong>/0.50</strong> &middot; Tax A0 &middot; G/L 41000000 &middot; Profit Center T-PCB##</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">Accounts Receivable &rarr; Perform Foreign Currency Valuation</span>
+        Company Code TA## &middot; Key Date: <strong>last day prev period</strong> &middot; Area: <strong>IF</strong> &middot; <strong>Test Run: Select</strong> &middot; Customer T-AC## &rarr; Execute</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Tab Postings → <strong>Update Run</strong> → Execute → ver documento generado (reversi&oacute;n autom&aacute;tica el d&iacute;a siguiente).</span><span class="en">Postings tab → <strong>Update Run</strong> → Execute → view generated document (automatic reversal next day).</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Verificar en BS/IS: cuentas <strong>12100000</strong> (AR reconciliation) y <strong>12102000</strong> en Assets → Current Assets; cuenta <strong>72040000</strong> (Loss from FCV) en P&amp;L.</span><span class="en">Verify in BS/IS: accounts <strong>12100000</strong> (AR reconciliation) and <strong>12102000</strong> in Assets → Current Assets; account <strong>72040000</strong> (Loss from FCV) in P&amp;L.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ8&ndash;9</span>
+      <div class="ex-title"><div>EJ8: Flat-Rate Value Adjustment (AB) &middot; EJ9: Regroup Receivables (FAGL_CL_REGROUP)</div><div class="ex-sub"><span class="es">Unidad 4 &middot; ~60 min</span><span class="en">Unit 4 &middot; ~60 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ8 &mdash; Flat-Rate Individual Value Adjustment</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Receivable &rarr; Maintain Business Partner</span> <span class="es">Customer T-AC## → Account Management tab → Valuation Key: <strong>AB</strong> → Save.</span><span class="en">Customer T-AC## → Account Management tab → Valuation Key: <strong>AB</strong> → Save.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Accounts Receivable &rarr; Perform Further Valuations (SAPF107V)</span> Company Code TA## &middot; Customer T-AC## &rarr; Test Run &rarr; Update Run &rarr; <span class="es">verificar ajuste generado.</span><span class="en">verify generated adjustment.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ9 &mdash; Regroup Receivables (FAGL_CL_REGROUP)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Receivable &rarr; Regroup Receivables / Payables</span> Sort Method: <strong>SAP</strong> &middot; Valuation Area: <strong>IF</strong> &middot; Company Code TA## &rarr; Test Run &rarr; Update Run</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Verificar en BS/IS: partidas a cobrar/pagar reagrupadas seg&uacute;n vida residual. Cuentas de ajuste (no reconciliaci&oacute;n directa).</span><span class="en">Verify in BS/IS: receivables/payables regrouped by remaining life. Adjustment accounts (not direct reconciliation).</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Unidad 5 &mdash; Profit and Loss (EJ 10&ndash;15)</span><span class="en">Unit 5 &mdash; Profit and Loss (EX 10&ndash;15)</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ10</span>
+      <div class="ex-title"><div><span class="es">Display the P&amp;L Statement using Cost of Sales Accounting</span><span class="en">Display the P&amp;L Statement using Cost of Sales Accounting</span></div><div class="ex-sub"><span class="es">Unidad 5 &middot; BS/IS Multidimensional &middot; ~20 min</span><span class="en">Unit 5 &middot; BS/IS Multidimensional &middot; ~20 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Reporting &rarr; Balance Sheet / Income Statement - Multidimensional</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Verificar que el P&amp;L por Cost of Sales Accounting muestra Functional Area como dimensi&oacute;n. Comparar con Period Accounting. El resultado operativo es el mismo en ambos.</span><span class="en">Verify that P&amp;L by Cost of Sales Accounting shows Functional Area as a dimension. Compare with Period Accounting. The operating result is the same in both.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ11</span>
+      <div class="ex-title"><div><span class="es">Post Accruals and Deferrals (Rental Invoice + STANDARD_5 + Schedule GL Jobs)</span><span class="en">Post Accruals and Deferrals (Rental Invoice + STANDARD_5 + Schedule GL Jobs)</span></div><div class="ex-sub"><span class="es">Unidad 5 &middot; Create Incoming Invoices &middot; Post General Journal Entries &middot; Schedule GL Jobs &middot; ~60 min</span><span class="en">Unit 5 &middot; Create Incoming Invoices &middot; Post General Journal Entries &middot; Schedule GL Jobs &middot; ~60 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="alert alert-ind"><strong><span class="es">Contexto:</span><span class="en">Context:</span></strong> <span class="es">TA## realiz&oacute; un pago trimestral de alquiler el 1 de diciembre del a&ntilde;o anterior. Acumular los gastos al per&iacute;odo correcto mediante asientos de acumulaci&oacute;n/diferimiento.</span><span class="en">TA## made a quarterly rental payment on December 1 of the previous year. Accrue expenses to the correct period using accrual/deferral entries.</span></div>
+      <div class="sec-title">Task 1 &mdash; <span class="es">Contabilizar factura de alquiler</span><span class="en">Post rental invoice</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Payable &rarr; Create Incoming Invoices</span>
+        <table style="margin-top:6px;font-size:11.5px"><tr><th>Campo/Field</th><th>Valor/Value</th></tr>
+        <tr><td>Vendor</td><td>T-AV##</td></tr>
+        <tr><td>Invoice date / Posting Date</td><td><strong>December 1, previous year</strong></td></tr>
+        <tr><td>Amount</td><td><strong>1500 EUR</strong></td></tr>
+        <tr><td>Tax Code</td><td><strong>V0</strong> (0% Input tax non taxable)</td></tr>
+        <tr><td>G/L acct</td><td><strong>63005000</strong> (Office/Building Rent)</td></tr>
+        <tr><td>Amount in doc. curr.</td><td>1500</td></tr>
+        <tr><td>Cost center</td><td>TA##1100</td></tr></table></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">General Ledger &mdash; Reporting &rarr; Balance Sheet / Income Statement</span>
+        Statement Version <strong>FS##</strong> &middot; End Period <strong>12 / Previous Year</strong> &middot; Comp. End Period <strong>1 / Current Year</strong> &middot; EUR &rarr; Go.<br>
+        <span class="es">Buscar G/L 63005000 &rarr; verificar gasto de 1500 EUR registrado.</span><span class="en">Search G/L 63005000 &rarr; verify 1500 EUR expense recorded.</span></div></div>
+      <div class="sec-title">Task 2 &mdash; <span class="es">Asiento de acumulaci&oacute;n/diferimiento (STANDARD_5)</span><span class="en">Accrual/deferral entry (STANDARD_5)</span></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">General Ledger &rarr; Post General Journal Entries &rarr; Select Templates &rarr; STANDARD_5</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">
+        <span class="es">Header tab:</span><span class="en">Header tab:</span>
+        Journal Entry Date / Posting Date: <strong>December 31, previous year</strong> &middot; Type SA &middot; Company Code TA## &middot; Currency EUR<br>
+        <span class="es">Auto-Reverse tab:</span><span class="en">Auto-Reverse tab:</span> <strong>Reversal Reason 05 (Accrual)</strong> &middot; <strong>Plnd Reversal Date: January 1, current year</strong><br>
+        <span class="es">L&iacute;neas:</span><span class="en">Lines:</span>
+        <table style="margin-top:6px;font-size:11.5px"><tr><th>G/L</th><th>D/C</th><th>Amount</th><th>Tax / Cost Center</th></tr>
+        <tr><td><strong>12561000</strong> (Prepaid expenses)</td><td>Debit</td><td><strong>1000</strong></td><td>&mdash;</td></tr>
+        <tr><td><strong>63005000</strong> (Office/Building Rent)</td><td>Credit</td><td><strong>1000</strong></td><td>V0 / TA##1100</td></tr></table>
+        &rarr; Simulate &rarr; <strong>Post.</strong></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Verificar BS/IS FS## per&iacute;odo 12/PY: gasto en 63005000 reducido en 1000 (de 1500 a 500 en el per&iacute;odo).</span><span class="en">Verify BS/IS FS## period 12/PY: expense in 63005000 reduced by 1000 (from 1500 to 500 in the period).</span></div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-body"><span class="step-path">General Ledger &mdash; Closing &rarr; Schedule General Ledger Jobs &rarr; Create &rarr; template: "Post General Journal Entries with Auto-reverse"</span>
+        Job Name: Post GJE with Auto-reverse ## &middot; Start Immediately &middot; Company Code TA## &middot; Plnd Reversal Date: <strong>January 1, current year</strong> &middot; Test Run: Deselect &rarr; Schedule.</div></div>
+      <div class="step"><div class="step-num">7</div><div class="step-body"><span class="es">Verificar BS/IS FS## per&iacute;odo 12/PY vs 01/CY: en enero el gasto de 1000 aparece revertido.</span><span class="en">Verify BS/IS FS## period 12/PY vs 01/CY: in January the 1000 EUR expense appears reversed.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ12</span>
+      <div class="ex-title"><div><span class="es">Post Manual Accrual for Insurance Contributions (Accruals Management)</span><span class="en">Post Manual Accrual for Insurance Contributions (Accruals Management)</span></div><div class="ex-sub"><span class="es">Unidad 5 &middot; Z_INSURANC / INSURA / LINEAR &middot; ~60 min</span><span class="en">Unit 5 &middot; Z_INSURANC / INSURA / LINEAR &middot; ~60 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accruals Management &rarr; Accrual Objects</span> <span class="es">Crear nuevo objeto: Company Code TA##.</span><span class="en">Create new object: Company Code TA##.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Accrual Object Category: <strong>Z_INSURANC</strong> &middot; Person Responsible: <strong>S4F15-##</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Life tab: Start of Life: <strong>Jan 1, CY</strong> &middot; End of Life: <strong>Dec 31, CY</strong><br>Account Assignments: Cost Center <strong>TA##1100</strong></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Item Data tab: Accr Item Type: <strong>INSURA</strong> &middot; Ledger Group: <strong>0L</strong> &middot; Tot. Accr Amt (TC): <strong>6,000 EUR</strong> &middot; Accrual/Deferral Method: <strong>LINEAR</strong><br><span class="es">Verificar Calculated Accruals (500 EUR/mes) → Save → anotar n&uacute;mero de objeto.</span><span class="en">Verify Calculated Accruals (500 EUR/month) → Save → note object number.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="step-path">Accruals Management &rarr; Start Periodic Run — Manual Accruals</span> App Component: <strong>ACAC</strong> &middot; Company Code TA## &middot; Accrual Item Type: INSURA &middot; Key Date: <strong>last day Jan CY</strong> &middot; Test Run &rarr; Execute</div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-body"><span class="es">Desmarcar Test Run &rarr; Execute (Update Run) &rarr; verificar documento contabilizado (500 EUR).</span><span class="en">Deselect Test Run &rarr; Execute (Update Run) &rarr; verify posted document (500 EUR).</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ13&ndash;15</span>
+      <div class="ex-title"><div>EJ13: PO Accrual Objects &middot; EJ14: Approve &amp; Post Periodic Accruals &middot; EJ15: Supplier Invoice</div><div class="ex-sub"><span class="es">Unidad 5 &middot; POAC Flow &middot; ~90 min</span><span class="en">Unit 5 &middot; POAC Flow &middot; ~90 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ13 &mdash; <span class="es">Crear PO Accrual Objects</span><span class="en">Create PO Accrual Objects</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Manage Purchase Orders &rarr; T-AV## &middot; material de servicio &middot; Delivery Date: current month-end</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Verificar en Display PO Accruals (POACTREE03) que el objeto de acumulaci&oacute;n fue creado autom&aacute;ticamente para el PO.</span><span class="en">Verify in Display PO Accruals (POACTREE03) that the accrual object was automatically created for the PO.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ14 &mdash; <span class="es">Review, Approve and Post Periodic Accruals</span><span class="en">Review, Approve and Post Periodic Accruals</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Schedule Accruals Jobs &rarr; Propose Period Amounts</span> <span class="es">Ejecutar para generar propuesta de acumulaci&oacute;n peri&oacute;dica.</span><span class="en">Run to generate periodic accrual proposal.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">My Inbox</span> <span class="es">Revisar propuesta. Ajustar si necesario.</span><span class="en">Review proposal. Adjust if needed.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">Approve Periodic Accruals (G/L Accountants app)</span> <span class="es">Aprobaci&oacute;n formal.</span><span class="en">Formal approval.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">Schedule Accruals Jobs &rarr; Periodic Posting Run</span> <span class="es">Contabilizar accruals aprobados.</span><span class="en">Post approved accruals.</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ15 &mdash; <span class="es">Supplier Invoice with Accruals Postings (reduce PO accrual)</span><span class="en">Supplier Invoice with Accruals Postings (reduces PO accrual)</span></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Payable &rarr; Create Supplier Invoice &rarr; referencing PO</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Post factura → verificar en Display PO Accruals que el objeto de acumulaci&oacute;n se redujo autom&aacute;ticamente (online). <strong>No revertir manualmente</strong>.</span><span class="en">Post invoice → verify in Display PO Accruals that the accrual object was automatically reduced (online). <strong>Do not reverse manually</strong>.</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="es">Unidades 6, 7, 8, 9 &mdash; EJ 16&ndash;21</span><span class="en">Units 6, 7, 8, 9 &mdash; EX 16&ndash;21</span></div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ16&ndash;17</span>
+      <div class="ex-title"><div>EJ16: Post to Ledger Group (Z0) &middot; EJ17: FCV Simulation Run (Extension Ledger)</div><div class="ex-sub"><span class="es">Unidad 6 &middot; Ledger Groups / Extension Ledger &middot; ~90 min</span><span class="en">Unit 6 &middot; Ledger Groups / Extension Ledger &middot; ~90 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="sub"><div class="sub-title">EJ16 &mdash; Post to a Ledger Group</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Post General Journal Entries</span> <span class="es">Contabilizar asiento para Ledger Group <strong>0L</strong> (leading). Luego asiento separado para Ledger Group <strong>Z0</strong> (Extension).</span><span class="en">Post entry for Ledger Group <strong>0L</strong> (leading). Then separate entry for Ledger Group <strong>Z0</strong> (Extension).</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Balance Sheet / Income Statement &rarr; Ledger 0L vs Ledger Z0</span> <span class="es">Comparar cuenta 24097000. Z0 muestra total (0L + delta Z0).</span><span class="en">Compare account 24097000. Z0 shows total (0L + delta Z0).</span></div></div></div>
+      <div class="sub"><div class="sub-title">EJ17 &mdash; FCV Simulation Run (crear Simulation Extension Ledger)</div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">SPRO &rarr; FA &rarr; FA Global Settings &rarr; Ledgers &rarr; Ledger &rarr; Define Settings for Ledgers and Currency Types</span> <span class="es">Crear nuevo ledger:</span><span class="en">Create new ledger:</span><br>Ledger Name: Gr.## Simulation Ext. Ledger &middot; Leading: (blank) &middot; Ledger Type: <strong>Extension Ledger</strong> &middot; Extn. Ledger Type: <strong>Line items with technical numbers / deletion possible</strong> &middot; Underlying Ledger: <strong>0L</strong></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">Accounts Payable &rarr; Perform Foreign Currency Valuation</span> Company Code TA## &middot; Vendor T-AV## &middot; Simulation Ledger → <strong>Simulation Run</strong> &rarr; Execute</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Verificar BS con Simulation Ledger: muestra valores delta de FCV sin afectar 0L.</span><span class="en">Verify BS with Simulation Ledger: shows FCV delta values without affecting 0L.</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ18</span>
+      <div class="ex-title"><div><span class="es">Execute the Balance Audit Reports</span><span class="en">Execute the Balance Audit Reports</span></div><div class="ex-sub"><span class="es">Unidad 7 &middot; Balance Audit Trail &middot; ~20 min</span><span class="en">Unit 7 &middot; Balance Audit Trail &middot; ~20 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Reporting &rarr; Balance Audit Trail Line Items</span> Company Code TA## &middot; G/L Account 31000000</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="step-path">General Ledger &rarr; Reporting &rarr; Balance Audit Trail Open Items</span></div></div>
+      <div class="alert alert-amber"><strong>Hint:</strong> <span class="es">Ejecutar el Balance Audit Trail ANTES de archivar documentos. Los documentos archivados no pueden explicarse en auditor&iacute;a sin este informe.</span><span class="en">Run the Balance Audit Trail BEFORE archiving documents. Archived documents cannot be explained in an audit without this report.</span></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ19</span>
+      <div class="ex-title"><div><span class="es">Create and Execute Tasks in the Financial Closing Cockpit</span><span class="en">Create and Execute Tasks in the Financial Closing Cockpit</span></div><div class="ex-sub"><span class="es">Unidad 8 &middot; FCC Template T##TEMPL &middot; ~90 min</span><span class="en">Unit 8 &middot; FCC Template T##TEMPL &middot; ~90 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">General Ledger &rarr; Closing &rarr; Manage Task Templates</span> <span class="es">Copiar template 1-FC-MONTH como <strong>T##TEMPL</strong>.</span><span class="en">Copy template 1-FC-MONTH as <strong>T##TEMPL</strong>.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">Closing Hierarchy: Controlling Area/Company code &rarr; Asignar A000 y TA## como single values &rarr; Save.</span><span class="en">Closing Hierarchy: Controlling Area/Company code &rarr; Assign A000 and TA## as single values &rarr; Save.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Crear Task Group <strong>TG_BAL##</strong>: Description "Balance Sheet", Responsible S4F15-##, Auto Global ID: Select.</span><span class="en">Create Task Group <strong>TG_BAL##</strong>: Description "Balance Sheet", Responsible S4F15-##, Auto Global ID: Select.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="es">Crear Task 1 (tipo Transactions): "Maintain Financial Statement Version". Crear Task 2 (tipo Jobs): Balance Sheet report.</span><span class="en">Create Task 1 (type Transactions): "Maintain Financial Statement Version". Create Task 2 (type Jobs): Balance Sheet report.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="es">Create Periodic Task List &rarr; Key Date, FY, PP &rarr; Status: <strong>Released</strong> &rarr; Process Closing Tasks (Classic) &rarr; ejecutar tasks.</span><span class="en">Create Periodic Task List &rarr; Key Date, FY, PP &rarr; Status: <strong>Released</strong> &rarr; Process Closing Tasks (Classic) &rarr; execute tasks.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ20</span>
+      <div class="ex-title"><div><span class="es">Manage Task Dependencies in the FCC</span><span class="en">Manage Task Dependencies in the FCC</span></div><div class="ex-sub"><span class="es">Unidad 8 &middot; Dependencies tab &middot; ~45 min</span><span class="en">Unit 8 &middot; Dependencies tab &middot; ~45 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="es">En el template T##TEMPL: seleccionar Task 2 (Balance Sheet report) &rarr; tab Dependencies &rarr; a&ntilde;adir Task 1 (Maintain FSV) como predecesor.</span><span class="en">In template T##TEMPL: select Task 2 (Balance Sheet report) &rarr; Dependencies tab &rarr; add Task 1 (Maintain FSV) as predecessor.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><span class="es">En Process Closing Tasks: intentar ejecutar Task 2 primero &rarr; sistema muestra "Dependent Tasks Found" &rarr; elegir <strong>No</strong> para ejecutar predecesora primero.</span><span class="en">In Process Closing Tasks: try to execute Task 2 first &rarr; system shows "Dependent Tasks Found" &rarr; choose <strong>No</strong> to run predecessor first.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="es">Ejecutar Task 1 &rarr; cambiar estado a <strong>Completed without errors</strong> &rarr; Task 2 cambia autom&aacute;ticamente a "In Process" &rarr; ejecutar Task 2.</span><span class="en">Execute Task 1 &rarr; change status to <strong>Completed without errors</strong> &rarr; Task 2 automatically changes to "In Process" &rarr; execute Task 2.</span></div></div>
+    </div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-header" onclick="toggleEx(this)"><span class="ex-num">EJ21</span>
+      <div class="ex-title"><div><span class="es">Intercompany Matching and Reconciliation (ICMR)</span><span class="en">Intercompany Matching and Reconciliation (ICMR)</span></div><div class="ex-sub"><span class="es">Unidad 9 &middot; Trading Partner &middot; Schedule Matching Runs &middot; ~60 min</span><span class="en">Unit 9 &middot; Trading Partner &middot; Schedule Matching Runs &middot; ~60 min</span></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="ex-body">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><span class="step-path">Accounts Receivable &rarr; Maintain Business Partner</span>
+        Customer T-AC## → Control Data tab → <strong>Trading Partner: 1010</strong> → Save<br>
+        Vendor T-AV## → Control Data tab → <strong>Trading Partner: TA##</strong> → Save</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">
+        <span class="es">Contabilizar <strong>3 facturas de cliente en TA##</strong> (AR — customer T-AC##) + las correspondientes <strong>3 facturas de proveedor en company code 1010</strong> (AP — vendor T-AV##). Las discrepancias se crean intencionalmente entre los dos lados:</span>
+        <span class="en">Post <strong>3 customer invoices in TA##</strong> (AR — customer T-AC##) + corresponding <strong>3 vendor invoices in company code 1010</strong> (AP — vendor T-AV##). Discrepancies are created intentionally between the two sides:</span>
+        <table style="margin-top:6px;font-size:11.5px">
+          <tr><th>Ref</th><th><span class="es">TA## (AR) — customer T-AC##</span><span class="en">TA## (AR) — customer T-AC##</span></th><th><span class="es">1010 (AP) — vendor T-AV##</span><span class="en">1010 (AP) — vendor T-AV##</span></th><th><span class="es">Discrepancia</span><span class="en">Discrepancy</span></th></tr>
+          <tr><td>REF1</td><td>1,000 EUR &middot; G/L 41000000</td><td>1,000 EUR &middot; G/L 61003000 &middot; CC 111##</td><td><span class="es">Ninguna → matched</span><span class="en">None → matched</span></td></tr>
+          <tr><td>REF2</td><td><strong>2,000 EUR</strong> &middot; G/L 41000000</td><td><strong>2,009 EUR</strong> &middot; G/L 61003000 &middot; CC 111##</td><td><strong>9 EUR</strong></td></tr>
+          <tr><td>REF3</td><td>1,000 <strong>EUR</strong> &middot; G/L 41000000</td><td>1,000 <strong>USD</strong> &middot; G/L 61003000 &middot; CC 111##</td><td><span class="es">Moneda diferente</span><span class="en">Different currency</span></td></tr>
+        </table>
+        <span class="es">En ambos casos: Assignment (Details tab) = GR##-REF1/REF2/REF3 respectivamente. Tax code V0 (1010). Tax code A0 (TA##). Invoice date = mes anterior.</span>
+        <span class="en">In both cases: Assignment (Details tab) = GR##-REF1/REF2/REF3 respectively. Tax code V0 (1010). Tax code A0 (TA##). Invoice date = previous month.</span>
+      </div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><span class="step-path">Intercompany Reconciliation &rarr; Schedule Matching Runs</span> Matching Method: <strong>ZF003</strong> &middot; Filter: <strong>RCOMP&lt;='1010' or RCOMP='TA##'</strong> &middot; Trigger Follow-Ups: <strong>Selected</strong> &rarr; Execute</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><span class="step-path">Manage Assignments — By Reconciliation Case</span> <span class="es">Revisar partidas matched/unmatched. REF1: matched. REF2 y REF3: discrepancias.</span><span class="en">Review matched/unmatched items. REF1: matched. REF2 and REF3: discrepancies.</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><span class="step-path">Reconciliation Balances</span> <span class="es">Verificar diferencias YTD entre TA## y 1010.</span><span class="en">Verify YTD differences between TA## and 1010.</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ QUICK REFERENCE ═══ -->
+<div class="view" id="qr">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num" style="background:var(--purple)">QR</span><div><h2>Quick Reference &mdash; S4F15</h2><p><span class="es">Transacciones, apps Fiori y conceptos clave</span><span class="en">Transactions, Fiori apps, and key concepts</span></p></div></div>
+
+  <div class="sec-title"><span class="es">Transacciones / Programas</span><span class="en">Transactions / Programs</span></div>
+  <table>
+    <tr><th>T-Code / Programa</th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th><th><span class="es">&Aacute;rea</span><span class="en">Area</span></th></tr>
+    <tr><td>FAGLGVTR</td><td><span class="es">Balance Carryforward. BS → mismo saldo; P&amp;L → Retained Earnings. Primera actividad del nuevo ejercicio.</span><span class="en">Balance Carryforward. BS → same balance; P&amp;L → Retained Earnings. First activity of new fiscal year.</span></td><td>U7</td></tr>
+    <tr><td>FAGL_FCV</td><td><span class="es">Foreign Currency Valuation. App Fiori: Perform Foreign Currency Valuation. Ejecutar ANTES de FS.</span><span class="en">Foreign Currency Valuation. Fiori app: Perform Foreign Currency Valuation. Run BEFORE FS.</span></td><td>U4</td></tr>
+    <tr><td>FAGL_CL_REGROUP</td><td><span class="es">Reagrupar cuentas a cobrar/pagar por vida residual. Usa cuentas de ajuste (no reconciliaci&oacute;n directa).</span><span class="en">Regroup receivables/payables by remaining life. Uses adjustment accounts (no direct reconciliation).</span></td><td>U4</td></tr>
+    <tr><td>SAPF130D</td><td><span class="es">Balance Confirmations para clientes. App Fiori: Create Balance Confirmations For Customers.</span><span class="en">Balance Confirmations for customers. Fiori app: Create Balance Confirmations For Customers.</span></td><td>U4</td></tr>
+    <tr><td>SAPF130K</td><td><span class="es">Balance Confirmations para proveedores.</span><span class="en">Balance Confirmations for vendors.</span></td><td>U4</td></tr>
+    <tr><td>SAPF107V</td><td><span class="es">Flat-Rate Individual Value Adjustment. App: Perform Further Valuations. Requiere Valuation Key AB en master BP.</span><span class="en">Flat-Rate Individual Value Adjustment. App: Perform Further Valuations. Requires Valuation Key AB in BP master.</span></td><td>U4</td></tr>
+    <tr><td>MRN9DELTA</td><td><span class="es">Delta Run de valoraci&oacute;n de existencias (Balance Sheet Valuation). Valoraci&oacute;n diferencial entre per&iacute;odos.</span><span class="en">Stock valuation delta run (Balance Sheet Valuation). Differential valuation between periods.</span></td><td>U3</td></tr>
+    <tr><td>MRN9</td><td><span class="es">Valoraci&oacute;n de existencias: WIP y Finished Goods.</span><span class="en">Stock valuation: WIP and Finished Goods.</span></td><td>U3</td></tr>
+    <tr><td>FAGL_EHP4_T001B_COFI</td><td><span class="es">Abrir/cerrar períodos de contabilizaci&oacute;n en FI (Intervals 1, 2 y 3).</span><span class="en">Open/close posting periods in FI (Intervals 1, 2 and 3).</span></td><td>U7</td></tr>
+    <tr><td>OKP1</td><td><span class="es">Bloqueo de per&iacute;odos en CO.</span><span class="en">CO Period Lock.</span></td><td>U7</td></tr>
+    <tr><td>OB58</td><td><span class="es">Maintain Financial Statement Versions (transacci&oacute;n cl&aacute;sica). Reemplazada por Manage Global Hierarchies.</span><span class="en">Maintain Financial Statement Versions (classic transaction). Replaced by Manage Global Hierarchies.</span></td><td>U2</td></tr>
+    <tr><td>POACTREE03</td><td><span class="es">Display Accrual Objects (PO Accruals). Visualizar objeto de acumulaci&oacute;n de PO.</span><span class="en">Display Accrual Objects (PO Accruals). View PO accrual objects.</span></td><td>U5</td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:20px"><span class="es">Apps Fiori Clave (por grupo)</span><span class="en">Key Fiori Apps (by group)</span></div>
+  <table>
+    <tr><th><span class="es">App</span><span class="en">App</span></th><th>Grupo / Tile Group</th></tr>
+    <tr><td>Balance Sheet / Income Statement</td><td>General Ledger — Reporting</td></tr>
+    <tr><td>Balance Sheet / Income Statement - Multidimensional</td><td>General Ledger — Reporting</td></tr>
+    <tr><td>Manage Global Hierarchies</td><td>General Ledger — Reporting</td></tr>
+    <tr><td>Audit Journal</td><td>General Ledger — Reporting</td></tr>
+    <tr><td>Balance Audit Trail Line Items</td><td>General Ledger — Reporting</td></tr>
+    <tr><td>Balance Audit Trail Open Items</td><td>General Ledger — Reporting</td></tr>
+    <tr><td>Post General Journal Entries</td><td>General Ledger</td></tr>
+    <tr><td>Schedule General Ledger Jobs</td><td>General Ledger — Closing</td></tr>
+    <tr><td>Schedule Asset Accounting Jobs</td><td>General Ledger — Closing</td></tr>
+    <tr><td>Manage Task Templates</td><td>General Ledger — Closing</td></tr>
+    <tr><td>Process Closing Tasks (Classic)</td><td>General Ledger — Closing</td></tr>
+    <tr><td>Task Lists</td><td>General Ledger — Closing</td></tr>
+    <tr><td>Create Outgoing Invoices</td><td>Accounts Receivable</td></tr>
+    <tr><td>Create Balance Confirmations For Customers</td><td>Accounts Receivable</td></tr>
+    <tr><td>Perform Foreign Currency Valuation</td><td>Accounts Receivable</td></tr>
+    <tr><td>Perform Further Valuations</td><td>Accounts Receivable</td></tr>
+    <tr><td>Regroup Receivables / Payables</td><td>Accounts Receivable</td></tr>
+    <tr><td>Create Incoming Invoices</td><td>Accounts Payable</td></tr>
+    <tr><td>Analyze GR/IR Clearing Account</td><td>Materials Management</td></tr>
+    <tr><td>Accrual Objects (Create/Display)</td><td>Accruals Management</td></tr>
+    <tr><td>Start Periodic Run — Manual Accruals</td><td>Accruals Management</td></tr>
+    <tr><td>Schedule Accruals Jobs</td><td>Accruals Management</td></tr>
+    <tr><td>Approve Periodic Accruals — G/L Accountants</td><td>Accruals Management</td></tr>
+    <tr><td>Display Purchase Order Accruals</td><td>Accruals Management</td></tr>
+    <tr><td>Schedule Matching Runs</td><td>Intercompany Reconciliation</td></tr>
+    <tr><td>Manage Assignments — By Reconciliation Case</td><td>Intercompany Reconciliation</td></tr>
+    <tr><td>Reconciliation Status Overview</td><td>Intercompany Reconciliation</td></tr>
+    <tr><td>Reconciliation Balances</td><td>Intercompany Reconciliation</td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:20px"><span class="es">Technical Names clave</span><span class="en">Key Technical Names</span></div>
+  <table>
+    <tr><th>Nombre</th><th><span class="es">Descripci&oacute;n</span><span class="en">Description</span></th></tr>
+    <tr><td>2CCFITRIALBALQ0001</td><td><span class="es">Trial Balance — Analysis for Microsoft Excel. Nombre t&eacute;cnico para acceder al report en Excel.</span><span class="en">Trial Balance — Analysis for Microsoft Excel. Technical name to access Excel report.</span></td></tr>
+    <tr><td>STANDARD_5</td><td><span class="es">Template de Post General Journal Entries para accruals/deferrals manuales.</span><span class="en">Post General Journal Entries template for manual accruals/deferrals.</span></td></tr>
+    <tr><td>SF_JOURNAL_ENTRIES_03</td><td><span class="es">Data Source para ICMR Matching Method ZF003. Desde tabla ACDOCA (Universal Journal).</span><span class="en">Data Source for ICMR Matching Method ZF003. From table ACDOCA (Universal Journal).</span></td></tr>
+    <tr><td>ICADOCM</td><td><span class="es">Tabla SAP con resultados del matching en ICMR.</span><span class="en">SAP table with ICMR matching results.</span></td></tr>
+    <tr><td>FS##</td><td><span class="es">FSV de formaci&oacute;n creada desde 1010, CoA YCOA, activada en Manage Global Hierarchies.</span><span class="en">Training FSV created from 1010, CoA YCOA, activated in Manage Global Hierarchies.</span></td></tr>
+    <tr><td>Z_INSURANC / INSURA</td><td><span class="es">Accrual Object Category / Item Type para acumulaci&oacute;n de seguros en ej. 12.</span><span class="en">Accrual Object Category / Item Type for insurance accrual in EX 12.</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══ IMG PATHS ═══ -->
+<div class="view" id="img">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num" style="background:var(--blue)">IMG</span><div><h2><span class="es">Rutas IMG &mdash; S4F15</span><span class="en">IMG Paths &mdash; S4F15</span></h2><p>SPRO &rarr; SAP Reference IMG &rarr; <strong>Financial Accounting</strong></p></div></div>
+  <div class="alert alert-ind" style="margin-bottom:16px"><strong><span class="es">Ruta base:</span><span class="en">Base path:</span></strong> SPRO &rarr; SAP Reference IMG &rarr; Financial Accounting (FA)</div>
+
+  <div class="sec-title">U4 &mdash; <span class="es">Foreign Currency Valuation</span><span class="en">Foreign Currency Valuation</span></div>
+  <table>
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Ruta IMG</span><span class="en">IMG Path</span></th></tr>
+    <tr><td>Activate Delta Logic</td><td><span class="step-path" style="display:inline">FA → General Ledger Accounting → Periodic Processing → Valuate → Activate Delta Logic</span></td></tr>
+    <tr><td>Define Valuation Areas</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Periodic Processing → Valuate → Define Valuation Areas</span></td></tr>
+    <tr><td>Define Valuation Methods</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Periodic Processing → Valuate → Define Valuation Methods</span></td></tr>
+    <tr><td>Assign Valuation Areas and Accounting Principles</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Periodic Processing → Valuate → Assign Valuation Areas and Accounting Principles</span></td></tr>
+    <tr><td>Prepare Automatic Postings for FCV</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Periodic Processing → Valuate → Foreign Currency Valuation → Prepare Automatic Postings for FCV</span></td></tr>
+    <tr><td>Number Range for Valuation Run ID</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Periodic Processing → Valuate → Number Range Interval for Valuation Run ID</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:18px">U4 &mdash; <span class="es">Regrouping Receivables/Payables</span><span class="en">Regrouping Receivables/Payables</span></div>
+  <table>
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Ruta IMG</span><span class="en">IMG Path</span></th></tr>
+    <tr><td>Define Sort Method and Adjustment Accounts</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Periodic Processing → Reclassify → Transfer and Sort Receivables and Payables → Define Sort Method and Adjustment Accts</span></td></tr>
+    <tr><td>Define Retained Earnings Account</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Master Data → G/L Accounts → Preparations → Define Retained Earnings Account</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:18px">U5 &mdash; <span class="es">Accruals Management / PO Accruals</span><span class="en">Accruals Management / PO Accruals</span></div>
+  <table>
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Ruta IMG</span><span class="en">IMG Path</span></th></tr>
+    <tr><td>Set Application Component (POAC)</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Business Transactions → Accruals Management → Set Application Component to be Customized</span></td></tr>
+    <tr><td>Activate Online Transfer (Variant 0001)</td><td><span class="step-path" style="display:inline">FA → GL → Business Transactions → Accruals Management → Set App Component → POAC → PO Transfer Variant 0001 → Activate</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:18px">U6 &mdash; <span class="es">Ledger Groups / Extension Ledgers</span><span class="en">Ledger Groups / Extension Ledgers</span></div>
+  <table>
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Ruta IMG</span><span class="en">IMG Path</span></th></tr>
+    <tr><td>Define Settings for Ledgers and Currency Types</td><td><span class="step-path" style="display:inline">FA → Financial Accounting Global Settings → Ledgers → Ledger → Define Settings for Ledgers and Currency Types</span></td></tr>
+    <tr><td>Define Ledger Groups</td><td><span class="step-path" style="display:inline">FA → Financial Accounting Global Settings → Ledgers → Ledger → Define Ledger Groups</span></td></tr>
+    <tr><td>Define Document Types for Entry View in a Ledger</td><td><span class="step-path" style="display:inline">FA → Financial Accounting Global Settings → Document → Document Types → Define Document Types for Entry View in a Ledger</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:18px">U7 &mdash; <span class="es">Posting Periods / Balance Carryforward</span><span class="en">Posting Periods / Balance Carryforward</span></div>
+  <table>
+    <tr><th><span class="es">Actividad</span><span class="en">Activity</span></th><th><span class="es">Transacci&oacute;n directa / Ruta</span><span class="en">Direct transaction / Path</span></th></tr>
+    <tr><td>Opening/Closing Posting Periods (FI)</td><td><span class="step-path" style="display:inline">FAGL_EHP4_T001B_COFI (direct)</span></td></tr>
+    <tr><td>CO Period Lock</td><td><span class="step-path" style="display:inline">OKP1 (direct)</span></td></tr>
+    <tr><td>Balance Carryforward</td><td><span class="step-path" style="display:inline">FAGLGVTR (direct)</span></td></tr>
+    <tr><td>Define Retained Earnings Account</td><td><span class="step-path" style="display:inline">FA → GL Accounting → Master Data → G/L Accounts → Preparations → Define Retained Earnings Account</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══ CADENAS ═══ -->
+<div class="view" id="cad">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num" style="background:var(--amber)">&#9881;</span><div><h2><span class="es">Cadenas de Configuraci&oacute;n</span><span class="en">Configuration Chains</span></h2><p><span class="es">Dependencias cr&iacute;ticas del Financial Closing</span><span class="en">Critical Financial Closing dependencies</span></p></div></div>
+
+  <!-- CHAIN 1: FCV -->
+  <div class="card open">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="chain-badge">1</div><div><div><span class="es">Foreign Currency Valuation (FCV) &mdash; Cadena completa</span><span class="en">Foreign Currency Valuation (FCV) &mdash; Complete chain</span></div><div class="chain-trigger">&#9654; <span class="es">Proceso final: documentos de valoraci&oacute;n FCV contabilizados con reversi&oacute;n autom&aacute;tica.</span><span class="en">Final process: FCV valuation documents posted with automatic reversal.</span></div></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">CADENA &mdash; en este orden:</span><span class="en">CHAIN &mdash; in this order:</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Definir Valuation Methods</span><span class="en">Define Valuation Methods</span></div><div class="chain-path">SPRO &rarr; FA &rarr; GL &rarr; Periodic Processing &rarr; Valuate &rarr; Define Valuation Methods</div><div class="chain-why"><span class="es">Ej: IFRS = "Always Valuate". Sin m&eacute;todo: no puede asignarse &aacute;rea de valoraci&oacute;n.</span><span class="en">E.g.: IFRS = "Always Valuate". Without method: valuation area cannot be assigned.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Definir Valuation Areas</span><span class="en">Define Valuation Areas</span></div><div class="chain-path">SPRO &rarr; FA &rarr; GL &rarr; Periodic Processing &rarr; Valuate &rarr; Define Valuation Areas</div><div class="chain-why"><span class="es">Asignar m&eacute;todo IFRS al &aacute;rea IF. Vincular &aacute;rea a accounting principle.</span><span class="en">Assign IFRS method to area IF. Link area to accounting principle.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Configurar Delta Logic (si se necesita)</span><span class="en">Configure Delta Logic (if needed)</span></div><div class="chain-path">SPRO &rarr; FA &rarr; GL &rarr; Periodic Processing &rarr; Valuate &rarr; Activate Delta Logic</div><div class="chain-why"><span class="es">En blanco = sin Delta Logic → reversi&oacute;n autom&aacute;tica. Activa → sin reversi&oacute;n, solo delta.</span><span class="en">Blank = no Delta Logic → automatic reversal. Active → no reversal, delta only.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Prepare Automatic Postings for FCV (account determination)</span><span class="en">Prepare Automatic Postings for FCV (account determination)</span></div><div class="chain-path">FA &rarr; GL &rarr; Periodic Processing &rarr; Valuate &rarr; FCV &rarr; Prepare Automatic Postings</div><div class="chain-why"><span class="es">Sin cuentas: el FCV run falla al intentar generar el documento.</span><span class="en">Without accounts: FCV run fails when trying to generate the document.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><span class="es">Crear factura en moneda extranjera (USD)</span><span class="en">Create invoice in foreign currency (USD)</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">6</div><div class="chain-body"><div class="chain-title"><strong>Test Run → Update Run (FAGL_FCV)</strong></div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Documento FCV + reversi&oacute;n autom&aacute;tica. Verificar cuentas 12100000, 12102000, 72040000 en BS/IS.</span><span class="en">FCV document + automatic reversal. Verify accounts 12100000, 12102000, 72040000 in BS/IS.</span></strong></div></div></div>
+      </div>
+      <div class="chain-meta">
+        <div><div class="chain-meta-label">&#9888;&#65039; <span class="es">Orden crítico</span><span class="en">Critical order</span></div><ul class="chain-errors"><li><span class="es">FCV debe ejecutarse <strong>ANTES</strong> de crear los estados financieros. Si se invierte el orden, la valoraci&oacute;n no aparece en el BS/IS.</span><span class="en">FCV must run <strong>BEFORE</strong> creating financial statements. If reversed, valuation won't appear in BS/IS.</span></li></ul></div>
+        <div><div class="chain-meta-label"><span class="es">Cuentas FCV ej.</span><span class="en">FCV accounts ex.</span></div><div><span class="dep-tag">12100000 AR recon.</span><span class="dep-tag">12102000 FCV adj.</span><span class="dep-tag">72040000 FX loss</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAIN 2: PO Accruals -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="chain-badge">2</div><div><div><span class="es">PO Accruals &mdash; Flujo completo de aprobaci&oacute;n</span><span class="en">PO Accruals &mdash; Complete approval flow</span></div><div class="chain-trigger">&#9654; <span class="es">Proceso final: accruals de PO aprobados y contabilizados; reducidos autom&aacute;ticamente al recibir factura.</span><span class="en">Final process: PO accruals approved and posted; automatically reduced when invoice received.</span></div></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">CADENA</span><span class="en">CHAIN</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Activar Online Transfer para PO Accruals (Variant 0001)</span><span class="en">Activate Online Transfer for PO Accruals (Variant 0001)</span></div><div class="chain-path">SPRO &rarr; FA &rarr; GL &rarr; Business Transactions &rarr; Accruals Management &rarr; Set App Component → POAC → PO Transfer Variant 0001 → Activate</div><div class="chain-why"><span class="es">Sin activar: al crear el PO no se genera objeto de acumulaci&oacute;n autom&aacute;ticamente.</span><span class="en">Without activating: creating a PO does not automatically generate an accrual object.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Purchase Order (Manage Purchase Orders)</span><span class="en">Create Purchase Order (Manage Purchase Orders)</span></div><div class="chain-why"><span class="es">PO crea objeto de acumulaci&oacute;n autom&aacute;ticamente (si Online Transfer activo).</span><span class="en">PO automatically creates accrual object (if Online Transfer active).</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><strong>Propose Period Amounts</strong> (Schedule Accruals Jobs)</div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><strong>My Inbox</strong> &mdash; <span class="es">Revisar y ajustar propuesta</span><span class="en">Review and adjust proposal</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><strong>Approve Periodic Accruals</strong> (G/L Accountants)</div></div></div>
+        <div class="chain-step"><div class="chain-num">6</div><div class="chain-body"><div class="chain-title"><strong>Periodic Posting Run</strong> &mdash; <span class="es">contabilizar accruals aprobados</span><span class="en">post approved accruals</span></div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong><span class="es">Factura proveedor → reducción automática (online) del PO accrual. NO revertir manualmente.</span><span class="en">Vendor invoice → automatic (online) reduction of PO accrual. Do NOT reverse manually.</span></strong></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAIN 3: FCC -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="card-title"><div class="chain-badge">3</div><div><div><span class="es">Financial Closing Cockpit (FCC) &mdash; Setup y ejecuci&oacute;n</span><span class="en">Financial Closing Cockpit (FCC) &mdash; Setup and execution</span></div><div class="chain-trigger">&#9654; <span class="es">Proceso final: Task List Released y todas las tareas ejecutadas en orden con dependencias respetadas.</span><span class="en">Final process: Task List Released and all tasks executed in order with dependencies respected.</span></div></div></div>
+      <span class="chevron">&#8250;</span></div>
+    <div class="card-body">
+      <div class="chain-label">&#9881;&#65039; <span class="es">CADENA</span><span class="en">CHAIN</span></div>
+      <div class="chain-steps">
+        <div class="chain-step"><div class="chain-num">1</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Template (10 caracteres)</span><span class="en">Create Template (10 characters)</span></div><div class="chain-path">Manage Task Templates &rarr; Copiar 1-FC-MONTH &rarr; T##TEMPL</div><div class="chain-why"><span class="es">Closing Hierarchy: Controlling Area/Company code. Asignar A000 y TA##.</span><span class="en">Closing Hierarchy: Controlling Area/Company code. Assign A000 and TA##.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">2</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Task Groups (reutilizables)</span><span class="en">Create Task Groups (reusable)</span></div><div class="chain-why"><span class="es">Ventaja: cross-template maintenance, mass changes, m&uacute;ltiples empresas.</span><span class="en">Advantage: cross-template maintenance, mass changes, multiple companies.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">3</div><div class="chain-body"><div class="chain-title"><span class="es">Crear Tasks (Types: Notes/Transactions/Programs/Jobs/Workflow...)</span><span class="en">Create Tasks (Types: Notes/Transactions/Programs/Jobs/Workflow...)</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">4</div><div class="chain-body"><div class="chain-title"><span class="es">Definir Dependencies (tab Dependencies en cada task)</span><span class="en">Define Dependencies (Dependencies tab on each task)</span></div><div class="chain-why"><span class="es">Task con predecesor: no ejecutable hasta que predecesora est&eacute; Completed.</span><span class="en">Task with predecessor: not executable until predecessor is Completed.</span></div></div></div>
+        <div class="chain-step"><div class="chain-num">5</div><div class="chain-body"><div class="chain-title"><span class="es">Create Periodic Task List &rarr; Status: <strong>Released</strong></span><span class="en">Create Periodic Task List &rarr; Status: <strong>Released</strong></span></div><div class="chain-why"><span class="es">Sin status Released: la task list NO puede ejecutarse.</span><span class="en">Without Released status: task list CANNOT be executed.</span></div></div></div>
+        <div class="chain-final"><div class="chain-num" style="background:var(--green);color:#fff;">&#10003;</div><div class="chain-body"><div class="chain-title"><strong>Process Closing Tasks (Classic) &rarr; <span class="es">Ejecutar tasks en orden &rarr; Completed.</span><span class="en">Execute tasks in order &rarr; Completed.</span></strong></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPARATIVAS ═══ -->
+<div class="view" id="cmp">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num" style="background:var(--teal)">&#9889;</span><div><h2><span class="es">Comparativas Cr&iacute;ticas &mdash; S4F15</span><span class="en">Critical Comparisons &mdash; S4F15</span></h2><p><span class="es">Las diferencias m&aacute;s preguntadas en el examen</span><span class="en">The most examined differences</span></p></div></div>
+
+  <div class="sec-title"><span class="es">Period Accounting vs Cost of Sales Accounting</span><span class="en">Period Accounting vs Cost of Sales Accounting</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Period Accounting</th><th>Cost of Sales Accounting</th></tr>
+    <tr><td><span class="es">Resultado operativo</span><span class="en">Operating result</span></td><td colspan="2"><span class="es">Igual en ambos</span><span class="en">Same in both</span></td></tr>
+    <tr><td><span class="es">Agrupaci&oacute;n costes</span><span class="en">Cost grouping</span></td><td><span class="es">Por naturaleza (nómina, materiales...)</span><span class="en">By nature (payroll, materials...)</span></td><td><span class="es">Por función (producción, ventas, admin.)</span><span class="en">By function (production, sales, admin.)</span></td></tr>
+    <tr><td>Functional Area</td><td>No</td><td><strong>Sí / Yes &mdash; requerido</strong></td></tr>
+    <tr><td><span class="es">Derivaci&oacute;n Functional Area</span><span class="en">Functional Area derivation</span></td><td>N/A</td><td>Manual &gt; Sust. &gt; Cuenta &gt; Obj.CO</td></tr>
+    <tr><td>ACDOCA</td><td>&#10003;</td><td>&#10003;</td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px"><span class="es">Standard Ledger vs Extension Ledger</span><span class="en">Standard Ledger vs Extension Ledger</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th>Standard Ledger (0L / 2L)</th><th>Extension Ledger (Z0)</th></tr>
+    <tr><td><span class="es">Datos almacenados</span><span class="en">Data stored</span></td><td><span class="es">Todos los valores</span><span class="en">All values</span></td><td><strong><span class="es">Solo delta</span><span class="en">Delta only</span></strong></td></tr>
+    <tr><td><span class="es">Reconciliación</span><span class="en">Reconciliation</span></td><td><span class="es">Requerida</span><span class="en">Required</span></td><td><strong><span class="es">Cero (zero reconciliation effort)</span><span class="en">Zero (zero reconciliation effort)</span></strong></td></tr>
+    <tr><td>Data footprint</td><td>Alto / High</td><td><strong>Mínimo / Minimal</strong></td></tr>
+    <tr><td>Underlying Ledger</td><td>N/A</td><td><strong>0L (siempre / always)</strong></td></tr>
+    <tr><td>Leading field</td><td><span class="es">Puede ser Leading (0L)</span><span class="en">Can be Leading (0L)</span></td><td><strong><span class="es">En blanco (NUNCA Leading)</span><span class="en">Blank (NEVER Leading)</span></strong></td></tr>
+    <tr><td>BS muestra</td><td><span class="es">Solo su propio valor</span><span class="en">Its own value only</span></td><td><strong>Total acumulado (0L + delta)</strong></td></tr>
+    <tr><td><span class="es">Uso típico</span><span class="en">Typical use</span></td><td><span class="es">Contabilidad normal / IFRS</span><span class="en">Normal accounting / IFRS</span></td><td><span class="es">Simulaciones, ajustes temporales</span><span class="en">Simulations, temporary adjustments</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px">FAGL_CL_REGROUP vs Manage Global Hierarchies (Aging)</div>
+  <table class="tbl-reg">
+    <tr><th></th><th>FAGL_CL_REGROUP</th><th>Aging en Manage Global Hierarchies</th></tr>
+    <tr><td><span class="es">Tipo</span><span class="en">Type</span></td><td><span class="es">Contabilizaci&oacute;n real en G/L</span><span class="en">Real G/L posting</span></td><td><span class="es">Solo reporting (sin posteo)</span><span class="en">Reporting only (no posting)</span></td></tr>
+    <tr><td><span class="es">Resultado</span><span class="en">Result</span></td><td><span class="es">Documentos FI + reversi&oacute;n autom&aacute;tica</span><span class="en">FI documents + automatic reversal</span></td><td><span class="es">Agrupaci&oacute;n visual por vida residual en BSV</span><span class="en">Visual grouping by remaining life in BSV</span></td></tr>
+    <tr><td><span class="es">Cuentas de ajuste</span><span class="en">Adjustment accounts</span></td><td><strong><span class="es">Sí (necesarias)</span><span class="en">Yes (required)</span></strong></td><td>No</td></tr>
+    <tr><td><span class="es">Cu&aacute;ndo usar</span><span class="en">When to use</span></td><td><span class="es">Requisitos legales de balance formal</span><span class="en">Legal requirements for formal balance</span></td><td><span class="es">An&aacute;lisis interno de aging</span><span class="en">Internal aging analysis</span></td></tr>
+  </table>
+
+  <div class="sec-title" style="margin-top:24px"><span class="es">FCV Sin Delta Logic vs Con Delta Logic</span><span class="en">FCV Without Delta Logic vs With Delta Logic</span></div>
+  <table class="tbl-reg">
+    <tr><th></th><th><span class="es">Sin Delta Logic</span><span class="en">Without Delta Logic</span></th><th><span class="es">Con Delta Logic</span><span class="en">With Delta Logic</span></th></tr>
+    <tr><td><span class="es">Contabilizaci&oacute;n</span><span class="en">Posting</span></td><td><span class="es">Valor completo cada vez</span><span class="en">Full value each time</span></td><td><span class="es">Solo diferencia incremental (delta)</span><span class="en">Only incremental difference (delta)</span></td></tr>
+    <tr><td><span class="es">Reversi&oacute;n</span><span class="en">Reversal</span></td><td><strong><span class="es">Autom&aacute;tica (1er d&iacute;a mes siguiente)</span><span class="en">Automatic (1st day of next month)</span></strong></td><td><strong><span class="es">NO reversi&oacute;n autom&aacute;tica</span><span class="en">NO automatic reversal</span></strong></td></tr>
+    <tr><td><span class="es">Caso de uso</span><span class="en">Use case</span></td><td><span class="es">Valoraciones mensuales est&aacute;ndar</span><span class="en">Standard monthly valuations</span></td><td><span class="es">Cuando se quiere acumular diferencias</span><span class="en">When accumulating differences is desired</span></td></tr>
+  </table>
+</div>
+
+<!-- ═══ EXAMEN ═══ -->
+<div class="view" id="exam">
+  <div class="page-brand"><span>&#9670; Valentina RF</span> &middot; S4F15 Certification Guide 2026</div>
+  <div class="mod-header"><span class="mod-num" style="background:var(--red)">&#127919;</span><div><h2><span class="es">Escenarios de Examen 2026 &mdash; S4F15</span><span class="en">Exam Scenarios 2026 &mdash; S4F15</span></h2><p>System-Based + Scenario-Based &middot; C_TS4FI_2023</p></div></div>
+  <div class="alert alert-ind" style="margin-bottom:18px">
+    <strong>System-Based:</strong> <span class="es">Navegar y ejecutar. Memorizar: Manage Global Hierarchies, Perform FCV, Accruals Management, Manage Task Templates, Schedule Matching Runs.</span><span class="en">Navigate and execute. Memorize: Manage Global Hierarchies, Perform FCV, Accruals Management, Manage Task Templates, Schedule Matching Runs.</span>
+    <br><strong>Scenario-Based:</strong> <span class="es">Avatar IA. Razonar la mejor soluci&oacute;n y por qu&eacute; no las alternativas.</span><span class="en">AI avatar. Reason the best solution and why not the alternatives.</span>
+  </div>
+
+  <div class="sec-title">System-Based <span class="es">Escenarios</span><span class="en">Scenarios</span></div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--ind-light),#eff6ff);border-color:var(--ind-mid);">
+    <div class="s-label" style="color:var(--ind)">&#128187; System-Based 1</div>
+    <div class="s-q"><span class="es">&#10067; Crear y activar la FSV FS## importando la versi&oacute;n 1010 en Manage Global Hierarchies.</span><span class="en">&#10067; Create and activate FSV FS## by importing version 1010 in Manage Global Hierarchies.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">General Ledger &rarr; Reporting &rarr; Manage Global Hierarchies &rarr; Import Hierarchy &rarr; Source: Maintain FSV &rarr; ID 1010 &rarr; Hierarchy ID: FS## &rarr; CoA: YCOA &rarr; Valid From: Jan 1 PY &rarr; Create &rarr; Edit (a&ntilde;adir nodos) &rarr; Save &rarr; Activate</span>
+    <span class="es"><strong>Verificar:</strong> Status = Active. La FSV aparece disponible en BS/IS. Sin Activate: draft, no funciona.</span><span class="en"><strong>Verify:</strong> Status = Active. FSV available in BS/IS. Without Activate: draft, doesn't work.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--ind-light),#eff6ff);border-color:var(--ind-mid);">
+    <div class="s-label" style="color:var(--ind)">&#128187; System-Based 2</div>
+    <div class="s-q"><span class="es">&#10067; Ejecutar la Foreign Currency Valuation para el company code TA## usando el &aacute;rea de valoraci&oacute;n IF, sin Delta Logic.</span><span class="en">&#10067; Execute the Foreign Currency Valuation for company code TA## using valuation area IF, without Delta Logic.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">Accounts Receivable &rarr; Perform Foreign Currency Valuation &rarr; Company Code TA## &rarr; Key Date: last day prev period &rarr; Area: IF &rarr; Test Run: Select &rarr; Execute &rarr; Tab Postings &rarr; Update Run &rarr; Execute</span>
+    <span class="es"><strong>Verificar:</strong> cuentas 12100000 y 12102000 en BS; 72040000 en P&amp;L. Documento de reversi&oacute;n autom&aacute;tico el d&iacute;a siguiente.</span><span class="en"><strong>Verify:</strong> accounts 12100000 and 12102000 in BS; 72040000 in P&amp;L. Automatic reversal document next day.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--ind-light),#eff6ff);border-color:var(--ind-mid);">
+    <div class="s-label" style="color:var(--ind)">&#128187; System-Based 3</div>
+    <div class="s-q"><span class="es">&#10067; Crear un objeto de acumulaci&oacute;n manual de seguro (Z_INSURANC / INSURA / LINEAR / 6000 EUR) y ejecutar el Posting Run para enero.</span><span class="en">&#10067; Create a manual insurance accrual object (Z_INSURANC / INSURA / LINEAR / 6000 EUR) and run the Posting Run for January.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">Accruals Management &rarr; Accrual Objects &rarr; Create &rarr; CC TA## &rarr; Category Z_INSURANC &rarr; Life: Jan 1–Dec 31 CY &rarr; Item: INSURA / 0L / 6000 EUR / LINEAR &rarr; Save &rarr; Start Periodic Run — Manual Accruals &rarr; ACAC / TA## / INSURA / last day Jan CY &rarr; Test &rarr; Update Run</span>
+    <span class="es"><strong>Verificar:</strong> documento de 500 EUR contabilizado (6000/12 = 500 por mes).</span><span class="en"><strong>Verify:</strong> document of 500 EUR posted (6000/12 = 500 per month).</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--ind-light),#eff6ff);border-color:var(--ind-mid);">
+    <div class="s-label" style="color:var(--ind)">&#128187; System-Based 4</div>
+    <div class="s-q"><span class="es">&#10067; Crear un template FCC T##TEMPL con dos tareas y una dependencia, crear la task list y ejecutarla.</span><span class="en">&#10067; Create FCC template T##TEMPL with two tasks and a dependency, create the task list and execute it.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">Manage Task Templates &rarr; Copy 1-FC-MONTH &rarr; T##TEMPL &rarr; Closing Hierarchy: CC/CoCode &rarr; Add tasks (Task 1: Transaction, Task 2: Job) &rarr; Task 2 Dependencies tab: add Task 1 as predecessor &rarr; Create Periodic Task List &rarr; Status Released &rarr; Process Closing Tasks (Classic)</span>
+    <span class="es"><strong>Verificar:</strong> ejecutar Task 2 primero → "Dependent Tasks Found" → No → ejecutar Task 1 → Completed → Task 2 pasa a "In Process" → ejecutar Task 2.</span><span class="en"><strong>Verify:</strong> execute Task 2 first → "Dependent Tasks Found" → No → execute Task 1 → Completed → Task 2 changes to "In Process" → execute Task 2.</span></div>
+  </div>
+
+  <div class="scenario-sb" style="background:linear-gradient(135deg,var(--ind-light),#eff6ff);border-color:var(--ind-mid);">
+    <div class="s-label" style="color:var(--ind)">&#128187; System-Based 5</div>
+    <div class="s-q"><span class="es">&#10067; Ejecutar el ICMR Matching Run para TA## y 1010 con Matching Method ZF003.</span><span class="en">&#10067; Execute the ICMR Matching Run for TA## and 1010 with Matching Method ZF003.</span></div>
+    <div class="s-a"><span class="step-path" style="margin-top:5px">Intercompany Reconciliation &rarr; Schedule Matching Runs &rarr; Method ZF003 &rarr; Filter: RCOMP&lt;='1010' or RCOMP='TA##' &rarr; Trigger Follow-Ups: Select &rarr; Execute &rarr; Manage Assignments — By Reconciliation Case &rarr; Reconciliation Balances</span>
+    <span class="es"><strong>Prerrequisito:</strong> Trading Partner asignado en BP master de T-AC## (→1010) y T-AV## (→TA##).</span><span class="en"><strong>Prerequisite:</strong> Trading Partner assigned in BP master of T-AC## (→1010) and T-AV## (→TA##).</span></div>
+  </div>
+
+  <div class="sec-title" style="margin-top:20px">Scenario-Based <span class="es">Escenarios</span><span class="en">Scenarios</span></div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 1</div>
+    <div class="s-q"><span class="es">&#10067; El controller pregunta por qu&eacute; el reporte BS/IS no muestra los nodos 3160010 y 3160020 que acaba de crear en la FSV. &iquest;Cu&aacute;l es la causa y c&oacute;mo se resuelve?</span><span class="en">&#10067; The controller asks why the BS/IS report doesn't show nodes 3160010 and 3160020 just created in the FSV. What is the cause and how to fix it?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">La FSV est&aacute; en estado <strong>Draft</strong> porque no se ejecut&oacute; el paso <strong>Activate</strong>. Sin Activate, la FSV no est&aacute; disponible en la selecci&oacute;n del reporte BS/IS. Soluci&oacute;n: Manage Global Hierarchies → seleccionar FS## → bot&oacute;n <strong>Activate</strong> → confirmar → verificar Status = Active.</span><span class="en">The FSV is in <strong>Draft</strong> state because the <strong>Activate</strong> step was not executed. Without Activate, the FSV is not available in BS/IS report selection. Solution: Manage Global Hierarchies → select FS## → <strong>Activate</strong> button → confirm → verify Status = Active.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 2</div>
+    <div class="s-q"><span class="es">&#10067; El auditor pregunta por qu&eacute; las diferencias de cambio no aparecen en el balance despu&eacute;s del cierre del mes anterior. &iquest;Cu&aacute;l es el error t&iacute;pico?</span><span class="en">&#10067; The auditor asks why currency differences don't appear in the balance after last month's close. What is the typical error?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es">El error m&aacute;s com&uacute;n es haber ejecutado el FCV <strong>despu&eacute;s</strong> de crear los estados financieros, no antes. La secuencia correcta es: FCV (FAGL_FCV) → Regrouping (FAGL_CL_REGROUP) → Balance Sheet/Income Statement. Si el FCV se ejecuta despu&eacute;s del BS/IS, las diferencias de cambio no aparecen en el reporte del cierre.</span><span class="en">The most common error is running FCV <strong>after</strong> creating financial statements, not before. The correct sequence is: FCV (FAGL_FCV) → Regrouping (FAGL_CL_REGROUP) → Balance Sheet/Income Statement. If FCV runs after BS/IS, currency differences don't appear in the closing report.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 3</div>
+    <div class="s-q"><span class="es">&#10067; El contable quiere revertir manualmente el PO accrual porque lleg&oacute; la factura. &iquest;Es correcto este proceso? &iquest;Qu&eacute; deber&iacute;a hacer en su lugar?</span><span class="en">&#10067; The accountant wants to manually reverse the PO accrual because the invoice arrived. Is this the correct process? What should they do instead?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es"><strong>No es correcto revertir manualmente</strong>. Cuando se contabiliza la factura del proveedor (Create Supplier Invoice), el sistema <strong>reduce autom&aacute;ticamente online</strong> el PO accrual correspondiente. Si se revierte manualmente también, el accrual quedar&iacute;a doblemente compensado. El proceso correcto: simplemente contabilizar la factura del proveedor y el sistema gestiona autom&aacute;ticamente la reducci&oacute;n del accrual.</span><span class="en"><strong>Manually reversing is incorrect</strong>. When the vendor invoice is posted (Create Supplier Invoice), the system <strong>automatically reduces online</strong> the corresponding PO accrual. If also reversed manually, the accrual would be doubly cleared. The correct process: simply post the vendor invoice and the system automatically handles the accrual reduction.</span></div>
+  </div>
+
+  <div class="scenario-sb">
+    <div class="s-label">&#129302; Scenario-Based 4</div>
+    <div class="s-q"><span class="es">&#10067; En ICMR, REF2 y REF3 aparecen como discrepancias aunque el sistema tiene los documentos correctamente contabilizados. &iquest;Cu&aacute;les son las causas m&aacute;s probables?</span><span class="en">&#10067; In ICMR, REF2 and REF3 appear as discrepancies even though the system has the documents correctly posted. What are the most likely causes?</span></div>
+    <div class="s-a"><strong><span class="es">Respuesta:</span><span class="en">Answer:</span></strong> <span class="es"><strong>REF2:</strong> diferencia de importe (1000 EUR vs 2009 EUR → 9 EUR de diferencia). Causa: la entidad contraparte registr&oacute; un importe diferente. <strong>REF3:</strong> diferencia de moneda (EUR vs USD). Aunque el importe nominal coincide, la moneda es diferente → el matching engine no puede hacer match autom&aacute;tico. Causas comunes en ICMR: diferencia de timing, diferencia de moneda, diferencia de importe, o el campo Trading Partner no est&aacute; asignado correctamente en el master de BP.</span><span class="en"><strong>REF2:</strong> amount difference (1000 EUR vs 2009 EUR → 9 EUR difference). Cause: counterparty entity recorded a different amount. <strong>REF3:</strong> currency difference (EUR vs USD). Even if the nominal amount matches, the currency differs → matching engine cannot auto-match. Common ICMR causes: timing difference, currency difference, amount difference, or Trading Partner field not correctly assigned in BP master.</span></div>
+  </div>
+</div>
+
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-sig"><div><div class="vrf">Valentina RF</div><div class="vrf-sub"><span class="es">Gu&iacute;a de Estudio SAP FI &middot; C_TS4FI_2023</span><span class="en">SAP FI Study Guide &middot; C_TS4FI_2023</span></div></div></div>
+    <div class="footer-meta">S4F15 &middot; Configuring the Financial Closing in SAP S/4HANA &middot; Course Version 26 &middot; 21 Exercises &middot; 7h &middot; 2026</div>
+  </div>
+</footer>
+<script>
+function showView(id,btn){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');if(btn)btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+function toggle(hdr){hdr.parentElement.classList.toggle('open');}
+function toggleEx(hdr){hdr.parentElement.classList.toggle('open');}
+function toggleLang(){var body=document.body;var isEs=body.classList.contains('lang-es');body.classList.toggle('lang-es',!isEs);body.classList.toggle('lang-en',isEs);document.getElementById('langLabel').textContent=isEs?'ES':'EN';}
+var MODULE_LABELS={u1:'U1',u2:'U2',u3:'U3',u4:'U4',u5:'U5',u6:'U6',u7:'U7',u8:'U8',u9:'U9',ex:'EJ',qr:'QR',img:'IMG',cad:'CAD',cmp:'CMP',exam:'EXAM'};
+var MODULE_COLORS={u1:'#4338ca',u2:'#3730a3',u3:'#15803d',u4:'#0f766e',u5:'#b45309',u6:'#1d4ed8',u7:'#7c3aed',u8:'#b91c1c',u9:'#0369a1',ex:'#c2410c',qr:'#7c3aed',img:'#1d4ed8',cad:'#b45309',cmp:'#0f766e',exam:'#b91c1c'};
+var searchIndex=[];
+function buildIndex(){document.querySelectorAll('.view').forEach(function(view){var vid=view.id;view.querySelectorAll('.card,.ex-card,.scenario-sb,tr').forEach(function(card){var raw=(card.innerText||card.textContent||'').replace(/\s+/g,' ').trim();if(raw.length<10)return;var title='';var h=card.querySelector('.card-title,.ex-title,.s-q,th');if(h)title=(h.innerText||h.textContent||'').replace(/\s+/g,' ').trim().slice(0,70);if(!title)title=raw.slice(0,60);searchIndex.push({vid:vid,title:title,text:raw});});}); }
+var lastQuery='',selectedIdx=-1,currentResults=[];
+function doSearch(q){q=q.trim();var clearBtn=document.getElementById('searchClear');var countEl=document.getElementById('searchCount');var resEl=document.getElementById('searchResults');clearBtn.style.display=q.length>0?'block':'none';removeHighlights();if(q.length<2){resEl.style.display='none';countEl.textContent='';lastQuery='';currentResults=[];return;}lastQuery=q;var words=q.toLowerCase().split(/\s+/).filter(function(w){return w.length>0;});var seenVidTitle={};searchIndex.forEach(function(entry){var tl=entry.text.toLowerCase();var allMatch=words.every(function(w){return tl.indexOf(w)!==-1;});if(!allMatch)return;var score=0;words.forEach(function(w){if(entry.title.toLowerCase().indexOf(w)!==-1)score+=10;var count=0,pos=0;while((pos=tl.indexOf(w,pos))!==-1){count++;pos++;}score+=count;});var key=entry.vid+'::'+entry.title.slice(0,40);if(!seenVidTitle[key]||seenVidTitle[key].score<score)seenVidTitle[key]={score:score,entry:entry};});currentResults=Object.values(seenVidTitle).sort(function(a,b){return b.score-a.score;}).slice(0,12).map(function(x){return x.entry;});selectedIdx=-1;renderResults(words);}
+function renderResults(words){var resEl=document.getElementById('searchResults');var countEl=document.getElementById('searchCount');if(currentResults.length===0){resEl.innerHTML='<div class="sr-empty">Sin resultados para &ldquo;'+escHtml(lastQuery)+'&rdquo;</div>';resEl.style.display='block';countEl.textContent='0';return;}countEl.textContent=currentResults.length+(currentResults.length===12?'+':'');var html='';currentResults.forEach(function(entry,i){var modLabel=MODULE_LABELS[entry.vid]||entry.vid.toUpperCase();var modColor=MODULE_COLORS[entry.vid]||'#64748b';var snippet=getSnippet(entry.text,words,90);html+='<div class="sr-item" data-idx="'+i+'" onclick="goResult('+i+')">'+'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">'+'<span class="sr-mod" style="background:'+modColor+'">'+modLabel+'</span>'+'<span class="sr-title">'+highlightWords(escHtml(entry.title),words)+'</span></div>'+'<div class="sr-snippet">'+snippet+'</div></div>';});resEl.innerHTML=html;resEl.style.display='block';}
+function getSnippet(text,words,maxLen){var tl=text.toLowerCase();var best=0;words.forEach(function(w){var pos=tl.indexOf(w);if(pos!==-1)best=pos;});var start=Math.max(0,best-30);return highlightWords(escHtml((start>0?'…':'')+text.slice(start,start+maxLen)+(start+maxLen<text.length?'…':'')),words);}
+function highlightWords(html,words){words.forEach(function(w){if(w.length<2)return;html=html.replace(new RegExp('('+escRe(w)+')','gi'),'<mark>$1</mark>');});return html;}
+function goResult(idx){if(idx<0||idx>=currentResults.length)return;var entry=currentResults[idx];document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});var targetView=document.getElementById(entry.vid);if(targetView)targetView.classList.add('active');document.querySelectorAll('.tab-btn').forEach(function(b){if(b.getAttribute('onclick')&&b.getAttribute('onclick').indexOf("'"+entry.vid+"'")!==-1)b.classList.add('active');});document.querySelectorAll('#'+entry.vid+' .card,#'+entry.vid+' .ex-card').forEach(function(card){var raw=(card.innerText||card.textContent||'').toLowerCase();var words=lastQuery.toLowerCase().split(/\s+/);if(words.every(function(w){return raw.indexOf(w)!==-1;}))card.classList.add('open');});removeHighlights();highlightInView(entry.vid,lastQuery.split(/\s+/));document.getElementById('searchResults').style.display='none';setTimeout(function(){var first=document.querySelector('#'+entry.vid+' mark.hl');if(first)first.scrollIntoView({behavior:'smooth',block:'center'});else window.scrollTo(0,0);},80);}
+function highlightInView(vid,words){var view=document.getElementById(vid);if(!view)return;var walker=document.createTreeWalker(view,NodeFilter.SHOW_TEXT,null,false);var nodes=[];var node;while(node=walker.nextNode())nodes.push(node);nodes.forEach(function(node){var val=node.nodeValue;if(!val||val.trim().length<2)return;var lval=val.toLowerCase();var needsMark=words.some(function(w){return w.length>1&&lval.indexOf(w.toLowerCase())!==-1;});if(!needsMark)return;var frag=document.createDocumentFragment();var re=new RegExp('('+words.map(escRe).join('|')+')','gi');val.split(re).forEach(function(part){if(re.test(part)){var mark=document.createElement('mark');mark.className='hl';mark.textContent=part;frag.appendChild(mark);}else frag.appendChild(document.createTextNode(part));});if(frag.childNodes.length>0&&node.parentNode)node.parentNode.replaceChild(frag,node);});}
+function removeHighlights(){document.querySelectorAll('mark.hl').forEach(function(m){var p=m.parentNode;if(p){p.replaceChild(document.createTextNode(m.textContent),m);p.normalize();}});}
+function clearSearch(){var inp=document.getElementById('globalSearch');inp.value='';document.getElementById('searchResults').style.display='none';document.getElementById('searchClear').style.display='none';document.getElementById('searchCount').textContent='';removeHighlights();lastQuery='';currentResults=[];inp.focus();}
+function searchKeyNav(e){var resEl=document.getElementById('searchResults');if(resEl.style.display==='none')return;var items=resEl.querySelectorAll('.sr-item');if(e.key==='ArrowDown'){e.preventDefault();selectedIdx=Math.min(selectedIdx+1,items.length-1);}else if(e.key==='ArrowUp'){e.preventDefault();selectedIdx=Math.max(selectedIdx-1,-1);}else if(e.key==='Enter'){e.preventDefault();if(selectedIdx>=0)goResult(selectedIdx);else if(currentResults.length>0)goResult(0);return;}else if(e.key==='Escape'){resEl.style.display='none';return;}else{return;}items.forEach(function(it,i){it.style.background=i===selectedIdx?'var(--ind-light)':'';});if(selectedIdx>=0&&items[selectedIdx])items[selectedIdx].scrollIntoView({block:'nearest'});}
+document.addEventListener('click',function(e){if(!document.getElementById('searchWrap').contains(e.target)){var r=document.getElementById('searchResults');if(r)r.style.display='none';}});
+function initTabFade(){['tabRow1','tabRow2'].forEach(function(rowId){var row=document.getElementById(rowId);if(!row)return;function updateFade(){row.classList.toggle('at-end',row.scrollLeft+row.clientWidth>=row.scrollWidth-4);}row.addEventListener('scroll',updateFade);updateFade();});}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+window.addEventListener('load',function(){initTabFade();setTimeout(buildIndex,200);});
+</script>
+<script src="assistant.js"></script>
+</body>
+</html>
